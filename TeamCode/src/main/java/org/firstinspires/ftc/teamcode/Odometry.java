@@ -42,6 +42,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 /*
@@ -65,6 +68,7 @@ public class Odometry extends OpMode {
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
+    final DistanceUnit distanceUnit = DistanceUnit.CM;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -222,7 +226,7 @@ public class Odometry extends OpMode {
          */
         mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
         pod.update();
-        telemetry.addData("xpos", pod.getPosX());
+        telemetry.addData("xpos", pod.getPosX(distanceUnit));
         telemetry.update();
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
