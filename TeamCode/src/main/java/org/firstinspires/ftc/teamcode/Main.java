@@ -11,6 +11,8 @@ import java.util.List;
 public class Main extends OpMode {
     public Data data = new Data();
     public List<RobotModule> modules;
+
+    @Override
     public void init() {
         //TODO: add all modules here!
         for (RobotModule module:
