@@ -32,7 +32,7 @@ To contribute to our teams codebase there are a few rules:
  - Only work in your own branch or repo and create pull requests to add to main.
  - Code used in competitions or other important events will be tagged.
  - All pull requests are required to be reviewed by people on the coding team.
-    - (if you are on the coding team it is required to be reviewed by someone else)
+  - (if you are on the coding team it is required to be reviewed by someone else)
  - Please push regularly! Regular contributions helps when we do our portfolio, and will show on the GitHub contribution graph when pulled to main.
 
 # Code Structure
