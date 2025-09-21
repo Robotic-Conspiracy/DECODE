@@ -15,12 +15,19 @@ public class RobotModule {
 
     /**
      * default init function, should not be overridden
-     * @param data_ Needs to be passed on init loop (not object creation) The Created Data class in the init loop
+     * @param data Needs to be passed on init loop (not object creation) The Created Data class in the init loop
      * @author GoldStar184
      */
-    public final void init(Data data_){
-        data = data_;
+    public final void init(Data data){
+        this.data = data;
     }
+
+    /**
+     * Im hoping that this is not needed, but just in case it is...
+     *
+     * @param telemetry the telemetry object to add telemetry to.
+     * @return the same telemetry object that was passed in. (with telemetry added)
+     */
     Telemetry telemetry(Telemetry telemetry){
         return telemetry;
     }
