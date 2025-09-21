@@ -22,7 +22,7 @@ public class Main extends OpMode {
 
     public List<RobotModule> modules;
     public void init() {
-        data.init(gamepad1, gamepad2, hardwareMap);
+
 
         //While we don't use these here, we are modifying them here they and can be gotten from the data class later.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
@@ -30,6 +30,10 @@ public class Main extends OpMode {
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
 
+        //Initialize the data class
+        data.init(gamepad1, gamepad2, hardwareMap, leftFrontDrive, rightFrontDrive, leftBackDrive, rightBackDrive);
+
+        //set behavior to break so faster slowdown for better control over the robot.
         leftFrontDrive.setZeroPowerBehavior(BRAKE);
         rightFrontDrive.setZeroPowerBehavior(BRAKE);
         leftBackDrive.setZeroPowerBehavior(BRAKE);
@@ -48,7 +52,10 @@ public class Main extends OpMode {
 
     @Override
     public void loop() {
-    //TODO: Actual code here!
+        for (RobotModule module:
+             modules) {
+            module.run();
+        }
     }
 
 }
