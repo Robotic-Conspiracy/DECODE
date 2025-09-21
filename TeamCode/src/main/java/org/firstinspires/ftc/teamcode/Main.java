@@ -5,6 +5,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.modules.Data;
 import org.firstinspires.ftc.teamcode.modules.DriveModule;
@@ -38,6 +39,11 @@ public class Main extends OpMode {
         rightFrontDrive.setZeroPowerBehavior(BRAKE);
         leftBackDrive.setZeroPowerBehavior(BRAKE);
         rightBackDrive.setZeroPowerBehavior(BRAKE);
+
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
 
 
 
