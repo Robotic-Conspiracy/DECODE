@@ -40,7 +40,7 @@ To contribute to our teams codebase there are a few rules:
 
 >⚠️ *All of this is guesses because the outline has not been pushed to any branch yet*
 
-Each Module of the Robot should be in its own file and extend the [`RobotModule`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/RobotModule.java) Class, This Class provides the base functions that *should* be used to make the module work. Each Module should have a primary method called `run` that does not have any arguments. For Example a `DriveModule.run` method might have the following documentation:
+Each Module of the Robot should be in its own file and extend the [`RobotModule`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/RobotModule.java) Class, This Class provides the base functions that *should* be used to make the module work. Each Module should have a primary method called `run` that does not have any arguments. For Example a `DriveModule` class might have the following documentation:
 ```java
 public class DriveModule extends RobotModule{
 
@@ -69,10 +69,10 @@ Note that this code is only to document how to document things and is not a repr
 
 You might have noticed the data class involved here, this class is how all data should be pass through the different modules. you can see this class [here](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/Data.java). *Note that until this branch is pushed into main this link will not work* To add to the `Data` class, there should be at least a getter method for each variable. If the variable needs to be able to be changed, there should be a setter method as well, otherwise the variable should be assigned in the `init` method. 
 
-The [Main](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Main.java) file should only have the setup code and other handlers, everything that can reasonably put in a module should be in a module.
+The [`Main.java`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Main.java) file should only have the setup code and other handlers, everything that can reasonably put in a module should be in a module.
 
 No matter what code is being added there should be javadoc comments for each method at the minimum. but theoretically the code should be heavily documented. This is **especially** true with trig or other calculations. Though this can be a link to an explanation.
 
-When making a pull request, there should be an explanation of all changes that are being made. It is a good idea to check that all added code is commented properly before making a pull request. The Commit messages should also me clear in what changes are being made, we don't want `added stuff` or `I was told to commit` to be a commit. If needed android studio lets gemini write commit messages for you, though these should be reviewed first and marked as AI generated. It is also generally a good idea to commit each file individually, this can let you write different commit messages for each file, though if the only change is changing a use of a changed function, different commit messages are not needed. Occasionally it can be good to rebase branches with main when the main branch is updated.  this can be done by switching to the main branch and selecting the working branch to rebase.
+When making a pull request, there should be an explanation of all changes that are being made. It is a good idea to check that all added code is commented properly before making a pull request. The Commit messages should also me clear in what changes are being made, we don't want `added stuff` or `I was told to commit` to be a commit. If needed android studio lets gemini write commit messages for you, though these should be reviewed first and marked as AI generated. It is also generally a good idea to commit each file individually, this can let you write different commit messages for each file, though if the only change is changing a use of a changed function, different commit messages are not needed. ~~Occasionally it can be good to rebase branches with main when the main branch is updated.  this can be done by switching to the main branch and selecting the working branch to rebase.~~ **Don't do this** This can cause issues with duplicate commits, see the commit history for the `meta-changes` branch.
 
 
