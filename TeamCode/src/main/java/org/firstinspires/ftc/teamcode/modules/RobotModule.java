@@ -9,7 +9,7 @@ public class RobotModule {
      * This has no params and should be overridden by the extending class
      * There should not be any needed data as input and all data should be in the Data class.
      */
-    void run(){
+    public void run(){
 
     }
 
