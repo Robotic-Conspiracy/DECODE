@@ -73,4 +73,6 @@ The [Main](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Main.java) file
 
 No matter what code is being added there should be javadoc comments for each method at the minimum. but theoretically the code should be heavily documented. This is **especially** true with trig or other calculations. Though this can be a link to an explanation.
 
+When making a pull request, there should be an explanation of all changes that are being made. It is a good idea to check that all added code is commented properly before making a pull request. The Commit messages should also me clear in what changes are being made, we don't want `added stuff` or `I was told to commit` to be a commit. If needed android studio lets gemini write commit messages for you, though these should be reviewed first and marked as AI generated. It is also generally a good idea to commit each file individually, this can let you write different commit messages for each file, though if the only change is changing a use of a changed function, different commit messages are not needed
+
 
