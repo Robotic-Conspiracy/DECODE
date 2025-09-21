@@ -40,9 +40,17 @@ To contribute to our teams codebase there are a few rules:
 
 >⚠️ *All of this is guesses because the outline has not been pushed to any branch yet*
 
-Each Module of the Robot should be in its own file and extend the `RobotModule` Class, This Class provides the base functions that *should* be used to make the module work. Each Moodule should have a primary method (lets call it `run` for now) and have CLEARLY documented requirements for what parameters and other things it requires. For Example a `DriveModule.run` method might have the following documentation:
+Each Module of the Robot should be in its own file and extend the [`RobotModule`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/RobotModule.java) Class, This Class provides the base functions that *should* be used to make the module work. Each Module should have a primary method called `run` that does not have any arguments. For Example a `DriveModule.run` method might have the following documentation:
 ```java
 public class DriveModule extends RobotModule{
+
+    /**
+     * Module run method.
+     **/
+    public void run(){
+        gamepad1 = data.getController(1); 
+        drive(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+    }
     /** 
     * Makes The Robot Move
     * Requires wheels on the robot
@@ -52,11 +60,17 @@ public class DriveModule extends RobotModule{
     * @param y A double representing the desired Left movement.
     * @param z A double representing the desired Turning to the left.
     **/
-    public run(double x, double y, double z){
+    public void drive(double x, double y, double z){
         //There is probability some code here, if there is not we have problems
     }
 }
 ```
-Note that this code is only to document how to document things and is not a representation of the actual code of the robot. 
+Note that this code is only to document how to document things and is not a representation of the actual code of the robot. if there needs to be init code, this can be run in the constructor.
+
+You might have noticed the data class involved here, this class is how all data should be pass through the different modules. you can see this class [here](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/Data.java). *Note that until this branch is pushed into main this link will not work* To add to the `Data` class, there should be at least a getter method for each variable. If the variable needs to be able to be changed, there should be a setter method as well, otherwise the variable should be assigned in the `init` method. 
+
+The [Main](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Main.java) file should only have the setup code and other handlers, everything that can reasonably put in a module should be in a module.
+
+No matter what code is being added there should be javadoc comments for each method at the minimum. but theoretically the code should be heavily documented. This is **especially** true with trig or other calculations. Though this can be a link to an explanation.
 
 
