@@ -34,7 +34,7 @@ To contribute to our teams codebase there are a few rules:
   - (if you are on the coding team it is required to be reviewed by someone else)
  - Please push regularly! Regular contributions helps when we do our portfolio, and will show on the GitHub contribution graph when pulled to main.
 
-# Code Structure
+## Code Structure
 
 Each Module of the Robot should be in its own file and extend the [`RobotModule`](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/RobotModule.java) Class, This Class provides the base functions that *should* be used to make the module work. Each Module should have a primary method called `run` that does not have any arguments. For Example a `DriveModule` class might have the following documentation:
 ```java
@@ -72,7 +72,7 @@ No matter what code is being added there should be javadoc comments for each met
 
 When making a pull request, there should be an explanation of all changes that are being made. It is a good idea to check that all added code is commented properly before making a pull request. The Commit messages should also me clear in what changes are being made, we don't want `added stuff` or `I was told to commit` to be a commit. If needed android studio lets gemini write commit messages for you, though these should be reviewed first and marked as AI generated. It is also generally a good idea to commit each file individually, this can let you write different commit messages for each file, though if the only change is changing a use of a changed function, different commit messages are not needed. ~~Occasionally it can be good to rebase branches with main when the main branch is updated.  this can be done by switching to the main branch and selecting the working branch to rebase.~~ **Don't do this** This can cause issues with duplicate commits, see the commit history for the `meta-changes` branch. 
 
-## Telemetry
+### Telemetry
 Telemetry is still a problem that is being worked on, while we are using [FTC Dashboard](https://acmerobotics.github.io/ftc-dashboard/) the `telemetry` object for some reason is not a linked object, that means that if we add data in one module, and update in another module, it does not properly update with the added data. While we are looking for fixes to this problem we currently have the following cursed code as a stopgap mesure:
 
 https://github.com/Robotic-Conspiracy/DECODE/blob/593de45dcac9032a748d02e57b4ff00bdde2874d/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/modules/RobotModule.java#L25-L33
