@@ -28,6 +28,13 @@ public class HardwareMap {
                 throw new IllegalNameException();
             }
         }
+
+        // read file
+        // seperate varuables into class name and name
+        // check that class name and name are allowed
+        // if they are continue if not throw an error
+        // map out loaded "hardware"
+
     }
 
 
