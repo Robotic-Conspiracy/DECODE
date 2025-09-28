@@ -34,6 +34,7 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -59,11 +60,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "StarterBotShootAndDrive", group = "StarterBot")
 //@Disabled
+@Config
 public class StarterBotShootAndDrive extends OpMode {
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
-    private int targetSpeed = 0;
+    public static int targetSpeed = 0;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -238,85 +240,12 @@ public class StarterBotShootAndDrive extends OpMode {
          */
         mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
         if(gamepad2.rightBumperWasPressed()) {
-            switch (launchSpeed) {
-                case STOPPED:
-                    launchSpeed = MotorLaunchSpeed.EXTRA_SLOW;
-                    break;
-                case EXTRA_SLOW:
-                    launchSpeed = MotorLaunchSpeed.SLOW;
-                    break;
-                case SLOW:
-                    launchSpeed = MotorLaunchSpeed.NORMAL;
-                    break;
-                case NORMAL:
-                    launchSpeed = MotorLaunchSpeed.FAST;
-                    break;
-                case FAST:
-                    launchSpeed = MotorLaunchSpeed.EXTRA_FAST;
-                    break;
-                case EXTRA_FAST:
-                    launchSpeed = MotorLaunchSpeed.MAX;
-                    break;
-                case MAX:
-                    launchSpeed = MotorLaunchSpeed.STOPPED;
-                    break;
-            }
+            targetSpeed += 10;
         }
         if(gamepad2.leftBumperWasPressed()) {
-            switch (launchSpeed) {
-                case STOPPED:
-                    launchSpeed = MotorLaunchSpeed.MAX;
-                    break;
-                case EXTRA_SLOW:
-                    launchSpeed = MotorLaunchSpeed.STOPPED;
-                    break;
-                case SLOW:
-                    launchSpeed = MotorLaunchSpeed.EXTRA_SLOW;
-                    break;
-                case NORMAL:
-                    launchSpeed = MotorLaunchSpeed.SLOW;
-                    break;
-                case FAST:
-                    launchSpeed = MotorLaunchSpeed.NORMAL;
-                    break;
-                case EXTRA_FAST:
-                    launchSpeed = MotorLaunchSpeed.FAST;
-                    break;
-                case MAX:
-                    launchSpeed = MotorLaunchSpeed.EXTRA_FAST;
-                    break;
-            }
+            targetSpeed += 10;
         }
-        switch (launchSpeed) {
-            case STOPPED:
-                targetSpeed = 0;
-                launcher.setVelocity(0);
-                break;
-            case EXTRA_SLOW:
-                targetSpeed = 250;
-                launcher.setVelocity(250);
-                break;
-            case SLOW:
-                targetSpeed = 500;
-                launcher.setVelocity(500);
-                break;
-            case NORMAL:
-                targetSpeed = 750;
-                launcher.setVelocity(750);
-                break;
-            case FAST:
-                targetSpeed = 1000;
-                launcher.setVelocity(1000);
-                break;
-            case EXTRA_FAST:
-                targetSpeed = 1250;
-                launcher.setVelocity(1250);
-                break;
-            case MAX:
-                targetSpeed = 2000;
-                launcher.setVelocity(2000);
-                break;
-        }
+        launcher.setVelocity(targetSpeed);
         launch(gamepad1.rightBumperWasPressed());
 
         /*
