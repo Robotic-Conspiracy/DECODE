@@ -34,7 +34,9 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -139,7 +141,7 @@ public class StarterBotShootAndDrive extends OpMode {
     @Override
     public void init() {
         launchState = LaunchState.IDLE;
-
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
          * to 'get' must correspond to the names assigned during the robot configuration
@@ -239,11 +241,11 @@ public class StarterBotShootAndDrive extends OpMode {
          * more complex maneuvers.
          */
         mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-        if(gamepad2.rightBumperWasPressed()) {
+        if(gamepad1.dpadUpWasPressed()) {
             targetSpeed += 10;
         }
-        if(gamepad2.leftBumperWasPressed()) {
-            targetSpeed += 10;
+        if(gamepad1.dpadDownWasPressed()) {
+            targetSpeed -= 10;
         }
         launcher.setVelocity(targetSpeed);
         launch(gamepad1.rightBumperWasPressed());
@@ -271,8 +273,8 @@ public class StarterBotShootAndDrive extends OpMode {
          */
 //        telemetry.addData("State", launchState);
 //        telemetry.addData("motorSpeed", launcher.getVelocity());
-        telemetry.addData("speed", launchSpeed);
-        telemetry.addData("velocity", launcher.getVelocity());
+        telemetry.addData("target speed", targetSpeed);
+        telemetry.addData("current speed", launcher.getVelocity());
     }
 
     /*
