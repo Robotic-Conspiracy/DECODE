@@ -125,9 +125,9 @@ public class Auto_The_First extends OpMode {
         }
 
         if (Y_Goal - 5 > posY){
-            forward = -change_by;
-        } else if (Y_Goal + 5 < posY){
             forward = change_by;
+        } else if (Y_Goal + 5 < posY){
+            forward = -change_by;
         }
 
         mecanumDrive(forward, strafe, -rotate);
