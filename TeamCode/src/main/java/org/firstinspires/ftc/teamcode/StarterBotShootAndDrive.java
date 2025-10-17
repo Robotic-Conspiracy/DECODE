@@ -247,7 +247,12 @@ public class StarterBotShootAndDrive extends OpMode {
         if(gamepad1.dpadDownWasPressed()) {
             targetSpeed -= 10;
         }
+        if (gamepad1.aWasPressed()){
+            targetSpeed = 1000;
+        }
         launcher.setVelocity(targetSpeed);
+
+
         launch(gamepad1.rightBumperWasPressed());
 
         /*
