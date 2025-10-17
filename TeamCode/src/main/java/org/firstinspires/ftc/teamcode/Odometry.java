@@ -34,6 +34,8 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -124,6 +126,7 @@ public class Odometry extends OpMode {
      */
     @Override
     public void init() {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         launchState = LaunchState.IDLE;
 
         /*
@@ -223,6 +226,7 @@ public class Odometry extends OpMode {
         mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
         pod.update();
         telemetry.addData("xpos", pod.getPosX());
+        telemetry.addData("ypos", pod.getPosY());
         telemetry.update();
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
