@@ -242,10 +242,10 @@ public class StarterBotShootAndDrive extends OpMode {
          */
         mecanumDrive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
         if(gamepad1.dpadUpWasPressed()) {
-            targetSpeed += 10;
+            targetSpeed += 20;
         }
         if(gamepad1.dpadDownWasPressed()) {
-            targetSpeed -= 10;
+            targetSpeed -= 20;
         }
         if (gamepad1.aWasPressed()){
             targetSpeed = 1000;
