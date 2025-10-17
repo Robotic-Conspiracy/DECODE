@@ -67,7 +67,7 @@ public class StarterBotShootAndDrive extends OpMode {
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
-    public static int targetSpeed = 0;
+    public static int targetSpeed = 1250;
 
     /*
      * When we control our launcher motor, we are using encoders. These allow the control system
@@ -247,6 +247,7 @@ public class StarterBotShootAndDrive extends OpMode {
         if(gamepad1.dpadDownWasPressed()) {
             targetSpeed -= 10;
         }
+        launcher.setVelocityPIDFCoefficients(500, 0.2, 0, 0);
         launcher.setVelocity(targetSpeed);
         launch(gamepad1.rightBumperWasPressed());
 
@@ -323,7 +324,7 @@ public class StarterBotShootAndDrive extends OpMode {
             case LAUNCHING:
                 if(feederTimer.seconds() > FEED_TIME_SECONDS) {
                     launchState = LaunchState.IDLE;
-                    leftFeeder.setPower(STOP_SPEED);
+                    leftFeeder.setPower(STOP_SPEED);telemetry.update();
                     rightFeeder.setPower(STOP_SPEED);
                 }
                 break;
