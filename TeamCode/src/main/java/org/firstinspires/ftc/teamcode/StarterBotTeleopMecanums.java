@@ -34,6 +34,8 @@ package org.firstinspires.ftc.teamcode;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -71,6 +73,7 @@ public class StarterBotTeleopMecanums extends OpMode {
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
+
     final double LAUNCHER_TARGET_VELOCITY = 1125;
     final double LAUNCHER_MIN_VELOCITY = 1075;
 
@@ -82,6 +85,8 @@ public class StarterBotTeleopMecanums extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+
+    private GoBildaPinpointDriver pod = null;
 
     ElapsedTime feederTimer = new ElapsedTime();
 
@@ -122,6 +127,7 @@ public class StarterBotTeleopMecanums extends OpMode {
     @Override
     public void init() {
         launchState = LaunchState.IDLE;
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
@@ -135,6 +141,8 @@ public class StarterBotTeleopMecanums extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
+
 
         /*
          * To drive forward, most robots need the motor on one side to be reversed,
@@ -217,6 +225,13 @@ public class StarterBotTeleopMecanums extends OpMode {
          * more complex maneuvers.
          */
         mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+
+
+        //Get the things updated.
+        pod.update();
+        telemetry.addData("x pos", pod.getPosX());
+        telemetry.addData("y pos", pod.getPosY());
+        telemetry.update();
 
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
