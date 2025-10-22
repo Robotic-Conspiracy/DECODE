@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.List;
 
 @Config
-@Autonomous
+@Autonomous(name = "drive left auto blue")
 public class The_Second_Auto extends OpMode {
     private DcMotor leftFrontDrive;
     private DcMotor rightFrontDrive;
@@ -27,6 +27,7 @@ public class The_Second_Auto extends OpMode {
     private CRServo rightFeeder;
     private GoBildaPinpointDriver pod;
     private states state = states.NOT_READY;
+    private int timesShot = 0;
 
     ElapsedTime feedTimer = new ElapsedTime();
 
@@ -69,47 +70,50 @@ public class The_Second_Auto extends OpMode {
 
     @Override
     public void loop() {
-        launcher.setVelocity(1200);
+        launcher.setVelocity(1150);
         telemetry.addData("Position", pod.getPosition());
         telemetry.addData("Velocity", launcher.getVelocity());
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
-        switch(state) {
-            case NOT_READY:
-                leftFrontDrive.setPower(1);
-                rightFrontDrive.setPower(-1);
-                leftBackDrive.setPower(-1);
-                rightBackDrive.setPower(1);
+        if(timesShot <= 3){
+            switch(state) {
+                case NOT_READY:
+                    leftFrontDrive.setPower(1);
+                    rightFrontDrive.setPower(-1);
+                    leftBackDrive.setPower(-1);
+                    rightBackDrive.setPower(1);
 
-                pod.update();
-                if(Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75){
-                    leftFrontDrive.setPower(0);
-                    rightFrontDrive.setPower(0);
-                    leftBackDrive.setPower(0);
-                    rightBackDrive.setPower(0);
-                    state = states.SPIN_UP;
-                }
+                    pod.update();
+                    if (Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75) {
+                        leftFrontDrive.setPower(0);
+                        rightFrontDrive.setPower(0);
+                        leftBackDrive.setPower(0);
+                        rightBackDrive.setPower(0);
+                        state = states.SPIN_UP;
+                    }
 
-                break;
-            case SPIN_UP:
-                if(feedTimer.seconds() > 2){
-                    state = (launcher.getVelocity() >= 1200-50 && launcher.getVelocity() <= 1250) ? states.LAUNCH : state;
-                }
+                    break;
+                case SPIN_UP:
+                    if (feedTimer.seconds() > 1) {
+                        state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
+                    }
 
-                break;
-            case LAUNCH:
-                leftFeeder.setPower(1);
-                rightFeeder.setPower(1);
-                feedTimer.reset();
-                state = states.LAUNCHING;
-                break;
-            case LAUNCHING:
-                telemetry.addData("Feed time", feedTimer.seconds());
-                if(feedTimer.seconds() > 0.2){
-                    state = states.SPIN_UP;
-                    leftFeeder.setPower(0);
-                    rightFeeder.setPower(0);
-                }
-                break;
+                    break;
+                case LAUNCH:
+                    leftFeeder.setPower(1);
+                    rightFeeder.setPower(1);
+                    feedTimer.reset();
+                    state = states.LAUNCHING;
+                    break;
+                case LAUNCHING:
+                    telemetry.addData("Feed time", feedTimer.seconds());
+                    if (feedTimer.seconds() > 0.2) {
+                        state = states.SPIN_UP;
+                        leftFeeder.setPower(0);
+                        rightFeeder.setPower(0);
+                        timesShot += 1;
+                    }
+                    break;
+            }
         }
         telemetry.addData("state", state);
 
