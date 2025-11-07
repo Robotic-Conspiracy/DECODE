@@ -82,19 +82,19 @@ public abstract class The_Fourth_Auto extends OpMode {
     launcher.setVelocityPIDFCoefficients(P,I,D,F);
     switch(state) {
       case NOT_READY:
-        //leftFrontDrive.setPower(-1);
-        //rightFrontDrive.setPower(1);
-        //leftBackDrive.setPower(1);
-        //rightBackDrive.setPower(-1);
+        leftFrontDrive.setPower(1);
+        rightFrontDrive.setPower(1);
+        leftBackDrive.setPower(1);
+        rightBackDrive.setPower(1);
 
-//        pod.update();
-//        if (Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75) {
-//          leftFrontDrive.setPower(0);
-//          rightFrontDrive.setPower(0);
-//          leftBackDrive.setPower(0);
-//          rightBackDrive.setPower(0);
+        pod.update();
+        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 15 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 15) {
+          leftFrontDrive.setPower(0);
+          rightFrontDrive.setPower(0);
+          leftBackDrive.setPower(0);
+          rightBackDrive.setPower(0);
           state = states.SPIN_UP;
-        //}
+        }
 
         break;
       case SPIN_UP:
@@ -129,7 +129,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
         pod.update();
         telemetry.addData("Position", pod.getPosition());
-        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 100 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 100) {
+        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
           leftFrontDrive.setPower(0);
           rightFrontDrive.setPower(0);
           leftBackDrive.setPower(0);
