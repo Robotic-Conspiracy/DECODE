@@ -13,11 +13,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import java.util.List;
-
 @Config
-@Autonomous(name = "drive left auto blue")
-public class The_Second_Auto extends OpMode {
+@Autonomous(name = "drive right auto red")
+public class The_Third_Auto extends OpMode {
     private DcMotor leftFrontDrive;
     private DcMotor rightFrontDrive;
     private DcMotor leftBackDrive;
@@ -74,47 +72,78 @@ public class The_Second_Auto extends OpMode {
         telemetry.addData("Position", pod.getPosition());
         telemetry.addData("Velocity", launcher.getVelocity());
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
-        if(timesShot <= 3){
-            switch(state) {
-                case NOT_READY:
-                    leftFrontDrive.setPower(1);
-                    rightFrontDrive.setPower(-1);
-                    leftBackDrive.setPower(-1);
-                    rightBackDrive.setPower(1);
+        telemetry.addLine("Version 1.0.3");
+        pod.update();
+        switch(state) {
+            case NOT_READY:
+                leftFrontDrive.setPower(-1);
+                rightFrontDrive.setPower(1);
+                leftBackDrive.setPower(1);
+                rightBackDrive.setPower(-1);
 
-                    pod.update();
-                    if (Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75) {
-                        leftFrontDrive.setPower(0);
-                        rightFrontDrive.setPower(0);
-                        leftBackDrive.setPower(0);
-                        rightBackDrive.setPower(0);
-                        state = states.SPIN_UP;
-                    }
 
-                    break;
-                case SPIN_UP:
-                    if (feedTimer.seconds() > 1) {
-                        state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
-                    }
+                if (Math.abs(pod.getPosY()) >= 50) {
+                    leftFrontDrive.setPower(0);
+                    rightFrontDrive.setPower(0);
+                    leftBackDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+                    state = states.SPIN_UP;
+                }
 
-                    break;
-                case LAUNCH:
-                    leftFeeder.setPower(1);
-                    rightFeeder.setPower(1);
-                    feedTimer.reset();
-                    state = states.LAUNCHING;
-                    break;
-                case LAUNCHING:
-                    telemetry.addData("Feed time", feedTimer.seconds());
+                break;
+            case SPIN_UP:
+                if (feedTimer.seconds() > 1) {
+                    state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
+                }
+
+                break;
+            case LAUNCH:
+                leftFeeder.setPower(1);
+                rightFeeder.setPower(1);
+                feedTimer.reset();
+                state = states.LAUNCHING;
+                break;
+            case LAUNCHING:
+                telemetry.addData("Feed time", feedTimer.seconds());
+                if(timesShot <= 3){
                     if (feedTimer.seconds() > 0.2) {
                         state = states.SPIN_UP;
                         leftFeeder.setPower(0);
                         rightFeeder.setPower(0);
                         timesShot += 1;
                     }
-                    break;
-            }
+                } else {
+                    state = states.REVERSING;
+                }
+
+                break;
+            case REVERSING:
+                if(Math.abs(pod.getPosX()) <= 150){
+                    System.out.println("Back");
+                    leftFrontDrive.setPower(1);
+                    rightFrontDrive.setPower(1);
+                    leftBackDrive.setPower(1);
+                    rightBackDrive.setPower(1);
+                } else if (Math.abs(pod.getPosY()) <= 75*4) {//not large enough value
+                    System.out.println("Right");
+                    leftFrontDrive.setPower(-1);
+                    rightFrontDrive.setPower(1);
+                    leftBackDrive.setPower(1);
+                    rightBackDrive.setPower(-1);
+
+                } else {
+                    state = states.DONE;
+                }
+                break;
+            case DONE:
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
+                break;
+
         }
+
         telemetry.addData("state", state);
 
     }
@@ -123,7 +152,9 @@ public class The_Second_Auto extends OpMode {
         NOT_READY,
         SPIN_UP,
         LAUNCH,
-        LAUNCHING
+        LAUNCHING,
+        REVERSING,
+        DONE
     }
 }
 
