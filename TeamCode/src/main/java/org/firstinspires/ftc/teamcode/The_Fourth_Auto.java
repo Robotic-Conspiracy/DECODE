@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -128,7 +129,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
         pod.update();
         telemetry.addData("Position", pod.getPosition());
-        if (Math.abs(pod.getPosY()) >= 100 || Math.abs(pod.getPosX()) >= 100) {
+        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 100 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 100) {
           leftFrontDrive.setPower(0);
           rightFrontDrive.setPower(0);
           leftBackDrive.setPower(0);
