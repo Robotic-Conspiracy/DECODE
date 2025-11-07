@@ -76,7 +76,7 @@ public abstract class The_Fourth_Auto extends OpMode {
   @Override
   public void loop() {
     pod.update();
-    launcher.setVelocity(1100);
+    launcher.setVelocity(1200);
     telemetry.addData("Position", pod.getPosition());
     telemetry.addData("Velocity", launcher.getVelocity());
     launcher.setVelocityPIDFCoefficients(P,I,D,F);
