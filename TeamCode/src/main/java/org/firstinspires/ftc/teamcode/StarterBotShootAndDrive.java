@@ -60,7 +60,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
 
-@TeleOp(name = "StarterBotShootAndDrive", group = "StarterBot")
+@TeleOp(name = "StarterBotShootAndDrive1", group = "StarterBot")
 //@Disabled
 @Config
 public class StarterBotShootAndDrive extends OpMode {
@@ -86,6 +86,7 @@ public class StarterBotShootAndDrive extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+    private CRServo bendyServoOne = null;
     //private DcMotorEx launcher = null;
     //private CRServo leftFeeder = null;
     //private CRServo rightFeeder = null;
@@ -154,7 +155,7 @@ public class StarterBotShootAndDrive extends OpMode {
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-
+        bendyServoOne = hardwareMap.get(CRServo.class, "bendy_servo_1");
         //launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         //leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         //rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
@@ -250,7 +251,7 @@ public class StarterBotShootAndDrive extends OpMode {
         launcher.setVelocityPIDFCoefficients(500, 0.2, 0, 0);
         launcher.setVelocity(targetSpeed);
         launch(gamepad1.rightBumperWasPressed());
-
+        bendyServoOne.setPower((gamepad1.dpad_right ? 1 : 0) - (gamepad1.dpad_left ? 1 : 0));
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.

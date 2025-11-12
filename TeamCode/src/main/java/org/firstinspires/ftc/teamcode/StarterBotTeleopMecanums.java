@@ -85,6 +85,7 @@ public class StarterBotTeleopMecanums extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
+    private CRServo bendyServoOne = null;
 
     private GoBildaPinpointDriver pod = null;
 
@@ -141,6 +142,7 @@ public class StarterBotTeleopMecanums extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        bendyServoOne = hardwareMap.get(CRServo.class, "bendy_servo_1");
         pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
 
@@ -189,6 +191,9 @@ public class StarterBotTeleopMecanums extends OpMode {
          * both work to feed the ball into the robot.
          */
         leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
 
         /*
          * Tell the driver that initialization is complete.
@@ -251,6 +256,7 @@ public class StarterBotTeleopMecanums extends OpMode {
         /*
          * Show the state and motor powers
          */
+
         telemetry.addData("State", launchState);
         telemetry.addData("motorSpeed", launcher.getVelocity());
 

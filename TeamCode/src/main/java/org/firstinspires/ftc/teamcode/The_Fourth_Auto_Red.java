@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "MAIN AUTO RED")
+@Autonomous(name = "Red goal")
 
 public class The_Fourth_Auto_Red extends The_Fourth_Auto{
   @Override
