@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Move right no shooting")
+@Autonomous(name = "Blue no shooting")
 public class The_Fith_Auto_right extends The_Fith_auto{
     @Override
     public void move() {
