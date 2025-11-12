@@ -276,6 +276,10 @@ public class StarterBotShootAndDrive extends OpMode {
 //        telemetry.addData("motorSpeed", launcher.getVelocity());
         telemetry.addData("target speed", targetSpeed);
         telemetry.addData("current speed", launcher.getVelocity());
+        telemetry.addData("leftBackPwr", leftBackDrive.getPower());
+        telemetry.addData("leftFrontPwr", leftFrontDrive.getPower());
+        telemetry.addData("rightBackPwr", rightBackDrive.getPower());
+        telemetry.addData("rightFrontPwr", rightFrontDrive.getPower());
     }
 
     /*

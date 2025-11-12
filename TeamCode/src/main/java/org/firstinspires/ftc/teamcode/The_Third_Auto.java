@@ -72,6 +72,8 @@ public class The_Third_Auto extends OpMode {
         telemetry.addData("Position", pod.getPosition());
         telemetry.addData("Velocity", launcher.getVelocity());
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
+        telemetry.addLine("Version 1.0.3");
+        pod.update();
         switch(state) {
             case NOT_READY:
                 leftFrontDrive.setPower(-1);
@@ -79,8 +81,8 @@ public class The_Third_Auto extends OpMode {
                 leftBackDrive.setPower(1);
                 rightBackDrive.setPower(-1);
 
-                pod.update();
-                if (Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75) {
+
+                if (Math.abs(pod.getPosY()) >= 50) {
                     leftFrontDrive.setPower(0);
                     rightFrontDrive.setPower(0);
                     leftBackDrive.setPower(0);
@@ -110,8 +112,34 @@ public class The_Third_Auto extends OpMode {
                         rightFeeder.setPower(0);
                         timesShot += 1;
                     }
+                } else {
+                    state = states.REVERSING;
                 }
 
+                break;
+            case REVERSING:
+                if(Math.abs(pod.getPosX()) <= 150){
+                    System.out.println("Back");
+                    leftFrontDrive.setPower(1);
+                    rightFrontDrive.setPower(1);
+                    leftBackDrive.setPower(1);
+                    rightBackDrive.setPower(1);
+                } else if (Math.abs(pod.getPosY()) <= 75*4) {//not large enough value
+                    System.out.println("Right");
+                    leftFrontDrive.setPower(-1);
+                    rightFrontDrive.setPower(1);
+                    leftBackDrive.setPower(1);
+                    rightBackDrive.setPower(-1);
+
+                } else {
+                    state = states.DONE;
+                }
+                break;
+            case DONE:
+                leftFrontDrive.setPower(0);
+                rightFrontDrive.setPower(0);
+                leftBackDrive.setPower(0);
+                rightBackDrive.setPower(0);
                 break;
 
         }
@@ -124,7 +152,9 @@ public class The_Third_Auto extends OpMode {
         NOT_READY,
         SPIN_UP,
         LAUNCH,
-        LAUNCHING
+        LAUNCHING,
+        REVERSING,
+        DONE
     }
 }
 
