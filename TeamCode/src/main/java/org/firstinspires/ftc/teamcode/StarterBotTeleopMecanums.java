@@ -43,6 +43,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -85,7 +86,7 @@ public class StarterBotTeleopMecanums extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
-    private CRServo bendyServoOne = null;
+    private Servo bendyServoOne = null;
 
     private GoBildaPinpointDriver pod = null;
 
@@ -142,7 +143,7 @@ public class StarterBotTeleopMecanums extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
-        bendyServoOne = hardwareMap.get(CRServo.class, "bendy_servo_1");
+        bendyServoOne = hardwareMap.get(Servo.class, "bendy_servo_1");
         pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
 

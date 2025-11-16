@@ -35,11 +35,11 @@ public abstract class The_Fourth_Auto extends OpMode {
   ElapsedTime feedTimer = new ElapsedTime();
 
 
-  public static double P = 500;
-  public static double I = 0.2;
-  public static double D = 0;
-  public static double F = 0;
-
+  public static double P = 203;
+  public static double I = 1.001;
+  public static double D = 0.0015;
+  public static double F = 0.1;
+///        launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
 
 
 

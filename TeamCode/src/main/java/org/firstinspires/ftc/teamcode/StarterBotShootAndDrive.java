@@ -43,6 +43,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -86,7 +87,14 @@ public class StarterBotShootAndDrive extends OpMode {
     private DcMotorEx launcher = null;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
-    private CRServo bendyServoOne = null;
+    private Servo bendyServoOne = null;
+
+    public static double servoPosition = 0;
+    private final double SERVO_MINIMUM_POSITION = 0;
+    private final double SERVO_MAXIMUM_POSITION = 50;
+    /**
+     *
+     */
     //private DcMotorEx launcher = null;
     //private CRServo leftFeeder = null;
     //private CRServo rightFeeder = null;
@@ -155,7 +163,7 @@ public class StarterBotShootAndDrive extends OpMode {
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        bendyServoOne = hardwareMap.get(CRServo.class, "bendy_servo_1");
+        bendyServoOne = hardwareMap.get(Servo.class, "bendy_servo_1");
         //launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         //leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         //rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
@@ -248,10 +256,34 @@ public class StarterBotShootAndDrive extends OpMode {
         if(gamepad1.dpadDownWasPressed()) {
             targetSpeed -= 10;
         }
-        launcher.setVelocityPIDFCoefficients(500, 0.2, 0, 0);
+        if(gamepad1.xWasPressed()){
+            targetSpeed -= 100;
+        }
+        if(gamepad1.yWasPressed()){
+            targetSpeed += 100;
+        }
+
+        if(gamepad1.dpadLeftWasPressed()){
+            servoPosition = 0;
+            targetSpeed = 1250;
+        }
+        if(gamepad1.dpadRightWasPressed()){
+            servoPosition = 45;
+            targetSpeed = 2000;
+        }
+
+
+        launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
         launcher.setVelocity(targetSpeed);
         launch(gamepad1.rightBumperWasPressed());
-        bendyServoOne.setPower((gamepad1.dpad_right ? 1 : 0) - (gamepad1.dpad_left ? 1 : 0));
+        servoPosition += (gamepad1.dpad_right ? 1 : 0) - (gamepad1.dpad_left ? 1 : 0);
+        if(servoPosition < SERVO_MINIMUM_POSITION){
+            servoPosition = SERVO_MINIMUM_POSITION;
+        } else if (servoPosition > SERVO_MAXIMUM_POSITION) {
+            servoPosition = SERVO_MAXIMUM_POSITION;
+        }
+
+        bendyServoOne.setPosition(servoPosition/360.0);
         /*
          * Here we give the user control of the speed of the launcher motor without automatically
          * queuing a shot.
@@ -277,10 +309,8 @@ public class StarterBotShootAndDrive extends OpMode {
 //        telemetry.addData("motorSpeed", launcher.getVelocity());
         telemetry.addData("target speed", targetSpeed);
         telemetry.addData("current speed", launcher.getVelocity());
-        telemetry.addData("leftBackPwr", leftBackDrive.getPower());
-        telemetry.addData("leftFrontPwr", leftFrontDrive.getPower());
-        telemetry.addData("rightBackPwr", rightBackDrive.getPower());
-        telemetry.addData("rightFrontPwr", rightFrontDrive.getPower());
+        telemetry.addData("Servo Target Position", servoPosition);
+        telemetry.addData("Servo Position", bendyServoOne.getPosition()*360);
     }
 
     /*
@@ -318,7 +348,7 @@ public class StarterBotShootAndDrive extends OpMode {
                 break;
             case SPIN_UP:
 
-                launchState = (launcher.getVelocity() >= targetSpeed-40) ? LaunchState.LAUNCH : launchState;
+                launchState = (launcher.getVelocity() >= targetSpeed-20) ? LaunchState.LAUNCH : launchState;
                 break;
             case LAUNCH:
                 leftFeeder.setPower(FULL_SPEED);

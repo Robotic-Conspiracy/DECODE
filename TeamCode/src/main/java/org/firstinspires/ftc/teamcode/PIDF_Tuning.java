@@ -16,6 +16,7 @@ public class PIDF_Tuning  extends OpMode {
     public static double I = 0;
     public static double D = 0;
     public static double F = 0;
+    public static double targetSpeed = 2000;
     public static double switch_time = 10;
 
     private int Switch = 0;
@@ -40,10 +41,10 @@ public class PIDF_Tuning  extends OpMode {
         telemetry.addData("F", F);
         if(time.seconds() >= switch_time){
             if (Switch == 0) {
-                launcher.setVelocity(-2000);
+                launcher.setVelocity(-targetSpeed);
                 Switch = 1;
             } else {
-                launcher.setVelocity(2000);
+                launcher.setVelocity(targetSpeed);
                 Switch = 0;
             }
             time.reset();
