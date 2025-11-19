@@ -169,9 +169,9 @@ public class KylerPreset extends OpMode {
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
     }
