@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -25,6 +26,7 @@ public abstract class The_Fourth_Auto extends OpMode {
   protected DcMotor rightFrontDrive;
   protected DcMotor leftBackDrive;
   protected DcMotor rightBackDrive;
+  protected Servo angleThing;
   private DcMotorEx launcher;
   private CRServo leftFeeder;
   private CRServo rightFeeder;
@@ -55,10 +57,11 @@ public abstract class The_Fourth_Auto extends OpMode {
     leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
     rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
     launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+    angleThing = hardwareMap.get(Servo.class, "bendy_servo_1");
     pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
-    leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-    rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+    leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+    rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
     leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
     rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
     leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -75,10 +78,11 @@ public abstract class The_Fourth_Auto extends OpMode {
   @Override
   public void loop() {
     pod.update();
-    launcher.setVelocity(1100);
+    launcher.setVelocity(1200);
     telemetry.addData("Position", pod.getPosition());
     telemetry.addData("Velocity", launcher.getVelocity());
     launcher.setVelocityPIDFCoefficients(P,I,D,F);
+    angleThing.setPosition(15/360.0);
     switch(state) {
       case NOT_READY:
         //leftFrontDrive.setPower(-1);
@@ -98,7 +102,7 @@ public abstract class The_Fourth_Auto extends OpMode {
         break;
       case SPIN_UP:
         if (feedTimer.seconds() > 1) {
-          state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
+          state = (launcher.getVelocity() >= 1180 && launcher.getVelocity() <= 1220) ? states.LAUNCH : state;
         }
 
         break;

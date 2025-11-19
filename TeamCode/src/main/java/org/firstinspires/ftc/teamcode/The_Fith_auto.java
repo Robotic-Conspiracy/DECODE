@@ -4,7 +4,12 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -15,7 +20,16 @@ public abstract class The_Fith_auto extends OpMode {
     protected DcMotor rightFrontDrive;
     protected DcMotor leftBackDrive;
     protected DcMotor rightBackDrive;
+    protected Servo angleThing;
+    private DcMotorEx launcher;
+    private CRServo leftFeeder;
+    private CRServo rightFeeder;
     private GoBildaPinpointDriver pod;
+    private states state = states.NOT_READY;
+    private int timesShot = 0;
+
+    private ElapsedTime feedTimer = new ElapsedTime();
+    private ElapsedTime waitTimer = new ElapsedTime();
 
     @Override
     public void init(){
@@ -23,12 +37,18 @@ public abstract class The_Fith_auto extends OpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
         rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
+        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        angleThing = hardwareMap.get(Servo.class, "bendy_servo_1");
         pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         leftFrontDrive.setZeroPowerBehavior(BRAKE);
         rightFrontDrive.setZeroPowerBehavior(BRAKE);
@@ -38,18 +58,86 @@ public abstract class The_Fith_auto extends OpMode {
         pod.resetPosAndIMU();
         pod.setPosition(new Pose2D(DistanceUnit.MM,0,0, AngleUnit.RADIANS,0));
     }
-
+    @Override
+    public void start() {
+        waitTimer.reset();
+    }
     @Override
     public void loop() {
+        launcher.setVelocity(1980);
+        launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
+        angleThing.setPosition(38/360.0);
         pod.update();
-        if(Math.abs(pod.getPosX(DistanceUnit.MM)) < 200 && Math.abs(pod.getPosY(DistanceUnit.MM)) < 200){
-            move();
-        } else {
-            leftFrontDrive.setPower(0);
-            rightFrontDrive.setPower(0);
-            leftBackDrive.setPower(0);
-            rightBackDrive.setPower(0);
+        //ToDo: finish setting up the state machine
+        switch(state) {
+            case NOT_READY:
+                if (Math.abs(pod.getHeading(AngleUnit.DEGREES)) < 15) {
+                    rotate();
+                } else {
+                    state = states.SPIN_UP;
+                    leftFrontDrive.setPower(0);
+                    leftBackDrive.setPower(0);
+                    rightFrontDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+                }
+
+                break;
+            case SPIN_UP:
+                if (feedTimer.seconds() > 1) {
+                    state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
+                }
+
+                break;
+            case LAUNCH:
+                leftFeeder.setPower(1);
+                rightFeeder.setPower(1);
+                feedTimer.reset();
+                state = states.LAUNCHING;
+                break;
+            case LAUNCHING:
+                telemetry.addData("Feed time", feedTimer.seconds());
+                if(timesShot <= 4){
+                    if (feedTimer.seconds() > 0.2) {
+                        state = states.SPIN_UP;
+                        leftFeeder.setPower(0);
+                        rightFeeder.setPower(0);
+                        timesShot += 1;
+                    }
+                } else {
+                    leftFeeder.setPower(0);
+                    rightFeeder.setPower(0);
+                    state = states.MOVE;
+                }
+                break;
+            case MOVE:
+                move();
+
+                pod.update();
+                telemetry.addData("Position", pod.getPosition());
+                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 100 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 100) {
+                    leftFrontDrive.setPower(0);
+                    rightFrontDrive.setPower(0);
+                    leftBackDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+                    pod.update();
+                    state = states.STOP_MOVE;
+                }
+
+                break;
+            case STOP_MOVE:
+                break;
+
         }
     }
     public abstract void move();
+    public abstract void rotate();
+
+    private enum states {
+        NOT_READY,
+        SPIN_UP,
+        LAUNCH,
+        LAUNCHING,
+        MOVE,
+        STOP_MOVE
+    }
 }
