@@ -64,18 +64,23 @@ public class KylerPreset extends OpMode {
     public void loop() {
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){
-            targetSpeed += 20*(gamepad1.x ? 1 : 5);
+            targetSpeed += 20*(gamepad1.x ? 5 : 1);
         }
         if(gamepad1.dpadDownWasPressed()){
-            targetSpeed -= 20*(gamepad1.x ? 1 : 5);
+            targetSpeed -= 20*(gamepad1.x ? 5 : 1);
         }
 
         //changing servo rotation
         if(gamepad1.dpadRightWasPressed()){
-            targetSpeed += (gamepad1.x ? 1 : 5);
+            targetAngle += (gamepad1.x ? 5 : 1);
         }
         if(gamepad1.dpadLeftWasPressed()){
-            targetSpeed -= (gamepad1.x ? 1 : 5);
+            targetAngle -= (gamepad1.x ? 5 : 1);
+        }
+        if (targetAngle > SERVO_MAXIMUM_POSITION){
+            targetAngle = SERVO_MAXIMUM_POSITION;
+        } else if (targetAngle < SERVO_MINIMUM_POSITION){
+            targetAngle = SERVO_MINIMUM_POSITION;
         }
         if(gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {
             selectedPreset = Preset.CUSTOM;
@@ -154,6 +159,10 @@ public class KylerPreset extends OpMode {
         telemetry.addData("Servo Position: ", bendyServoOne.getPosition()*360);
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
+        telemetry.addData("front left wheel power", frontLeftMotor.getPower());
+        telemetry.addData("front right wheel power", frontRightMotor.getPower());
+        telemetry.addData("back left wheel power", backLeftMotor.getPower());
+        telemetry.addData("back right wheel power", backRightMotor.getPower());
         telemetry.update();
     }
 
@@ -170,7 +179,7 @@ public class KylerPreset extends OpMode {
 
 
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
