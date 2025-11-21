@@ -62,7 +62,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
     leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
     rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-    leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+    leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
     rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
     leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -132,7 +132,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
         pod.update();
         telemetry.addData("Position", pod.getPosition());
-        if (Math.abs(pod.getPosY()) >= 100 || Math.abs(pod.getPosX()) >= 100) {
+        if (Math.abs(pod.getPosY()) >= 150 || Math.abs(pod.getPosX()) >= 150) {
           leftFrontDrive.setPower(0);
           rightFrontDrive.setPower(0);
           leftBackDrive.setPower(0);

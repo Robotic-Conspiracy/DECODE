@@ -30,6 +30,9 @@ public abstract class The_Fith_auto extends OpMode {
 
     private ElapsedTime feedTimer = new ElapsedTime();
     private ElapsedTime waitTimer = new ElapsedTime();
+    protected String color = "None";
+
+    private double targetVelocity = 1960;
 
     @Override
     public void init(){
@@ -43,9 +46,9 @@ public abstract class The_Fith_auto extends OpMode {
         angleThing = hardwareMap.get(Servo.class, "bendy_servo_1");
         pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -61,30 +64,48 @@ public abstract class The_Fith_auto extends OpMode {
     @Override
     public void start() {
         waitTimer.reset();
+        System.out.println("reset wait timer");
     }
     @Override
     public void loop() {
-        launcher.setVelocity(1980);
+        launcher.setVelocity(targetVelocity);
         launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
         angleThing.setPosition(38/360.0);
         pod.update();
+        telemetry.addData("velocity ", launcher.getVelocity());
+        telemetry.addData("position x", pod.getPosX(DistanceUnit.MM));
+        telemetry.addData("position y", pod.getPosY(DistanceUnit.MM));
+        telemetry.update();
+//        telemetry.addData("front left wheel", leftFrontDrive.getPower());
+//        telemetry.addData("front right wheel", rightFrontDrive.getPower());
+//        telemetry.addData("back left wheel", leftBackDrive.getPower());
+//        telemetry.addData("back right wheel", rightBackDrive.getPower());
+
         //ToDo: finish setting up the state machine
         switch(state) {
             case NOT_READY:
-                if (Math.abs(pod.getHeading(AngleUnit.DEGREES)) < 15) {
-                    rotate();
+                if(waitTimer.seconds() >= 10) {
+                    double angle = pod.getHeading(AngleUnit.DEGREES);
+                    if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25) {
+                        move();
+                    } else if (color.equals("Blue") && angle < 20) {
+                        rotate();
+                    } else if (color.equals("Red") && angle > -20) {
+                        rotate();
+                    } else {
+                        state = states.SPIN_UP;
+                        leftFrontDrive.setPower(0);
+                        leftBackDrive.setPower(0);
+                        rightFrontDrive.setPower(0);
+                        rightBackDrive.setPower(0);
+                    }
                 } else {
-                    state = states.SPIN_UP;
-                    leftFrontDrive.setPower(0);
-                    leftBackDrive.setPower(0);
-                    rightFrontDrive.setPower(0);
-                    rightBackDrive.setPower(0);
+                    System.out.println(waitTimer.seconds());
                 }
-
                 break;
             case SPIN_UP:
                 if (feedTimer.seconds() > 1) {
-                    state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
+                    state = (launcher.getVelocity() >= targetVelocity-20 && launcher.getVelocity() <= targetVelocity+20) ? states.LAUNCH : state;
                 }
 
                 break;
@@ -97,11 +118,12 @@ public abstract class The_Fith_auto extends OpMode {
             case LAUNCHING:
                 telemetry.addData("Feed time", feedTimer.seconds());
                 if(timesShot <= 4){
-                    if (feedTimer.seconds() > 0.2) {
+                    if (feedTimer.seconds() > 0.3) {
                         state = states.SPIN_UP;
                         leftFeeder.setPower(0);
                         rightFeeder.setPower(0);
                         timesShot += 1;
+                        feedTimer.reset();
                     }
                 } else {
                     leftFeeder.setPower(0);
@@ -114,7 +136,7 @@ public abstract class The_Fith_auto extends OpMode {
 
                 pod.update();
                 telemetry.addData("Position", pod.getPosition());
-                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 100 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 100) {
+                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
                     leftFrontDrive.setPower(0);
                     rightFrontDrive.setPower(0);
                     leftBackDrive.setPower(0);
