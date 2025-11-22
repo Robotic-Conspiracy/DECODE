@@ -6,14 +6,15 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -26,6 +27,7 @@ public abstract class The_Fourth_Auto extends OpMode {
   protected DcMotor rightFrontDrive;
   protected DcMotor leftBackDrive;
   protected DcMotor rightBackDrive;
+  protected Servo angleThing;
   private DcMotorEx launcher;
   private CRServo leftFeeder;
   private CRServo rightFeeder;
@@ -36,11 +38,11 @@ public abstract class The_Fourth_Auto extends OpMode {
   ElapsedTime feedTimer = new ElapsedTime();
 
 
-  public static double P = 500;
-  public static double I = 0.2;
-  public static double D = 0;
-  public static double F = 0;
-
+  public static double P = 203;
+  public static double I = 1.001;
+  public static double D = 0.0015;
+  public static double F = 0.1;
+///        launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
 
 
 
@@ -56,11 +58,12 @@ public abstract class The_Fourth_Auto extends OpMode {
     leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
     rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
     launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+    angleThing = hardwareMap.get(Servo.class, "bendy_servo_1");
     pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
-    leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-    rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-    leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+    leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+    rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+    leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
     rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
     leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -80,26 +83,27 @@ public abstract class The_Fourth_Auto extends OpMode {
     telemetry.addData("Position", pod.getPosition());
     telemetry.addData("Velocity", launcher.getVelocity());
     launcher.setVelocityPIDFCoefficients(P,I,D,F);
+    angleThing.setPosition(15/360.0);
     switch(state) {
       case NOT_READY:
-        leftFrontDrive.setPower(1);
-        rightFrontDrive.setPower(1);
-        leftBackDrive.setPower(1);
-        rightBackDrive.setPower(1);
+        //leftFrontDrive.setPower(-1);
+        //rightFrontDrive.setPower(1);
+        //leftBackDrive.setPower(1);
+        //rightBackDrive.setPower(-1);
 
-        pod.update();
-        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 15 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 15) {
-          leftFrontDrive.setPower(0);
-          rightFrontDrive.setPower(0);
-          leftBackDrive.setPower(0);
-          rightBackDrive.setPower(0);
+//        pod.update();
+//        if (Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75) {
+//          leftFrontDrive.setPower(0);
+//          rightFrontDrive.setPower(0);
+//          leftBackDrive.setPower(0);
+//          rightBackDrive.setPower(0);
           state = states.SPIN_UP;
-        }
+        //}
 
         break;
       case SPIN_UP:
         if (feedTimer.seconds() > 1) {
-          state = (launcher.getVelocity() >= 1080 && launcher.getVelocity() <= 1200) ? states.LAUNCH : state;
+          state = (launcher.getVelocity() >= 1180 && launcher.getVelocity() <= 1220) ? states.LAUNCH : state;
         }
 
         break;
@@ -129,7 +133,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
         pod.update();
         telemetry.addData("Position", pod.getPosition());
-        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
+        if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 150 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 150) {
           leftFrontDrive.setPower(0);
           rightFrontDrive.setPower(0);
           leftBackDrive.setPower(0);
