@@ -35,4 +35,18 @@ public class The_Fith_Auto_left extends The_Fith_auto{
         rightBackDrive.setPower((forward - strafe + rotate)/denominator);
 
     }
+
+    @Override
+    public void strafe() {
+        double forward  = 0;
+        double strafe = -0.25;
+        double rotate = 0;
+
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
+
+        leftFrontDrive.setPower((forward - strafe - rotate)/denominator);
+        leftBackDrive.setPower((forward + strafe - rotate)/denominator);
+        rightFrontDrive.setPower((forward + strafe + rotate)/denominator);
+        rightBackDrive.setPower((forward - strafe + rotate)/denominator);
+    }
 }

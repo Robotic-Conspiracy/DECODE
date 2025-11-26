@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
-public abstract class The_Fith_auto extends OpMode {
+public abstract class test extends OpMode {
     protected DcMotor leftFrontDrive;
     protected DcMotor rightFrontDrive;
     protected DcMotor leftBackDrive;
@@ -75,6 +75,9 @@ public abstract class The_Fith_auto extends OpMode {
         telemetry.addData("velocity ", launcher.getVelocity());
         telemetry.addData("position x", pod.getPosX(DistanceUnit.MM));
         telemetry.addData("position y", pod.getPosY(DistanceUnit.MM));
+        telemetry.addData("angle", pod.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("state", state);
+
         telemetry.update();
 //        telemetry.addData("front left wheel", leftFrontDrive.getPower());
 //        telemetry.addData("front right wheel", rightFrontDrive.getPower());
@@ -84,7 +87,7 @@ public abstract class The_Fith_auto extends OpMode {
         //ToDo: finish setting up the state machine
         switch(state) {
             case NOT_READY:
-                if(waitTimer.seconds() >= 10) {
+                if(waitTimer.seconds() >= 1) {
                     double angle = pod.getHeading(AngleUnit.DEGREES);
                     if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25) {
                         move();
@@ -104,7 +107,7 @@ public abstract class The_Fith_auto extends OpMode {
                 }
                 break;
             case SPIN_UP:
-                if (feedTimer.seconds() > 1.25) {
+                if (feedTimer.seconds() > 1) {
                     state = (launcher.getVelocity() >= targetVelocity-20 && launcher.getVelocity() <= targetVelocity+20) ? states.LAUNCH : state;
                 }
 
@@ -132,18 +135,6 @@ public abstract class The_Fith_auto extends OpMode {
                 }
                 break;
             case MOVE:
-//                move();
-//
-//                pod.update();
-//                telemetry.addData("Position", pod.getPosition());
-//                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
-//                    leftFrontDrive.setPower(0);
-//                    rightFrontDrive.setPower(0);
-//                    leftBackDrive.setPower(0);
-//                    rightBackDrive.setPower(0);
-//                    pod.update();
-//                    state = states.STOP_MOVE;
-//                }
                 pod.update();
                 if(Math.abs(pod.getPosY(DistanceUnit.MM)) < 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 200) {
                     move();
@@ -160,6 +151,15 @@ public abstract class The_Fith_auto extends OpMode {
 
                 pod.update();
 
+//                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
+//                    leftFrontDrive.setPower(0);
+//                    rightFrontDrive.setPower(0);
+//                    leftBackDrive.setPower(0);
+//                    rightBackDrive.setPower(0);
+//                    pod.update();
+//                    state = states.STOP_MOVE;
+//                }
+
                 break;
             case STOP_MOVE:
                 break;
@@ -168,8 +168,9 @@ public abstract class The_Fith_auto extends OpMode {
     }
     public abstract void move();
     public abstract void rotate();
+    public abstract void unrotate();
+    public abstract void reverse();
     public abstract void strafe();
-
     private enum states {
         NOT_READY,
         SPIN_UP,
