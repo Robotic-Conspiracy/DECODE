@@ -10,6 +10,16 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @TeleOp(name = "Main Driver Preset")
 public class KylerPreset extends OpMode {
@@ -49,6 +59,11 @@ public class KylerPreset extends OpMode {
     private LaunchState launchState = null;
     private Preset selectedPreset = null;
 
+    private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
+    private AprilTagProcessor aprilTagProcessor;
+    private VisionPortal portal;
+    private AprilTagDetection targetDetection = null;
+
 
     @Override
     public void init() {
@@ -58,10 +73,29 @@ public class KylerPreset extends OpMode {
         initialize_drive();
         initialize_feeder();
         initialize_launcher();
+
+        aprilTagProcessor = aprilTagProcessorBuilder.build();
+
+        aprilTagProcessor.setDecimation(3);
+//        portal = new VisionPortal.Builder()
+//                .setCamera(BuiltinCameraDirection.BACK)
+//                .addProcessor(aprilTagProcessor)
+//                .build();
+        portal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .addProcessor(aprilTagProcessor)
+                .build();
     }
 
     @Override
     public void loop() {
+        if(portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+            ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+            }
+            exposureControl.setExposure((long) 1, TimeUnit.MILLISECONDS);
+        }
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){
             targetSpeed += 20*(gamepad1.x ? 5 : 1);
@@ -94,21 +128,42 @@ public class KylerPreset extends OpMode {
                     break;
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
-                    targetSpeed = 1520;
-                    targetAngle = 25;
+                    targetSpeed = 1480;
+                    targetAngle = 30;
                     break;
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
-                    targetSpeed = 1920;
-                    targetAngle = 35;
+                    targetSpeed = 1900;
+                    targetAngle = 38;
                     break;
                 case BACK:
+                    selectedPreset = Preset.JUGGLE;
+                    targetSpeed = 600;
+                    targetAngle = 8;
+                    break;
+                case JUGGLE:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1200;
                     targetAngle = 15;
                     break;
             }
         }
+        List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+        AprilTagDetection detection = null;
+        if(!detections.isEmpty()){
+            for(AprilTagDetection Detection : detections){
+                if(Detection.id == 24 || Detection.id == 20){
+                    detection = Detection;
+                    telemetry.addData("detected id: ", detection.id);
+                }
+            }
+            if(gamepad1.b && detection != null){
+                if(Math.abs(detection.ftcPose.z) > 0.75) {
+                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.05, -0.15, 0.15));
+                }
+            }
+        }
+
 
         if(targetAngle > SERVO_MAXIMUM_POSITION){
             targetAngle = SERVO_MAXIMUM_POSITION;
@@ -200,6 +255,15 @@ public class KylerPreset extends OpMode {
 
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
+        if(Math.abs(forward) < 0.1){
+            forward = 0;
+        }
+        if(Math.abs(strafe) < 0.1){
+            strafe = 0;
+        }
+        if(Math.abs(rotate) < 0.1){
+            rotate = 0;
+        }
 
         frontLeftMotor.setPower((forward - strafe - rotate)/denominator);
         backLeftMotor.setPower((forward + strafe - rotate)/denominator);
@@ -220,6 +284,7 @@ public class KylerPreset extends OpMode {
         CUSTOM,
         GOAL,
         MIDDLE,
+        JUGGLE,
         BACK
     }
 }
