@@ -21,8 +21,11 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "Main Driver Preset")
-public class KylerPreset extends OpMode {
+//update by 0.1 for small changes update by 1 or to nearest full for large updates or fetures
+//V1 adds artifact kicker 
+//V2 adds intake?
+@TeleOp(name = "Samuels Test Bot V 0.1")
+public class thepreset extends OpMode {
 
     //Launch servo objects and vars
     private final double FEED_TIME_SECONDS = 0.20;
@@ -49,7 +52,7 @@ public class KylerPreset extends OpMode {
 
     private DcMotorEx launcher = null;
     private Servo bendyServoOne = null;
-    private Servo artifactKicker = null;
+    private Servo artifactkicker = null;
 
 
     //configurable vars
@@ -61,7 +64,6 @@ public class KylerPreset extends OpMode {
     private ElapsedTime Timer = new ElapsedTime();
     private LaunchState launchState = null;
     private Preset selectedPreset = null;
-
     private CRServo grabbyServo1;
     private CRServo grabbyServo2;
     private CRServo grabbyServo3;
@@ -80,7 +82,6 @@ public class KylerPreset extends OpMode {
         initialize_drive();
         initialize_feeder();
         initialize_launcher();
-
         grabbyServo1 = hardwareMap.get(CRServo.class, "servo 1");
         grabbyServo2 = hardwareMap.get(CRServo.class, "servo 2");
         grabbyServo3 = hardwareMap.get(CRServo.class, "servo 3");
@@ -99,11 +100,11 @@ public class KylerPreset extends OpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTagProcessor)
                 .build();
+
     }
 
     @Override
     public void loop() {
-        //chaing speed
         if(portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
@@ -111,6 +112,17 @@ public class KylerPreset extends OpMode {
             }
             exposureControl.setExposure((long) 1, TimeUnit.MILLISECONDS);
         }
+        if(gamepad1.right_trigger >=0.5){
+            grabbyServo2.setPower(1);
+            grabbyServo1.setPower(1);
+            grabbyServo3.setPower(1);
+        } else {
+            grabbyServo2.setPower(0);
+            grabbyServo1.setPower(0);
+            grabbyServo3.setPower(0);
+        }
+
+        //chaing speed
         if(gamepad1.dpadUpWasPressed()){
             targetSpeed += 20*(gamepad1.x ? 5 : 1);
         }
@@ -133,36 +145,6 @@ public class KylerPreset extends OpMode {
         if(gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {
             selectedPreset = Preset.CUSTOM;
         }
-        if(gamepad1.yWasPressed()){
-            switch(selectedPreset){
-                case CUSTOM:
-                    selectedPreset = Preset.GOAL;
-                    targetSpeed = 1200;
-                    targetAngle = 18;
-                    break;
-                case GOAL:
-                    selectedPreset = Preset.MIDDLE;
-                    targetSpeed = 1520;
-                    targetAngle = 28;
-                    break;
-                case MIDDLE:
-                    selectedPreset = Preset.BACK;
-                    targetSpeed = 1920;
-                    targetAngle = 38;
-                    break;
-                case BACK:
-                    selectedPreset = Preset.JUGGLE;
-                    targetSpeed = 600;
-                    targetAngle = 8;
-                    break;
-                case JUGGLE:
-                    selectedPreset = Preset.GOAL;
-                    targetSpeed = 1200;
-                    targetAngle = 15;
-                    break;
-
-            }
-        }
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
         AprilTagDetection detection = null;
         if(!detections.isEmpty()) {
@@ -178,36 +160,61 @@ public class KylerPreset extends OpMode {
                 }
             }
         }
+        if(gamepad1.yWasPressed()){
+            switch(selectedPreset){
+                case CUSTOM:
+                    selectedPreset = Preset.GOAL;
+                    targetSpeed = 1200;
+                    targetAngle = 15;
+                    break;
+                case GOAL:
+                    selectedPreset = Preset.MIDDLE;
+                    targetSpeed = 1520;
+                    targetAngle = 25;
+                    break;
+                case MIDDLE:
+                    selectedPreset = Preset.BACK;
+                    targetSpeed = 1920;
+                    targetAngle = 35;
+                    break;
+                case BACK:
+                    selectedPreset = Preset.GOAL;
+                    targetSpeed = 1200;
+                    targetAngle = 15;
+                    break;
+            }
+        }
+
         if(targetAngle > SERVO_MAXIMUM_POSITION){
             targetAngle = SERVO_MAXIMUM_POSITION;
         } else if (targetAngle < SERVO_MINIMUM_POSITION){
             targetAngle = SERVO_MINIMUM_POSITION;
         }
-        if(gamepad1.right_trigger >=0.5){
-            grabbyServo2.setPower(1);
-            grabbyServo1.setPower(1);
-            grabbyServo3.setPower(1);
-        } else {
-            grabbyServo2.setPower(0);
-            grabbyServo1.setPower(0);
-            grabbyServo3.setPower(0);
+        if(gamepad1.aWasPressed()){//
+            artifactkicker.setPosition(KICKER_MINIMUM_POSITION/360);//
+            Timer.reset();//
+            if(Timer.seconds() > FEED_TIME_SECONDS){//
+                artifactkicker.setPosition(KICKER_MAXIMUM_POSITION/360);//
+            }//
         }
         launcher.setVelocity(targetSpeed);
-        if(gamepad1.leftBumperWasPressed()){
-            artifactKicker.setPosition(KICKER_MAXIMUM_POSITION/360);
-        } else {
-            artifactKicker.setPosition(KICKER_MINIMUM_POSITION/360);
-        }
 
         AddTelemetry();
         Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
         bendyServoOne.setPosition(targetAngle/360);
         launch(gamepad1.rightBumperWasPressed());
+        if (gamepad1.xWasPressed()) {//
+            leftFeeder.setPower(FULL_SPEED);//
+            rightFeeder.setPower(FULL_SPEED);//
+        }else{//
+            leftFeeder.setPower(STOP_SPEED);//
+            rightFeeder.setPower(STOP_SPEED);//
+            }
+        }
 
-
-    }
 
     private void launch(boolean launchRequested) {
+        telemetry.addData("state", launchState);
         switch  (launchState) {
             case IDLE:
                 launchState = launchRequested ? LaunchState.SPIN_UP : launchState;
@@ -245,6 +252,7 @@ public class KylerPreset extends OpMode {
         telemetry.addData("front right wheel power", frontRightMotor.getPower());
         telemetry.addData("back left wheel power", backLeftMotor.getPower());
         telemetry.addData("back right wheel power", backRightMotor.getPower());
+        telemetry.addData("KICKER Position: ", artifactkicker.getPosition()*360);//
         telemetry.update();
     }
 
@@ -266,12 +274,14 @@ public class KylerPreset extends OpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
+
     private void initialize_launcher(){
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
         bendyServoOne = hardwareMap.get(Servo.class, "bendy_servo_1");
-        artifactKicker = hardwareMap.get(Servo.class, "artifact_kicker");
+        artifactkicker = hardwareMap.get(Servo.class, "artifact_kicker");//
     }
+
     private void initialize_feeder(){
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
@@ -279,7 +289,6 @@ public class KylerPreset extends OpMode {
         leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
     }
-
 
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
@@ -292,7 +301,8 @@ public class KylerPreset extends OpMode {
     }
 
 
-    private enum LaunchState {
+
+        private enum LaunchState {
         IDLE,
         SPIN_UP,
         LAUNCH,
@@ -303,7 +313,7 @@ public class KylerPreset extends OpMode {
         CUSTOM,
         GOAL,
         MIDDLE,
-        JUGGLE,
         BACK
     }
 }
+
