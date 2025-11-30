@@ -30,8 +30,8 @@ public class KylerPreset extends OpMode {
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 50;
-    private final double KICKER_MINIMUM_POSITION = 0;
-    private final double KICKER_MAXIMUM_POSITION = 110;
+    private final double KICKER_MINIMUM_POSITION = 110;
+    private final double KICKER_MAXIMUM_POSITION = 0;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
