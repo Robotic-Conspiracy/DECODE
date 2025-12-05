@@ -41,7 +41,7 @@ public abstract class The_Fith_auto extends OpMode {
     private ElapsedTime waitTimer = new ElapsedTime();
     protected String color = "None";
 
-    private double targetVelocity = 1940;
+    private double targetVelocity = 1720;
 
     private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
@@ -92,17 +92,25 @@ public abstract class The_Fith_auto extends OpMode {
     public void start() {
         waitTimer.reset();
         System.out.println("reset wait timer");
+        while(portal.getCameraState() != VisionPortal.CameraState.STREAMING){
+            telemetry.addLine("Camera is not streaming");
+            telemetry.update();
+        }
+        ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
+        if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+            exposureControl.setMode(ExposureControl.Mode.Manual);
+        }
+        exposureControl.setExposure((long)1, TimeUnit.MILLISECONDS);
     }
     @Override
     public void loop() {
         launcher.setVelocity(targetVelocity);
         launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
-        angleThing.setPosition(36/360.0);
+        angleThing.setPosition(38/360.0);
         pod.update();
         telemetry.addData("velocity ", launcher.getVelocity());
         telemetry.addData("position x", pod.getPosX(DistanceUnit.MM));
         telemetry.addData("position y", pod.getPosY(DistanceUnit.MM));
-        telemetry.update();
 //        telemetry.addData("front left wheel", leftFrontDrive.getPower());
 //        telemetry.addData("front right wheel", rightFrontDrive.getPower());
 //        telemetry.addData("back left wheel", leftBackDrive.getPower());
@@ -110,11 +118,7 @@ public abstract class The_Fith_auto extends OpMode {
 
         //ToDo: finish setting up the state machine
         if(portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
-            ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
-            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
-                exposureControl.setMode(ExposureControl.Mode.Manual);
-            }
-            exposureControl.setExposure((long)1, TimeUnit.MILLISECONDS);
+
 
             switch(state) {
                 case NOT_READY:
@@ -123,20 +127,21 @@ public abstract class The_Fith_auto extends OpMode {
                         double angle = pod.getHeading(AngleUnit.DEGREES);
                         telemetry.addData("podY", pod.getPosY(DistanceUnit.MM));
                         telemetry.addData("podX", pod.getPosX(DistanceUnit.MM));
-                        telemetry.update();
+                        telemetry.addData("angle", angle);
 
+                        List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+
+                        AprilTagDetection detectionRed = null;
+                        AprilTagDetection detectionBlue = null;
                         if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25 ) {
                             move();
-                        } else if (color.equals("Blue") && angle < 19) {
-                            rotate();
-                        } else if (color.equals("Red") && angle > -19) {
+                        }else if (detections.isEmpty()){
                             rotate();
                         }else{
-                            List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
-                            AprilTagDetection detectionRed = null;
-                            AprilTagDetection detectionBlue = null;
+
                             if (!detections.isEmpty()) {
                                 for (AprilTagDetection Detection : detections) {
+                                    telemetry.addData("detecting id", Detection.id);
                                     if (Detection.id == 24) {
                                         detectionRed = Detection;
                                     }
@@ -145,10 +150,12 @@ public abstract class The_Fith_auto extends OpMode {
                                     }
                                 }
 
+
                                 if (color.equals("Blue") && detectionBlue != null) {
-                                    if (detectionBlue.ftcPose.z > 0.75) {
+                                    telemetry.addData("offset angle",detectionBlue.ftcPose.z);
+                                    if (detectionBlue.ftcPose.z > 0.5) {
                                         drive(0, 0, Range.clip(detectionBlue.ftcPose.z * -0.05, -0.15, 0.15));// was -0.15
-                                    } else if (detectionBlue.ftcPose.z < -0.75) {
+                                    } else if (detectionBlue.ftcPose.z < -0.5) {
                                         //Drive(0, 0, 1*(Math.abs(targetDetection.ftcPose.z)/100));// was 0.5
                                         drive(0, 0, Range.clip(detectionBlue.ftcPose.z * -0.05, -0.15, 0.15));
                                         //1*|offset|/15
@@ -156,10 +163,12 @@ public abstract class The_Fith_auto extends OpMode {
                                         state = states.SPIN_UP;
                                         drive(0, 0, 0);
                                     }
+                                    telemetry.update();
                                 } else if (color.equals("Red") && detectionRed != null) {
-                                    if (detectionRed.ftcPose.z > 0.75) {
+                                    telemetry.addData("offset angle",detectionRed.ftcPose.z);
+                                    if (detectionRed.ftcPose.z > 0.5) {
                                         drive(0, 0, Range.clip(detectionRed.ftcPose.z * -0.05, -0.15, 0.15));// was -0.15
-                                    } else if (detectionRed.ftcPose.z < -0.75) {
+                                    } else if (detectionRed.ftcPose.z < -0.5) {
                                         //Drive(0, 0, 1*(Math.abs(targetDetection.ftcPose.z)/100));// was 0.5
                                         drive(0, 0, Range.clip(detectionRed.ftcPose.z * -0.05, -0.15, 0.15));
                                         //1*|offset|/15
@@ -206,18 +215,18 @@ public abstract class The_Fith_auto extends OpMode {
                     }
                     break;
                 case MOVE:
-    //                move();
-    //
-    //                pod.update();
-    //                telemetry.addData("Position", pod.getPosition());
-    //                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
-    //                    leftFrontDrive.setPower(0);
-    //                    rightFrontDrive.setPower(0);
-    //                    leftBackDrive.setPower(0);
-    //                    rightBackDrive.setPower(0);
-    //                    pod.update();
-    //                    state = states.STOP_MOVE;
-    //                }
+                    //                move();
+                    //
+                    //                pod.update();
+                    //                telemetry.addData("Position", pod.getPosition());
+                    //                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
+                    //                    leftFrontDrive.setPower(0);
+                    //                    rightFrontDrive.setPower(0);
+                    //                    leftBackDrive.setPower(0);
+                    //                    rightBackDrive.setPower(0);
+                    //                    pod.update();
+                    //                    state = states.STOP_MOVE;
+                    //                }
                     pod.update();
                     if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 200) {
                         move();

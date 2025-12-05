@@ -79,11 +79,11 @@ public abstract class The_Fourth_Auto extends OpMode {
   @Override
   public void loop() {
     pod.update();
-    launcher.setVelocity(1200);
+    launcher.setVelocity(1080);
     telemetry.addData("Position", pod.getPosition());
     telemetry.addData("Velocity", launcher.getVelocity());
     launcher.setVelocityPIDFCoefficients(P,I,D,F);
-    angleThing.setPosition(15/360.0);
+    angleThing.setPosition(14/360.0);
     switch(state) {
       case NOT_READY:
         //leftFrontDrive.setPower(-1);
@@ -103,7 +103,7 @@ public abstract class The_Fourth_Auto extends OpMode {
         break;
       case SPIN_UP:
         if (feedTimer.seconds() > 1) {
-          state = (launcher.getVelocity() >= 1180 && launcher.getVelocity() <= 1220) ? states.LAUNCH : state;
+          state = (launcher.getVelocity() >= 1060 && launcher.getVelocity() <= 1100) ? states.LAUNCH : state;
         }
 
         break;

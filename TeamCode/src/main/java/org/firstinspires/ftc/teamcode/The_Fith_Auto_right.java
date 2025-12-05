@@ -25,7 +25,7 @@ public class The_Fith_Auto_right extends The_Fith_auto{
     public void rotate() {
         double forward  = 0;
         double strafe = 0;
-        double rotate = 0.25;
+        double rotate = 0.15;
 
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
 

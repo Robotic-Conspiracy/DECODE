@@ -123,28 +123,28 @@ public class KylerPreset extends OpMode {
             switch(selectedPreset){
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1200;
-                    targetAngle = 15;
+                    targetSpeed = 1080;
+                    targetAngle = 14;
                     break;
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
-                    targetSpeed = 1480;
-                    targetAngle = 30;
+                    targetSpeed = 1400;
+                    targetAngle = 31;
                     break;
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
-                    targetSpeed = 1900;
+                    targetSpeed = 1720;
                     targetAngle = 38;
                     break;
                 case BACK:
                     selectedPreset = Preset.JUGGLE;
-                    targetSpeed = 600;
+                    targetSpeed = 500;
                     targetAngle = 8;
                     break;
                 case JUGGLE:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1200;
-                    targetAngle = 15;
+                    targetSpeed = 1080;
+                    targetAngle = 14;
                     break;
             }
         }
@@ -157,8 +157,11 @@ public class KylerPreset extends OpMode {
                     telemetry.addData("detected id: ", detection.id);
                 }
             }
+            if(detection != null){
+                telemetry.addData("angle offset ", detection.ftcPose.z);
+            }
             if(gamepad1.b && detection != null){
-                if(Math.abs(detection.ftcPose.z) > 0.75) {
+                if(Math.abs(detection.ftcPose.z) > 0.5) {
                     Drive(0, 0, Range.clip(detection.ftcPose.z * -0.05, -0.15, 0.15));
                 }
             }
