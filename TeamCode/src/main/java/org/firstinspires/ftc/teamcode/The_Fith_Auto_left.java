@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import kotlin.NotImplementedError;
 
-@Autonomous(name = "Blue Shoot from back")
-public class The_Fith_Auto_left extends The_Fith_auto{
+@Autonomous(name = "Blue Shoot from back - sams code")
+public class The_Fith_Auto_left extends The_Fifth_auto{
     @Override
     public void move() {
         color = "Blue";
