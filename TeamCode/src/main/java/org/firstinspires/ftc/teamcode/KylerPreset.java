@@ -21,7 +21,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "Main Driver Preset")
+@TeleOp(name = "Main Driver Preset - sams update")
 public class KylerPreset extends OpMode {
 
     //Launch servo objects and vars
@@ -50,7 +50,7 @@ public class KylerPreset extends OpMode {
 
 
     //configurable vars
-    public static int targetSpeed = 1260;//launch motor speed
+    public static int targetSpeed = 0;//launch motor speed
     public static double targetAngle = 0;
 
 
@@ -94,7 +94,7 @@ public class KylerPreset extends OpMode {
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
             }
-            exposureControl.setExposure((long) 1, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){
