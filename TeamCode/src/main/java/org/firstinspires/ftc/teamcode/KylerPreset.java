@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp(name = "Main Driver Preset - sams update")
 public class KylerPreset extends OpMode {
-
+    
     //Launch servo objects and vars
     private final double FEED_TIME_SECONDS = 0.20;
     private final double STOP_SPEED = 0.0;
@@ -63,6 +63,7 @@ public class KylerPreset extends OpMode {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
+    camera.getExposureControl().setMode(ExposureControl.Mode.Auto);camera.getGainControl().setMode(GainControl.Mode.Auto);
 
 
     @Override
@@ -92,9 +93,10 @@ public class KylerPreset extends OpMode {
         if(portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
-                exposureControl.setMode(ExposureControl.Mode.Manual);
+                //exposureControl.setMode(ExposureControl.Mode.Manual);
+                camera.getExposureControl().setMode(ExposureControl.Mode.Auto);camera.getGainControl().setMode(GainControl.Mode.Auto);
             }
-            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
+            //exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){
