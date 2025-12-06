@@ -94,7 +94,7 @@ public class KylerPreset extends OpMode {
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
             }
-            exposureControl.setExposure((long) 1, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){
