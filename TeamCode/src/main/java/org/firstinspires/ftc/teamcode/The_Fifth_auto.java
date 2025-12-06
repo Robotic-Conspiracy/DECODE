@@ -24,7 +24,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public abstract class The_Fith_auto extends OpMode {
+public abstract class The_Fifth_auto extends OpMode {
     protected DcMotor leftFrontDrive;
     protected DcMotor rightFrontDrive;
     protected DcMotor leftBackDrive;
@@ -142,11 +142,11 @@ public abstract class The_Fith_auto extends OpMode {
                         tag25Detected = false;  // Reset tag 25 flag each loop
                         if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25 ) {
                             move();
-                        }else if (detections.isEmpty()){
+                        }else if (detections.id != 20) && (detections.id != 24){
                             rotate();
                         }else{
 
-                            if (!detections.isEmpty()) {
+                            if ((detections.id != 20) && (detections.id != 24)) {
                                 for (AprilTagDetection Detection : detections) {
                                     telemetry.addData("detecting id", Detection.id);
                                     if (Detection.id == 24) {
@@ -281,18 +281,20 @@ public abstract class The_Fith_auto extends OpMode {
                     telemetry.addData("Juggle cycle", juggleCycles);
                     telemetry.addData("Sorts needed", sortGoalCount);
                     // Placeholder: transition to JUGGLE_ALIGN after juggling is complete
-                    if (juggleCycles >= sortGoalCount) {
+                    if (juggleCycles < sortGoalCount) {
                         if (feedTimer.seconds() > 0.3) {
                             targetVelocity = 500;
                             angleThing.setPosition(20/360.0); // adjust angle for juggle
                             state = states.SPIN_UP;
+                            juggleCycles += 1;
                             feedTimer.reset();
 
                         }
                     
                     }
-                    targetVelocity = 1720;
-                    angleThing.setPosition(38/360.0); // adjust angle for juggle
+                    elif (juggleCycles = sortGoalCount);
+                        targetVelocity = 1720;
+                        angleThing.setPosition(38/360.0);// adjust angle for juggle
                     break;
                 
             
