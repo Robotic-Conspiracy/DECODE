@@ -63,7 +63,7 @@ public class KylerPreset extends OpMode {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
-    camera.getExposureControl().setMode(ExposureControl.Mode.Auto);camera.getGainControl().setMode(GainControl.Mode.Auto);
+    
 
 
     @Override
@@ -93,10 +93,10 @@ public class KylerPreset extends OpMode {
         if(portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
-                //exposureControl.setMode(ExposureControl.Mode.Manual);
-                camera.getExposureControl().setMode(ExposureControl.Mode.Auto);camera.getGainControl().setMode(GainControl.Mode.Auto);
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+                
             }
-            //exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){
