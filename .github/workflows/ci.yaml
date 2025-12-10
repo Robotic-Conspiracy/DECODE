@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main, master, addCI ]
+    branches: [ main, master, addCI, Game-Ready-Code ]
   push:
-    branches: [ main, master, addCI ]
+    branches: [ main, master, addCI, Game-Ready-Code ]
 
 jobs:
   build-and-test:
