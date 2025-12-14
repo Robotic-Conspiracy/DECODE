@@ -50,8 +50,8 @@ public class KylerPreset extends OpMode {
 
 
     //configurable vars
-    public static int targetSpeed = 1260;//launch motor speed
-    public static double targetAngle = 0;
+    public static int targetSpeed = 1720;//launch motor speed
+    public static double targetAngle = 38;
 
 
     // other vars and objects
@@ -68,7 +68,7 @@ public class KylerPreset extends OpMode {
     @Override
     public void init() {
         launchState = LaunchState.IDLE;
-        selectedPreset = Preset.CUSTOM;
+        selectedPreset = Preset.BACK;
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         initialize_drive();
         initialize_feeder();
