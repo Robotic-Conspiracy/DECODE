@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import kotlin.NotImplementedError;
 
-@Autonomous(name = "Red Shoot from back no sort")
+@Autonomous(name = "Red Shoot 3 from back no sort no intake")
 public class back_line_auto_red extends back_line_auto_main{
     @Override
     public void move() {
