@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -25,14 +26,16 @@ import java.util.concurrent.TimeUnit;
 public class sams_teleop extends OpMode {
 
     //Launch servo objects and vars
-    private final double FEED_TIME_SECONDS = 0.350;
+    private final double FEED_TIME_SECONDS = 0.30;
+    private final double REV_TIME = 1.0;  //how long the feeders spin reversse when intake starts
+    private final double REV_SPEED = -1.0;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 50;
     private final double INTAKE_POS = 0;
     private final double LAUNCH_POS = 95;
-    private final int spin_speed = 500;
+    private final int spin_speed = -500;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -41,6 +44,26 @@ public class sams_teleop extends OpMode {
     private DcMotorEx backLeftMotor = null;
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
+    private static double FL_MAX_RPM = 435;
+    private static double FR_MAX_RPM = 435;
+    private static double BL_MAX_RPM = 435;
+    private static double BR_MAX_RPM = 435;
+    private static double TPR_435 = 537.6;
+    private static double TPR_6k = 28;
+    private static double TPR_1640 = 145.6;
+    double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
+    double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
+    double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
+    double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
+    double BR_RPM = (TPS_BR * 60) / TPR_435;
+    double BL_RPM = (TPS_BL * 60) / TPR_435;
+    double FR_RPM = (TPS_FR * 60) / TPR_435;
+    double FL_RPM = (TPS_FL * 60) / TPR_435;
+    private static double FL_TARGET_RPM = (0 * TPR_435) / 60.0;
+
+    private static double FR_TARGET_RPM = (0 * TPR_435) / 60.0;
+    private static double BL_TARGET_RPM = (0 * TPR_435) / 60.0;
+    private static double BR_TARGET_RPM = (0 * TPR_435) / 60.0;
 
     //launcher motor
     private final double P = 203;
@@ -57,7 +80,7 @@ public class sams_teleop extends OpMode {
     //configurable vars
     public static int targetSpeed = 1720;//launch motor speed
     public static double targetAngle = 38;
-    public static int intake_speed = 1400;
+    public static int intake_speed = 1600;
 
 
     // other vars and objects
@@ -151,12 +174,12 @@ public class sams_teleop extends OpMode {
                     targetAngle = 8;
                     break;
                 case JUGGLE:
-                    selectedPreset = Preset.GOAL;
+                    selectedPreset = Preset.OFF;
                     targetSpeed = 1080;
                     targetAngle = 14;
                     break;
                 case OFF:
-                    selectedPreset = Preset.OFF;
+                    selectedPreset = Preset.GOAL;
                     targetSpeed = 0;
                     targetAngle = 0;
                     break;
@@ -328,11 +351,21 @@ public class sams_teleop extends OpMode {
         if(Math.abs(rotate) < 0.1){
             rotate = 0;
         }
+        if (gamepad1.right_stick_button) {
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 200;
+        }
+        else{
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
+        }
 
-        frontLeftMotor.setPower((forward - strafe - rotate)/denominator);
-        backLeftMotor.setPower((forward + strafe - rotate)/denominator);
-        frontRightMotor.setPower((forward + strafe + rotate)/denominator);
-        backRightMotor.setPower((forward - strafe + rotate)/denominator);
+        //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
+        //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
+        //frontRightMotor.setPower((forward + strafe + rotate)/denominator);
+        //backRightMotor.setPower((forward - strafe + rotate)/denominator);
+        frontLeftMotor.setVelocity( ((forward - strafe - rotate)/denominator)*FL_MAX_RPM);
+        backLeftMotor.setVelocity(  ((forward + strafe - rotate)/denominator)*BL_MAX_RPM);
+        frontRightMotor.setVelocity(((forward + strafe + rotate)/denominator)*FR_MAX_RPM);
+        backRightMotor.setVelocity( ((forward - strafe + rotate)/denominator)*BR_MAX_RPM);
 
     }
     private enum IntakeState {
