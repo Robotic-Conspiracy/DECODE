@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
+@Config
 @TeleOp(name = "Solo Op -sams code")
 public class sams_teleop extends OpMode {
 
@@ -28,11 +30,14 @@ public class sams_teleop extends OpMode {
     private final double FEED_TIME_SECONDS = 0.350;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
+    private final double REV_SPEED = -1.0;
+    private static double Current_speed = 0.0;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 50;
     private final double INTAKE_POS = 0;
     private final double LAUNCH_POS = 95;
     private final int spin_speed = 500;
+
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -57,7 +62,12 @@ public class sams_teleop extends OpMode {
     //configurable vars
     public static int targetSpeed = 1720;//launch motor speed
     public static double targetAngle = 38;
-    public static int intake_speed = 1500;
+    public static int intake_speed = 1600;
+    public static int AWD_MAX_RPM = 0;
+    public static int FL_MAX_RPM = 0;
+    public static int FR_MAX_RPM = 0;
+    public static int BL_MAX_RPM = 0;
+    public static int BR_MAX_RPM = 0;
 
 
     // other vars and objects
@@ -71,6 +81,8 @@ public class sams_teleop extends OpMode {
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
 
+    private Servo light = null;
+
 
     @Override
     public void init() {
@@ -82,7 +94,7 @@ public class sams_teleop extends OpMode {
         initialize_feeder();
         initialize_launcher();
         initialize_intake();
-
+        light = hardwareMap.get(Servo.class, "the holy light");
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -162,6 +174,28 @@ public class sams_teleop extends OpMode {
                     break;
             }
         }
+
+        switch (selectedPreset){
+            case CUSTOM:
+                light.setPosition(1);
+                break;
+            case OFF:
+                light.setPosition(0.277);
+                break;
+            case GOAL:
+                light.setPosition(0.5);
+                break;
+            case MIDDLE:
+                light.setPosition(0.388);
+                break;
+            case JUGGLE:
+                light.setPosition(0.555);
+                break;
+            case BACK:
+                light.setPosition(0.722);
+                break;
+        }
+
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
         AprilTagDetection detection = null;
         if(!detections.isEmpty()){
@@ -212,8 +246,9 @@ public class sams_teleop extends OpMode {
                 }
                 break;
             case LAUNCH:
-                leftFeeder.setPower(FULL_SPEED);
-                rightFeeder.setPower(FULL_SPEED);
+                Current_speed = FULL_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
                 Timer.reset();
                 launchState = LaunchState.LAUNCHING;
 
@@ -221,8 +256,9 @@ public class sams_teleop extends OpMode {
             case LAUNCHING:
                 if(Timer.seconds() > FEED_TIME_SECONDS){
                     launchState = LaunchState.IDLE;
-                    leftFeeder.setPower(STOP_SPEED);
-                    rightFeeder.setPower(STOP_SPEED);
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
                 }
                 break;
 
@@ -235,14 +271,26 @@ public class sams_teleop extends OpMode {
             case READY:
                 bendyServoTwo.setPosition(LAUNCH_POS/360);
                 intake.setVelocity(0);
+                if (Current_speed  == REV_SPEED) {
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                }
                 break;
 
             case NOT_READY:
                 bendyServoTwo.setPosition(LAUNCH_POS/360);
                 intake.setVelocity(0);
+                if (Current_speed == REV_SPEED) {
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                }
                 break;
 
             case INTAKE:
+                leftFeeder.setPower(REV_SPEED);
+                rightFeeder.setPower(REV_SPEED);
                 bendyServoTwo.setPosition(INTAKE_POS/360);
                 intake.setVelocity(intake_speed);
                 break;
