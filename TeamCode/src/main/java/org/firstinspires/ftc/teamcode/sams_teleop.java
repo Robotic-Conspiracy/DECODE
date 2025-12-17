@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -37,6 +38,7 @@ public class sams_teleop extends OpMode {
     private final double INTAKE_POS = 0;
     private final double LAUNCH_POS = 95;
     private final int spin_speed = -500;
+    private double Current_speed = STOP_SPEED;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -86,14 +88,6 @@ public class sams_teleop extends OpMode {
     public static int targetSpeed = 0;//launch motor speed
     public static double targetAngle = 38;
     public static int intake_speed = 1600;
-
-    public static int AWD_MAX_RPM = 0;
-    public static int FL_MAX_RPM = 0;
-    public static int FR_MAX_RPM = 0;
-    public static int BL_MAX_RPM = 0;
-    public static int BR_MAX_RPM = 0;
-
-
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
     private LaunchState launchState = null;
@@ -291,33 +285,39 @@ public class sams_teleop extends OpMode {
     }
     private void intake(boolean intakeRequested, boolean spinRequested) {
         intakeState = IntakeState.READY;
-        intakeState = spinRequested ? IntakeState.SPIN : intakeRequested ? IntakeState.INTAKE : intakeState;
+        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (bendyServoTwo.getPosition()*360 == LAUNCH_POS ?IntakeState.START_INTAKE : IntakeState.INTAKE): intakeState);
         switch  (intakeState) {
             case READY:
                 bendyServoTwo.setPosition(LAUNCH_POS/360);
                 intake.setVelocity(0);
-                if (Current_speed  == REV_SPEED) {
+                if(Timer.seconds() > REV_TIME){
                     Current_speed = STOP_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
                 }
+
                 break;
 
-            case NOT_READY:
-                bendyServoTwo.setPosition(LAUNCH_POS/360);
-                intake.setVelocity(0);
-                if (Current_speed == REV_SPEED) {
-                    Current_speed = STOP_SPEED;
+            case START_INTAKE:
+                if (bendyServoTwo.getPosition()*360 == LAUNCH_POS) {
+                    Timer.reset();
+                    Current_speed = REV_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
-                }
+                    bendyServoTwo.setPosition(INTAKE_POS / 360);
+                    }
+                intakeState =  IntakeState.INTAKE;
                 break;
+
 
             case INTAKE:
-                leftFeeder.setPower(REV_SPEED);
-                rightFeeder.setPower(REV_SPEED);
                 bendyServoTwo.setPosition(INTAKE_POS/360);
                 intake.setVelocity(intake_speed);
+                if(Timer.seconds() > REV_TIME){
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                }
                 break;
 
             case SPIN:
@@ -435,7 +435,8 @@ public class sams_teleop extends OpMode {
         SPIN,
         INTAKE,
         READY,
-        NOT_READY
+        NOT_READY,
+        START_INTAKE
     }
 
     private enum LaunchState {
