@@ -175,17 +175,17 @@ public class sams_teleop extends OpMode {
                 case BACK:
                     selectedPreset = Preset.JUGGLE;
                     targetSpeed = 500;
-                    targetAngle = 8;
+                    targetAngle = 20;
                     break;
                 case JUGGLE:
                     selectedPreset = Preset.OFF;
-                    targetSpeed = 1080;
-                    targetAngle = 14;
+                    targetSpeed = 0;
+                    targetAngle = 0;
                     break;
                 case OFF:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 0;
-                    targetAngle = 0;
+                    targetSpeed = 1080;
+                    targetAngle = 14;
                     break;
             }
         }
