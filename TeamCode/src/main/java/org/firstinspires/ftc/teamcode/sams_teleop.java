@@ -57,7 +57,7 @@ public class sams_teleop extends OpMode {
     //configurable vars
     public static int targetSpeed = 1720;//launch motor speed
     public static double targetAngle = 38;
-    public static int intake_speed = 1400;
+    public static int intake_speed = 1500;
 
 
     // other vars and objects
