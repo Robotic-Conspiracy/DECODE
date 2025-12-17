@@ -48,22 +48,26 @@ public class sams_teleop extends OpMode {
     private static double FR_MAX_RPM = 435;
     private static double BL_MAX_RPM = 435;
     private static double BR_MAX_RPM = 435;
-    private static double TPR_435 = 537.6;
-    private static double TPR_6k = 28;
-    private static double TPR_1640 = 145.6;
-    double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
-    double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
-    double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
-    double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
-    double BR_RPM = (TPS_BR * 60) / TPR_435;
-    double BL_RPM = (TPS_BL * 60) / TPR_435;
-    double FR_RPM = (TPS_FR * 60) / TPR_435;
-    double FL_RPM = (TPS_FL * 60) / TPR_435;
-    private static double FL_TARGET_RPM = (0 * TPR_435) / 60.0;
-
-    private static double FR_TARGET_RPM = (0 * TPR_435) / 60.0;
-    private static double BL_TARGET_RPM = (0 * TPR_435) / 60.0;
-    private static double BR_TARGET_RPM = (0 * TPR_435) / 60.0;
+    private final double TPR_435 = 384.5;
+    private final double TPR_6k = 28;
+    private final double TPR_1640 = 145.6;
+//    //double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
+//    //double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
+//    //double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
+//    double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
+//    double BR_RPM = (TPS_BR * 60) / TPR_435;
+//    double BL_RPM = (TPS_BL * 60) / TPR_435;
+//    double FR_RPM = (TPS_FR * 60) / TPR_435;
+//    double FL_RPM = (TPS_FL * 60) / TPR_435;
+//    private  double FL_TARGET_RPM = (0 * TPR_435) / 60.0;
+//
+//    private double FR_TARGET_RPM = (0 * TPR_435) / 60.0;
+//    private double BL_TARGET_RPM = (0 * TPR_435) / 60.0;
+//    private double BR_TARGET_RPM = (0 * TPR_435) / 60.0;
+    double FL_RPM = 0;
+    double FR_RPM = 0;
+    double BL_RPM = 0;
+    double BR_RPM = 0;
 
     //launcher motor
     private final double P = 203;
@@ -78,7 +82,7 @@ public class sams_teleop extends OpMode {
 
 
     //configurable vars
-    public static int targetSpeed = 1720;//launch motor speed
+    public static int targetSpeed = 0;//launch motor speed
     public static double targetAngle = 38;
     public static int intake_speed = 1600;
 
@@ -294,10 +298,10 @@ public class sams_teleop extends OpMode {
         telemetry.addData("back left wheel power", backLeftMotor.getPower());
         telemetry.addData("back right wheel power", backRightMotor.getPower());
         telemetry.addData("","");
-        telemetry.addData("front left wheel speed", frontLeftMotor.getVelocity());
-        telemetry.addData("front right wheel speed", frontRightMotor.getVelocity());
-        telemetry.addData("back left wheel speed", backLeftMotor.getVelocity());
-        telemetry.addData("back right wheel speed", backRightMotor.getVelocity());
+        telemetry.addData("front left wheel speed", FL_RPM);
+        telemetry.addData("front right wheel speed", FR_RPM);
+        telemetry.addData("back left wheel speed", BL_RPM);
+        telemetry.addData("back right wheel speed", BR_RPM);
         telemetry.update();
     }
 
@@ -356,16 +360,29 @@ public class sams_teleop extends OpMode {
         }
         else{
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
+
         }
+        double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
+        double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
+        double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
+        double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
+        BR_RPM = (TPS_BR * 60) / TPR_435;
+        BL_RPM = (TPS_BL * 60) / TPR_435;
+        FR_RPM = (TPS_FR * 60) / TPR_435;
+        FL_RPM = (TPS_FL * 60) / TPR_435;
+        double FL_TARGET_RPM = (((forward - strafe - rotate)/denominator)*FL_MAX_RPM * TPR_435) / 60.0;
+        double FR_TARGET_RPM = (((forward + strafe + rotate)/denominator)*BL_MAX_RPM * TPR_435) / 60.0;
+        double BL_TARGET_RPM = (((forward + strafe - rotate)/denominator)*BR_MAX_RPM * TPR_435) / 60.0;
+        double BR_TARGET_RPM = (((forward - strafe + rotate)/denominator)*FR_MAX_RPM * TPR_435) / 60.0;
 
         //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
         //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
         //frontRightMotor.setPower((forward + strafe + rotate)/denominator);
         //backRightMotor.setPower((forward - strafe + rotate)/denominator);
-        frontLeftMotor.setVelocity( ((forward - strafe - rotate)/denominator)*FL_MAX_RPM);
-        backLeftMotor.setVelocity(  ((forward + strafe - rotate)/denominator)*BL_MAX_RPM);
-        frontRightMotor.setVelocity(((forward + strafe + rotate)/denominator)*FR_MAX_RPM);
-        backRightMotor.setVelocity( ((forward - strafe + rotate)/denominator)*BR_MAX_RPM);
+        frontLeftMotor.setVelocity(FL_TARGET_RPM);
+        backLeftMotor.setVelocity(BL_TARGET_RPM);
+        frontRightMotor.setVelocity(FR_TARGET_RPM);
+        backRightMotor.setVelocity(BR_TARGET_RPM);
 
     }
     private enum IntakeState {
