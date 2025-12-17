@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -22,6 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
+@Config
 @TeleOp(name = "Solo Op -sams code")
 public class sams_teleop extends OpMode {
 
@@ -36,6 +38,7 @@ public class sams_teleop extends OpMode {
     private final double INTAKE_POS = 0;
     private final double LAUNCH_POS = 95;
     private final int spin_speed = -500;
+    private double Current_speed = STOP_SPEED;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -85,8 +88,6 @@ public class sams_teleop extends OpMode {
     public static int targetSpeed = 0;//launch motor speed
     public static double targetAngle = 38;
     public static int intake_speed = 1600;
-
-
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
     private LaunchState launchState = null;
@@ -97,6 +98,8 @@ public class sams_teleop extends OpMode {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
+
+    private Servo light = null;
 
 
     @Override
@@ -109,7 +112,7 @@ public class sams_teleop extends OpMode {
         initialize_feeder();
         initialize_launcher();
         initialize_intake();
-
+        light = hardwareMap.get(Servo.class, "the holy light");
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -182,6 +185,7 @@ public class sams_teleop extends OpMode {
                     targetSpeed = 0;
                     targetAngle = 0;
                     break;
+
                 case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1080;
@@ -189,6 +193,28 @@ public class sams_teleop extends OpMode {
                     break;
             }
         }
+
+        switch (selectedPreset){
+            case CUSTOM:
+                light.setPosition(1);
+                break;
+            case OFF:
+                light.setPosition(0.277);
+                break;
+            case GOAL:
+                light.setPosition(0.5);
+                break;
+            case MIDDLE:
+                light.setPosition(0.388);
+                break;
+            case JUGGLE:
+                light.setPosition(0.555);
+                break;
+            case BACK:
+                light.setPosition(0.722);
+                break;
+        }
+
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
         AprilTagDetection detection = null;
         if(!detections.isEmpty()){
@@ -239,8 +265,9 @@ public class sams_teleop extends OpMode {
                 }
                 break;
             case LAUNCH:
-                leftFeeder.setPower(FULL_SPEED);
-                rightFeeder.setPower(FULL_SPEED);
+                Current_speed = FULL_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
                 Timer.reset();
                 launchState = LaunchState.LAUNCHING;
 
@@ -248,8 +275,9 @@ public class sams_teleop extends OpMode {
             case LAUNCHING:
                 if(Timer.seconds() > FEED_TIME_SECONDS){
                     launchState = LaunchState.IDLE;
-                    leftFeeder.setPower(STOP_SPEED);
-                    rightFeeder.setPower(STOP_SPEED);
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
                 }
                 break;
 
@@ -257,21 +285,39 @@ public class sams_teleop extends OpMode {
     }
     private void intake(boolean intakeRequested, boolean spinRequested) {
         intakeState = IntakeState.READY;
-        intakeState = spinRequested ? IntakeState.SPIN : intakeRequested ? IntakeState.INTAKE : intakeState;
+        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (bendyServoTwo.getPosition()*360 == LAUNCH_POS ?IntakeState.START_INTAKE : IntakeState.INTAKE): intakeState);
         switch  (intakeState) {
             case READY:
                 bendyServoTwo.setPosition(LAUNCH_POS/360);
                 intake.setVelocity(0);
+                if(Timer.seconds() > REV_TIME){
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                }
+
                 break;
 
-            case NOT_READY:
-                bendyServoTwo.setPosition(LAUNCH_POS/360);
-                intake.setVelocity(0);
+            case START_INTAKE:
+                if (bendyServoTwo.getPosition()*360 == LAUNCH_POS) {
+                    Timer.reset();
+                    Current_speed = REV_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                    bendyServoTwo.setPosition(INTAKE_POS / 360);
+                    }
+                intakeState =  IntakeState.INTAKE;
                 break;
+
 
             case INTAKE:
                 bendyServoTwo.setPosition(INTAKE_POS/360);
                 intake.setVelocity(intake_speed);
+                if(Timer.seconds() > REV_TIME){
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                }
                 break;
 
             case SPIN:
@@ -389,7 +435,8 @@ public class sams_teleop extends OpMode {
         SPIN,
         INTAKE,
         READY,
-        NOT_READY
+        NOT_READY,
+        START_INTAKE
     }
 
     private enum LaunchState {
