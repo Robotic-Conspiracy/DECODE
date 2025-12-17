@@ -256,21 +256,21 @@ public class sams_teleop extends OpMode {
     }
     private void AddTelemetry() {
         telemetry.addData("Current Preset: ", selectedPreset);
-        telemetry.addData()
+        telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("Servo Position: ", bendyServoOne.getPosition()*360);
         telemetry.addData("Servo 2 Position: ", bendyServoTwo.getPosition()*360);
-        telemetry.addData()
+        telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
         telemetry.addData("intake target RPM", intake_speed);
         telemetry.addData("current INTAKE velocity", intake.getVelocity());
-        telemetry.addData()
+        telemetry.addData("","");
         telemetry.addData("front left wheel power", frontLeftMotor.getPower());
         telemetry.addData("front right wheel power", frontRightMotor.getPower());
         telemetry.addData("back left wheel power", backLeftMotor.getPower());
         telemetry.addData("back right wheel power", backRightMotor.getPower());
-        telemetry.addData()
+        telemetry.addData("","");
         telemetry.addData("front left wheel speed", frontLeftMotor.getVelocity());
         telemetry.addData("front right wheel speed", frontRightMotor.getVelocity());
         telemetry.addData("back left wheel speed", backLeftMotor.getVelocity());
