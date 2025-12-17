@@ -29,7 +29,7 @@ public class sams_teleop extends OpMode {
 
     //Launch servo objects and vars
     private final double FEED_TIME_SECONDS = 0.30;
-    private final double REV_TIME = 1.0;  //how long the feeders spin reversse when intake starts
+    private final double REV_TIME = 0.5;  //how long the feeders spin reversse when intake starts
     private final double REV_SPEED = -1.0;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
@@ -87,9 +87,10 @@ public class sams_teleop extends OpMode {
     //configurable vars
     public static int targetSpeed = 0;//launch motor speed
     public static double targetAngle = 38;
-    public static int intake_speed = 1600;
+    public static int intake_speed = 1400;
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
+    private ElapsedTime Timer2 = new ElapsedTime();
     private LaunchState launchState = null;
     private IntakeState intakeState = null;
     private Preset selectedPreset = null;
@@ -285,12 +286,12 @@ public class sams_teleop extends OpMode {
     }
     private void intake(boolean intakeRequested, boolean spinRequested) {
         intakeState = IntakeState.READY;
-        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (bendyServoTwo.getPosition()*360 == LAUNCH_POS ?IntakeState.START_INTAKE : IntakeState.INTAKE): intakeState);
+        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME/2 ?IntakeState.START_INTAKE : IntakeState.INTAKE): intakeState);
         switch  (intakeState) {
             case READY:
                 bendyServoTwo.setPosition(LAUNCH_POS/360);
                 intake.setVelocity(0);
-                if(Timer.seconds() > REV_TIME){
+                if(Current_speed == REV_SPEED){
                     Current_speed = STOP_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
@@ -299,21 +300,24 @@ public class sams_teleop extends OpMode {
                 break;
 
             case START_INTAKE:
-                if (bendyServoTwo.getPosition()*360 == LAUNCH_POS) {
-                    Timer.reset();
+                if (Current_speed != REV_SPEED) {
+                    Timer2.reset();
                     Current_speed = REV_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
-                    bendyServoTwo.setPosition(INTAKE_POS / 360);
+                    //bendyServoTwo.setPosition(INTAKE_POS / 360);
                     }
-                intakeState =  IntakeState.INTAKE;
+                if(Timer2.seconds() > REV_TIME/2) {
+                    intakeState = IntakeState.INTAKE;
+                }
                 break;
 
 
             case INTAKE:
-                bendyServoTwo.setPosition(INTAKE_POS/360);
+                bendyServoTwo.setPosition(INTAKE_POS / 360);
                 intake.setVelocity(intake_speed);
-                if(Timer.seconds() > REV_TIME){
+
+                if(Timer2.seconds() > REV_TIME){
                     Current_speed = STOP_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
@@ -402,7 +406,7 @@ public class sams_teleop extends OpMode {
             rotate = 0;
         }
         if (gamepad1.right_stick_button) {
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 200;
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 150;
         }
         else{
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
@@ -412,14 +416,15 @@ public class sams_teleop extends OpMode {
         double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
         double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
         double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
+
         BR_RPM = (TPS_BR * 60) / TPR_435;
         BL_RPM = (TPS_BL * 60) / TPR_435;
         FR_RPM = (TPS_FR * 60) / TPR_435;
         FL_RPM = (TPS_FL * 60) / TPR_435;
-        double FL_TARGET_RPM = (((forward - strafe - rotate)/denominator)*FL_MAX_RPM * TPR_435) / 60.0;
-        double FR_TARGET_RPM = (((forward + strafe + rotate)/denominator)*BL_MAX_RPM * TPR_435) / 60.0;
-        double BL_TARGET_RPM = (((forward + strafe - rotate)/denominator)*BR_MAX_RPM * TPR_435) / 60.0;
-        double BR_TARGET_RPM = (((forward - strafe + rotate)/denominator)*FR_MAX_RPM * TPR_435) / 60.0;
+        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate)/denominator),3)*FL_MAX_RPM)   * TPR_435) / 60.0;
+        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate)/denominator),3)*BL_MAX_RPM) * TPR_435) / 60.0;
+        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate)/denominator),3)*BR_MAX_RPM) * TPR_435) / 60.0;
+        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate)/denominator),3)*FR_MAX_RPM) * TPR_435) / 60.0;
 
         //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
         //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
