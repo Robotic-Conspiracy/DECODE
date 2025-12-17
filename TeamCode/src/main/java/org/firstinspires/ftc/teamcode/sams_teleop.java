@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class sams_teleop extends OpMode {
 
     //Launch servo objects and vars
-    private final double FEED_TIME_SECONDS = 0.50;
+    private final double FEED_TIME_SECONDS = 0.350;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
@@ -37,10 +37,10 @@ public class sams_teleop extends OpMode {
     private CRServo rightFeeder = null;
 
     //Drive Motor objects
-    private DcMotor frontLeftMotor = null;
-    private DcMotor backLeftMotor = null;
-    private DcMotor frontRightMotor = null;
-    private DcMotor backRightMotor = null;
+    private DcMotorEx frontLeftMotor = null;
+    private DcMotorEx backLeftMotor = null;
+    private DcMotorEx frontRightMotor = null;
+    private DcMotorEx backRightMotor = null;
 
     //launcher motor
     private final double P = 203;
@@ -57,7 +57,7 @@ public class sams_teleop extends OpMode {
     //configurable vars
     public static int targetSpeed = 1720;//launch motor speed
     public static double targetAngle = 38;
-    public static int intake_speed = 1500;
+    public static int intake_speed = 1400;
 
 
     // other vars and objects
@@ -155,6 +155,11 @@ public class sams_teleop extends OpMode {
                     targetSpeed = 1080;
                     targetAngle = 14;
                     break;
+                case OFF:
+                    selectedPreset = Preset.OFF;
+                    targetSpeed = 0;
+                    targetAngle = 0;
+                    break;
             }
         }
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
@@ -251,24 +256,33 @@ public class sams_teleop extends OpMode {
     }
     private void AddTelemetry() {
         telemetry.addData("Current Preset: ", selectedPreset);
+        telemetry.addData()
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("Servo Position: ", bendyServoOne.getPosition()*360);
         telemetry.addData("Servo 2 Position: ", bendyServoTwo.getPosition()*360);
+        telemetry.addData()
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
+        telemetry.addData("intake target RPM", intake_speed);
         telemetry.addData("current INTAKE velocity", intake.getVelocity());
+        telemetry.addData()
         telemetry.addData("front left wheel power", frontLeftMotor.getPower());
         telemetry.addData("front right wheel power", frontRightMotor.getPower());
         telemetry.addData("back left wheel power", backLeftMotor.getPower());
         telemetry.addData("back right wheel power", backRightMotor.getPower());
+        telemetry.addData()
+        telemetry.addData("front left wheel speed", frontLeftMotor.getVelocity());
+        telemetry.addData("front right wheel speed", frontRightMotor.getVelocity());
+        telemetry.addData("back left wheel speed", backLeftMotor.getVelocity());
+        telemetry.addData("back right wheel speed", backRightMotor.getVelocity());
         telemetry.update();
     }
 
     private void initialize_drive(){
-        frontLeftMotor = hardwareMap.get(DcMotor.class, "left_front_drive");// DRIVE SETUP
-        backLeftMotor = hardwareMap.get(DcMotor.class, "left_back_drive");
-        frontRightMotor = hardwareMap.get(DcMotor.class, "right_front_drive");
-        backRightMotor = hardwareMap.get(DcMotor.class, "right_back_drive");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "left_front_drive");// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, "left_back_drive");
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, "right_front_drive");
+        backRightMotor = hardwareMap.get(DcMotorEx.class, "right_back_drive");
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);// DRIVE SETUP
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -340,6 +354,7 @@ public class sams_teleop extends OpMode {
         GOAL,
         MIDDLE,
         JUGGLE,
-        BACK
+        BACK,
+        OFF
     }
 }
