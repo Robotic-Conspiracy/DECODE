@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import kotlin.NotImplementedError;
 
-@Autonomous(name = "Test Auto")
-public class The_test extends test{
+@Autonomous(name = "Red Shoot 3 from back no sort no intake")
+public class back_line_auto_red extends back_line_auto_main{
     @Override
     public void move() {
         color = "Red";
@@ -25,7 +25,7 @@ public class The_test extends test{
     public void rotate() {
         double forward  = 0;
         double strafe = 0;
-        double rotate = 0.25;
+        double rotate = 0.15;
 
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
 
@@ -35,39 +35,8 @@ public class The_test extends test{
         rightBackDrive.setPower((forward - strafe + rotate)/denominator);
 
     }
-
-    @Override
-    public void unrotate() {
-        double forward  = 0;
-        double strafe = 0;
-        double rotate = -0.25;
-
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-
-        leftFrontDrive.setPower((forward - strafe - rotate)/denominator);
-        leftBackDrive.setPower((forward + strafe - rotate)/denominator);
-        rightFrontDrive.setPower((forward + strafe + rotate)/denominator);
-        rightBackDrive.setPower((forward - strafe + rotate)/denominator);
-    }
-
-    @Override
-    public void reverse() {
-        color = "Red";
-        double forward  = 0.25;
-        double strafe = 0;
-        double rotate = 0;
-
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-
-        leftFrontDrive.setPower((forward - strafe - rotate)/denominator);
-        leftBackDrive.setPower((forward + strafe - rotate)/denominator);
-        rightFrontDrive.setPower((forward + strafe + rotate)/denominator);
-        rightBackDrive.setPower((forward - strafe + rotate)/denominator);
-    }
-
     @Override
     public void strafe() {
-        color = "Red";
         double forward  = 0;
         double strafe = 0.25;
         double rotate = 0;

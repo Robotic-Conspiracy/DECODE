@@ -24,7 +24,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public abstract class The_Fifth_auto extends OpMode {
+public abstract class back_line_auto_main extends OpMode {
     protected DcMotor leftFrontDrive;
     protected DcMotor rightFrontDrive;
     protected DcMotor leftBackDrive;
@@ -47,10 +47,6 @@ public abstract class The_Fifth_auto extends OpMode {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
-    private ElapsedTime juggleTimer = new ElapsedTime();
-    private int juggleCycles = 0;
-    private int sortGoalCount = 0;
-    private boolean tag25Detected = false;
 
 
     @Override
@@ -104,7 +100,7 @@ public abstract class The_Fifth_auto extends OpMode {
         if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
             exposureControl.setMode(ExposureControl.Mode.Manual);
         }
-        exposureControl.setExposure((long)16, TimeUnit.MILLISECONDS);
+        exposureControl.setExposure((long)1, TimeUnit.MILLISECONDS);
     }
     @Override
     public void loop() {
@@ -137,16 +133,13 @@ public abstract class The_Fifth_auto extends OpMode {
 
                         AprilTagDetection detectionRed = null;
                         AprilTagDetection detectionBlue = null;
-                        AprilTagDetection detectionJuggle = null;
-                        int detectionJuggleId = -1;
-                        tag25Detected = false;  // Reset tag 25 flag each loop
                         if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25 ) {
                             move();
-                        }else if (detections.id != 20) && (detections.id != 24){
+                        }else if (detections.isEmpty()){
                             rotate();
                         }else{
 
-                            if ((detections.id != 20) && (detections.id != 24)) {
+                            if (!detections.isEmpty()) {
                                 for (AprilTagDetection Detection : detections) {
                                     telemetry.addData("detecting id", Detection.id);
                                     if (Detection.id == 24) {
@@ -155,33 +148,10 @@ public abstract class The_Fifth_auto extends OpMode {
                                     if (Detection.id == 20) {
                                         detectionBlue = Detection;
                                     }
-                                    if (Detection.id == 21 || Detection.id == 22 || Detection.id == 23) {
-                                        detectionJuggle = Detection;
-                                        detectionJuggleId = Detection.id;
-                                    }
-                                    if (Detection.id == 25) {
-                                        tag25Detected = true;
-                                        telemetry.addData("WARNING", "Tag 25 detected - Shooting disabled");
-                                    }
                                 }
 
 
-                                if (detectionJuggle != null) {
-                                    // Handle juggle detection for tags 21, 22, or 23
-                                    state = states.JUGGLE;
-                                    juggleTimer.reset();
-                                    juggleCycles = 0;
-                                    // Set sort goal count based on tag ID
-                                    if (detectionJuggleId == 21) {
-                                        sortGoalCount = 2;  // Sort 2 times for tag 21
-                                    } else if (detectionJuggleId == 22) {
-                                        sortGoalCount = 1;  // Sort 1 time for tag 22
-                                    } else if (detectionJuggleId == 23) {
-                                        sortGoalCount = 0;  // No sorting for tag 23, go straight to align
-                                    }
-                                    telemetry.addData("Tag detected", detectionJuggleId);
-                                    telemetry.addData("Sorts needed", sortGoalCount);
-                                } else if (color.equals("Blue") && detectionBlue != null) {
+                                if (color.equals("Blue") && detectionBlue != null) {
                                     telemetry.addData("offset angle",detectionBlue.ftcPose.z);
                                     if (detectionBlue.ftcPose.z > 0.5) {
                                         drive(0, 0, Range.clip(detectionBlue.ftcPose.z * -0.05, -0.15, 0.15));// was -0.15
@@ -223,39 +193,40 @@ public abstract class The_Fifth_auto extends OpMode {
 
                     break;
                 case LAUNCH:
-                    if (!tag25Detected) {
-                        leftFeeder.setPower(1);
-                        rightFeeder.setPower(1);
-                        feedTimer.reset();
-                        state = states.LAUNCHING;
-                    } else {
-                        telemetry.addData("Status", "Shooting blocked - Tag 25 in frame");
-                        // Hold current state until tag 25 is out of frame
-                    }
+                    leftFeeder.setPower(1);
+                    rightFeeder.setPower(1);
+                    feedTimer.reset();
+                    state = states.LAUNCHING;
                     break;
                 case LAUNCHING:
                     telemetry.addData("Feed time", feedTimer.seconds());
-                    if (!tag25Detected) {
-                        if (timesShot <= 4) {
-                            if (feedTimer.seconds() > 0.3) {
-                                state = states.SPIN_UP;
-                                leftFeeder.setPower(0);
-                                rightFeeder.setPower(0);
-                                timesShot += 1;
-                                feedTimer.reset();
-                            }
-                        } else {
+                    if (timesShot <= 4) {
+                        if (feedTimer.seconds() > 0.3) {
+                            state = states.SPIN_UP;
                             leftFeeder.setPower(0);
                             rightFeeder.setPower(0);
-                            state = states.MOVE;
+                            timesShot += 1;
+                            feedTimer.reset();
                         }
                     } else {
-                        telemetry.addData("Status", "Shooting blocked - Tag 25 in frame");
                         leftFeeder.setPower(0);
                         rightFeeder.setPower(0);
+                        state = states.MOVE;
                     }
                     break;
                 case MOVE:
+                    //                move();
+                    //
+                    //                pod.update();
+                    //                telemetry.addData("Position", pod.getPosition());
+                    //                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 200) {
+                    //                    leftFrontDrive.setPower(0);
+                    //                    rightFrontDrive.setPower(0);
+                    //                    leftBackDrive.setPower(0);
+                    //                    rightBackDrive.setPower(0);
+                    //                    pod.update();
+                    //                    state = states.STOP_MOVE;
+                    //                }
                     pod.update();
                     if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 200 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 200) {
                         move();
@@ -275,29 +246,6 @@ public abstract class The_Fifth_auto extends OpMode {
                     break;
                 case STOP_MOVE:
                     break;
-                case JUGGLE:
-                    // TODO: Add juggling logic here with user-provided values
-                    // Juggle the ball to change position
-                    telemetry.addData("Juggle cycle", juggleCycles);
-                    telemetry.addData("Sorts needed", sortGoalCount);
-                    // Placeholder: transition to JUGGLE_ALIGN after juggling is complete
-                    if (juggleCycles < sortGoalCount) {
-                        if (feedTimer.seconds() > 0.3) {
-                            targetVelocity = 500;
-                            angleThing.setPosition(20/360.0); // adjust angle for juggle
-                            state = states.SPIN_UP;
-                            juggleCycles += 1;
-                            feedTimer.reset();
-
-                        }
-                    
-                    }
-                    elif (juggleCycles = sortGoalCount);
-                        targetVelocity = 1720;
-                        angleThing.setPosition(38/360.0);// adjust angle for juggle
-                    break;
-                
-            
             }
         }
     }
@@ -322,8 +270,6 @@ public abstract class The_Fifth_auto extends OpMode {
         LAUNCH,
         LAUNCHING,
         MOVE,
-        STOP_MOVE,
-        JUGGLE,
-        JUGGLE_ALIGN
+        STOP_MOVE
     }
 }

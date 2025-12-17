@@ -20,24 +20,27 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+// to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
+@TeleOp(name = "Solo Op -sams code")
+public class sams_teleop extends OpMode {
 
-@TeleOp(name = "Main Driver Preset - sams update")
-public class KylerPreset extends OpMode {
-    
     //Launch servo objects and vars
-    private final double FEED_TIME_SECONDS = 0.20;
+    private final double FEED_TIME_SECONDS = 0.350;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 50;
+    private final double INTAKE_POS = 0;
+    private final double LAUNCH_POS = 95;
+    private final int spin_speed = 500;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
     //Drive Motor objects
-    private DcMotor frontLeftMotor = null;
-    private DcMotor backLeftMotor = null;
-    private DcMotor frontRightMotor = null;
-    private DcMotor backRightMotor = null;
+    private DcMotorEx frontLeftMotor = null;
+    private DcMotorEx backLeftMotor = null;
+    private DcMotorEx frontRightMotor = null;
+    private DcMotorEx backRightMotor = null;
 
     //launcher motor
     private final double P = 203;
@@ -46,34 +49,39 @@ public class KylerPreset extends OpMode {
     private final double F = 0.1;
 
     private DcMotorEx launcher = null;
+    private DcMotorEx intake = null;
     private Servo bendyServoOne = null;
+    private Servo bendyServoTwo = null;
 
 
     //configurable vars
-    public static int targetSpeed = 0;//launch motor speed
-    public static double targetAngle = 0;
+    public static int targetSpeed = 1720;//launch motor speed
+    public static double targetAngle = 38;
+    public static int intake_speed = 1400;
 
 
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
     private LaunchState launchState = null;
+    private IntakeState intakeState = null;
     private Preset selectedPreset = null;
 
     private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
-    
 
 
     @Override
     public void init() {
         launchState = LaunchState.IDLE;
-        selectedPreset = Preset.CUSTOM;
+        intakeState = IntakeState.READY;
+        selectedPreset = Preset.BACK;
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         initialize_drive();
         initialize_feeder();
         initialize_launcher();
+        initialize_intake();
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
@@ -94,34 +102,33 @@ public class KylerPreset extends OpMode {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
-                
             }
             exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
         //chaing speed
-        if(gamepad1.dpadUpWasPressed()){
-            targetSpeed += 20*(gamepad1.x ? 5 : 1);
+        if(gamepad1.dpadUpWasPressed()){// MAPPING
+            targetSpeed += 20*(gamepad1.x ? 5 : 1); // MAPPING
         }
-        if(gamepad1.dpadDownWasPressed()){
-            targetSpeed -= 20*(gamepad1.x ? 5 : 1);
+        if(gamepad1.dpadDownWasPressed()){// MAPPING
+            targetSpeed -= 20*(gamepad1.x ? 5 : 1);// MAPPING
         }
 
         //changing servo rotation
-        if(gamepad1.dpadRightWasPressed()){
-            targetAngle += (gamepad1.x ? 5 : 1);
+        if(gamepad1.dpadRightWasPressed()){// MAPPING
+            targetAngle += (gamepad1.x ? 5 : 1);// MAPPING
         }
-        if(gamepad1.dpadLeftWasPressed()){
-            targetAngle -= (gamepad1.x ? 5 : 1);
+        if(gamepad1.dpadLeftWasPressed()){// MAPPING
+            targetAngle -= (gamepad1.x ? 5 : 1);// MAPPING
         }
         if (targetAngle > SERVO_MAXIMUM_POSITION){
             targetAngle = SERVO_MAXIMUM_POSITION;
         } else if (targetAngle < SERVO_MINIMUM_POSITION){
             targetAngle = SERVO_MINIMUM_POSITION;
         }
-        if(gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {
+        if(gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {// MAPPING
             selectedPreset = Preset.CUSTOM;
         }
-        if(gamepad1.yWasPressed()){
+        if(gamepad1.yWasPressed()){// MAPPING
             switch(selectedPreset){
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
@@ -148,6 +155,11 @@ public class KylerPreset extends OpMode {
                     targetSpeed = 1080;
                     targetAngle = 14;
                     break;
+                case OFF:
+                    selectedPreset = Preset.OFF;
+                    targetSpeed = 0;
+                    targetAngle = 0;
+                    break;
             }
         }
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
@@ -162,9 +174,9 @@ public class KylerPreset extends OpMode {
             if(detection != null){
                 telemetry.addData("angle offset ", detection.ftcPose.z);
             }
-            if(gamepad1.b && detection != null){
+            if(gamepad1.right_trigger > 0.5 && detection != null){// MAPPING
                 if(Math.abs(detection.ftcPose.z) > 0.5) {
-                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.05, -0.15, 0.15));
+                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.10, -0.15, 0.15));//made -0.05 -0.10 to maybe increse speed, if broken revert value
                 }
             }
         }
@@ -178,9 +190,10 @@ public class KylerPreset extends OpMode {
         launcher.setVelocity(targetSpeed);
 
         AddTelemetry();
-        Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         bendyServoOne.setPosition(targetAngle/360);
-        launch(gamepad1.rightBumperWasPressed());
+        launch(gamepad1.rightBumperWasPressed());// MAPPING
+        intake(gamepad1.left_trigger > 0.5, gamepad1.left_bumper); // MAPING
 
 
     }
@@ -189,8 +202,10 @@ public class KylerPreset extends OpMode {
         switch  (launchState) {
             case IDLE:
                 launchState = launchRequested ? LaunchState.SPIN_UP : launchState;
+
                 break;
             case SPIN_UP:
+
                 double velocity = launcher.getVelocity();
                 if(velocity >= targetSpeed -20 && velocity <= targetSpeed +20){
                     launchState = LaunchState.LAUNCH;
@@ -201,6 +216,7 @@ public class KylerPreset extends OpMode {
                 rightFeeder.setPower(FULL_SPEED);
                 Timer.reset();
                 launchState = LaunchState.LAUNCHING;
+
                 break;
             case LAUNCHING:
                 if(Timer.seconds() > FEED_TIME_SECONDS){
@@ -212,36 +228,72 @@ public class KylerPreset extends OpMode {
 
         }
     }
+    private void intake(boolean intakeRequested, boolean spinRequested) {
+        intakeState = IntakeState.READY;
+        intakeState = spinRequested ? IntakeState.SPIN : intakeRequested ? IntakeState.INTAKE : intakeState;
+        switch  (intakeState) {
+            case READY:
+                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                intake.setVelocity(0);
+                break;
 
+            case NOT_READY:
+                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                intake.setVelocity(0);
+                break;
+
+            case INTAKE:
+                bendyServoTwo.setPosition(INTAKE_POS/360);
+                intake.setVelocity(intake_speed);
+                break;
+
+            case SPIN:
+                intake.setVelocity(spin_speed);
+                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                break;
+
+        }
+    }
     private void AddTelemetry() {
         telemetry.addData("Current Preset: ", selectedPreset);
+        telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("Servo Position: ", bendyServoOne.getPosition()*360);
+        telemetry.addData("Servo 2 Position: ", bendyServoTwo.getPosition()*360);
+        telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
+        telemetry.addData("intake target RPM", intake_speed);
+        telemetry.addData("current INTAKE velocity", intake.getVelocity());
+        telemetry.addData("","");
         telemetry.addData("front left wheel power", frontLeftMotor.getPower());
         telemetry.addData("front right wheel power", frontRightMotor.getPower());
         telemetry.addData("back left wheel power", backLeftMotor.getPower());
         telemetry.addData("back right wheel power", backRightMotor.getPower());
+        telemetry.addData("","");
+        telemetry.addData("front left wheel speed", frontLeftMotor.getVelocity());
+        telemetry.addData("front right wheel speed", frontRightMotor.getVelocity());
+        telemetry.addData("back left wheel speed", backLeftMotor.getVelocity());
+        telemetry.addData("back right wheel speed", backRightMotor.getVelocity());
         telemetry.update();
     }
 
     private void initialize_drive(){
-        frontLeftMotor = hardwareMap.get(DcMotor.class, "left_front_drive");
-        backLeftMotor = hardwareMap.get(DcMotor.class, "left_back_drive");
-        frontRightMotor = hardwareMap.get(DcMotor.class, "right_front_drive");
-        backRightMotor = hardwareMap.get(DcMotor.class, "right_back_drive");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "left_front_drive");// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, "left_back_drive");
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, "right_front_drive");
+        backRightMotor = hardwareMap.get(DcMotorEx.class, "right_back_drive");
 
-        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);// DRIVE SETUP
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);// DRIVE SETUP
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);//
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
     private void initialize_launcher(){
@@ -253,8 +305,15 @@ public class KylerPreset extends OpMode {
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
 
-        leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
+        rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+
+    }
+    private void initialize_intake(){
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        bendyServoTwo = hardwareMap.get(Servo.class, "bendy_servo_2");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
+
     }
 
 
@@ -276,7 +335,12 @@ public class KylerPreset extends OpMode {
         backRightMotor.setPower((forward - strafe + rotate)/denominator);
 
     }
-
+    private enum IntakeState {
+        SPIN,
+        INTAKE,
+        READY,
+        NOT_READY
+    }
 
     private enum LaunchState {
         IDLE,
@@ -290,6 +354,7 @@ public class KylerPreset extends OpMode {
         GOAL,
         MIDDLE,
         JUGGLE,
-        BACK
+        BACK,
+        OFF
     }
 }
