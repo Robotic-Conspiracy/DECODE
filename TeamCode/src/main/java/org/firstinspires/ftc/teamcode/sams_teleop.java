@@ -80,7 +80,8 @@ public class sams_teleop extends OpMode {
 
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    private Servo bendyServoOne = null;
+    private Servo LEFT_LAUNCH_SERVO = null;
+    private servo RIGHT_LAUNCH_SERVO = null;
     private Servo bendyServoTwo = null;
 
 
@@ -100,7 +101,8 @@ public class sams_teleop extends OpMode {
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
 
-    private Servo light = null;
+    private Servo light1 = null;
+    private Servo light2 = null;
 
 
     @Override
@@ -113,7 +115,8 @@ public class sams_teleop extends OpMode {
         initialize_feeder();
         initialize_launcher();
         initialize_intake();
-        light = hardwareMap.get(Servo.class, "the holy light");
+        light1 = hardwareMap.get(Servo.class, "preset light");
+        light2 = hardwareMap.get(Servo.class, "launch light");
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -197,24 +200,42 @@ public class sams_teleop extends OpMode {
 
         switch (selectedPreset){
             case CUSTOM:
-                light.setPosition(1);
+                light1.setPosition(1);
                 break;
             case OFF:
-                light.setPosition(0.277);
+                light1.setPosition(0.277);
                 break;
             case GOAL:
-                light.setPosition(0.5);
+                light1.setPosition(0.5);
                 break;
             case MIDDLE:
-                light.setPosition(0.388);
+                light1.setPosition(0.388);
                 break;
             case JUGGLE:
-                light.setPosition(0.555);
+                light1.setPosition(0.555);
                 break;
             case BACK:
-                light.setPosition(0.722);
+                light1.setPosition(0.722);
                 break;
         }
+        switch (canlaunch){
+            case OFF:
+                light2.setPosition(0);
+                break;
+            case READY:
+                light2.setPosition(0.277);
+                break;
+            case NOT_READY:
+                light2.setPosition(0.5);
+                break;
+            case LAUNCHING:
+                light2.setPosition(0.388);
+                break;
+            case ERROR:
+                light2.setPosition(0.555);
+                break;
+        }
+
 
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
         AprilTagDetection detection = null;
@@ -245,7 +266,8 @@ public class sams_teleop extends OpMode {
 
         AddTelemetry();
         Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
-        bendyServoOne.setPosition(targetAngle/360);
+        LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
+        RIGHT_LAUNCH_SERVO.setPosition(targetAngle/360);
         launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.5, gamepad1.left_bumper); // MAPING
 
@@ -335,7 +357,8 @@ public class sams_teleop extends OpMode {
         telemetry.addData("Current Preset: ", selectedPreset);
         telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
-        telemetry.addData("Servo Position: ", bendyServoOne.getPosition()*360);
+        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition()*360);
+        telemetry.addData("R Servo Position: ", RIGHT_LAUNCH_SERVO.getPosition()*360);
         telemetry.addData("Servo 2 Position: ", bendyServoTwo.getPosition()*360);
         telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
@@ -376,7 +399,8 @@ public class sams_teleop extends OpMode {
     private void initialize_launcher(){
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
-        bendyServoOne = hardwareMap.get(Servo.class, "bendy_servo_1");
+        RIGHT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "right twideler");
+        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
     }
     private void initialize_feeder(){
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
@@ -458,5 +482,12 @@ public class sams_teleop extends OpMode {
         JUGGLE,
         BACK,
         OFF
+    }
+    private enum canlaunch {
+        OFF,//LIGHT will be off,
+        READY,//GREEN, RPM in range and AMPS not to high, intake off, everything is correct
+        NOT_READY,//RED: if intake or RMP is wrong
+        LAUNCHING,//PURPLE : state while launch is happening, it will turn purple
+        ERROR  //FLASHING RED : error indecates RPM drop and motor bog(power set higher than expected with no reason), voltage criticaly low, and AMP draw over set limit, launch dissabled until AMPS drop below set limit to prevent blowing FUSES
     }
 }
