@@ -1,5 +1,2 @@
-# Adding Codeowners to require reviews from both before pushing to main
-* @GoldStar184 @geppp41
-
-# Prevent any others added to the global owners from changing meta files
-/.github/ @GoldStar184
+# Adding Codeowners to require reviews from another coder before pushing to main
+* @Robotic-Conspiracy/Coders
