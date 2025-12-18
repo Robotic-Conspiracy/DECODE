@@ -134,7 +134,7 @@ public class sams_teleop extends OpMode {
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
             }
-            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure((long) 10, TimeUnit.MILLISECONDS);
         }
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){// MAPPING
@@ -230,7 +230,7 @@ public class sams_teleop extends OpMode {
             }
             if(gamepad1.right_trigger > 0.5 && detection != null){// MAPPING
                 if(Math.abs(detection.ftcPose.z) > 0.5) {
-                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.10, -0.15, 0.15));//made -0.05 -0.10 to maybe increse speed, if broken revert value
+                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.25, -0.50, 0.50));//made -0.05 -0.10 to maybe increse speed, if broken revert value
                 }
             }
         }
@@ -356,10 +356,10 @@ public class sams_teleop extends OpMode {
     }
 
     private void initialize_drive(){
-        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "left_front_drive");// DRIVE SETUP
-        backLeftMotor = hardwareMap.get(DcMotorEx.class, "left_back_drive");
-        frontRightMotor = hardwareMap.get(DcMotorEx.class, "right_front_drive");
-        backRightMotor = hardwareMap.get(DcMotorEx.class, "right_back_drive");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left_drive");// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, "back_left_drive");
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
+        backRightMotor = hardwareMap.get(DcMotorEx.class, "back_right_drive");
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);// DRIVE SETUP
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -396,13 +396,13 @@ public class sams_teleop extends OpMode {
 
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-        if(Math.abs(forward) < 0.1){
+        if(Math.abs(forward) < 0){
             forward = 0;
         }
-        if(Math.abs(strafe) < 0.1){
+        if(Math.abs(strafe) < 0){
             strafe = 0;
         }
-        if(Math.abs(rotate) < 0.1){
+        if(Math.abs(rotate) < 0){
             rotate = 0;
         }
         if (gamepad1.right_stick_button) {
