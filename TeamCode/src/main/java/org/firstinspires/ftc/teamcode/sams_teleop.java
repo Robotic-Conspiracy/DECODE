@@ -18,6 +18,8 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
@@ -33,8 +35,8 @@ public class sams_teleop extends OpMode {
     private final double REV_SPEED = -1.0;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
-    private final double SERVO_MINIMUM_POSITION = 0;
-    private final double SERVO_MAXIMUM_POSITION = 50;
+    private final double SERVO_MINIMUM_POSITION = -300;
+    private final double SERVO_MAXIMUM_POSITION = 300;
     private final double INTAKE_POS = 0;
     private final double LAUNCH_POS = 95;
     private final int spin_speed = -500;
@@ -81,8 +83,8 @@ public class sams_teleop extends OpMode {
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
-    private servo RIGHT_LAUNCH_SERVO = null;
-    private Servo bendyServoTwo = null;
+    private Servo RIGHT_LAUNCH_SERVO = null;
+    private Servo intake_ramp = null;
 
 
     //configurable vars
@@ -95,6 +97,7 @@ public class sams_teleop extends OpMode {
     private LaunchState launchState = null;
     private IntakeState intakeState = null;
     private Preset selectedPreset = null;
+    private CanLaunch canlaunch = null;
 
     private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
@@ -103,6 +106,7 @@ public class sams_teleop extends OpMode {
 
     private Servo light1 = null;
     private Servo light2 = null;
+    private AnalogInput floodgate = null;
 
 
     @Override
@@ -117,6 +121,7 @@ public class sams_teleop extends OpMode {
         initialize_intake();
         light1 = hardwareMap.get(Servo.class, "preset light");
         light2 = hardwareMap.get(Servo.class, "launch light");
+        floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -128,6 +133,7 @@ public class sams_teleop extends OpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTagProcessor)
                 .build();
+        canlaunch = CanLaunch.READY;
     }
 
     @Override
@@ -167,33 +173,33 @@ public class sams_teleop extends OpMode {
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1080;
-                    targetAngle = 14;
+                    targetAngle = 90-14;
                     break;
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
                     targetSpeed = 1400;
-                    targetAngle = 31;
+                    targetAngle = 90-31;
                     break;
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
                     targetSpeed = 1720;
-                    targetAngle = 38;
+                    targetAngle = 90-38;
                     break;
                 case BACK:
                     selectedPreset = Preset.JUGGLE;
                     targetSpeed = 500;
-                    targetAngle = 20;
+                    targetAngle = 90-20;
                     break;
                 case JUGGLE:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 0;
+                    targetAngle = 90-0;
                     break;
 
                 case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1080;
-                    targetAngle = 14;
+                    targetAngle = 90-14;
                     break;
             }
         }
@@ -308,10 +314,10 @@ public class sams_teleop extends OpMode {
     }
     private void intake(boolean intakeRequested, boolean spinRequested) {
         intakeState = IntakeState.READY;
-        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME/2 ?IntakeState.START_INTAKE : IntakeState.INTAKE): intakeState);
+        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME/2 ?IntakeState.START_INTAKE : IntakeState.INTAKE): IntakeState.READY);
         switch  (intakeState) {
             case READY:
-                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                intake_ramp.setPosition(LAUNCH_POS/360);
                 intake.setVelocity(0);
                 if(Current_speed == REV_SPEED){
                     Current_speed = STOP_SPEED;
@@ -327,7 +333,7 @@ public class sams_teleop extends OpMode {
                     Current_speed = REV_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
-                    //bendyServoTwo.setPosition(INTAKE_POS / 360);
+                    //intake_ramp.setPosition(INTAKE_POS / 360);
                     }
                 if(Timer2.seconds() > REV_TIME/2) {
                     intakeState = IntakeState.INTAKE;
@@ -336,7 +342,7 @@ public class sams_teleop extends OpMode {
 
 
             case INTAKE:
-                bendyServoTwo.setPosition(INTAKE_POS / 360);
+                intake_ramp.setPosition(INTAKE_POS / 360);
                 intake.setVelocity(intake_speed);
 
                 if(Timer2.seconds() > REV_TIME){
@@ -348,7 +354,7 @@ public class sams_teleop extends OpMode {
 
             case SPIN:
                 intake.setVelocity(spin_speed);
-                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                intake_ramp.setPosition(LAUNCH_POS/360);
                 break;
 
         }
@@ -359,7 +365,7 @@ public class sams_teleop extends OpMode {
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition()*360);
         telemetry.addData("R Servo Position: ", RIGHT_LAUNCH_SERVO.getPosition()*360);
-        telemetry.addData("Servo 2 Position: ", bendyServoTwo.getPosition()*360);
+        telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
         telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
@@ -375,6 +381,9 @@ public class sams_teleop extends OpMode {
         telemetry.addData("front right wheel speed", FR_RPM);
         telemetry.addData("back left wheel speed", BL_RPM);
         telemetry.addData("back right wheel speed", BR_RPM);
+        double voltage = floodgate.getVoltage();
+        telemetry.addData("Analog Voltage", voltage);
+
         telemetry.update();
     }
 
@@ -412,7 +421,7 @@ public class sams_teleop extends OpMode {
     }
     private void initialize_intake(){
         intake = hardwareMap.get(DcMotorEx.class, "intake");
-        bendyServoTwo = hardwareMap.get(Servo.class, "bendy_servo_2");
+        intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
     }
@@ -483,7 +492,7 @@ public class sams_teleop extends OpMode {
         BACK,
         OFF
     }
-    private enum canlaunch {
+    private enum CanLaunch {
         OFF,//LIGHT will be off,
         READY,//GREEN, RPM in range and AMPS not to high, intake off, everything is correct
         NOT_READY,//RED: if intake or RMP is wrong
