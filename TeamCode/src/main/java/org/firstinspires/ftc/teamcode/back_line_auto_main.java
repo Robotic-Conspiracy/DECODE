@@ -172,12 +172,14 @@ public abstract class back_line_auto_main extends OpMode {
                                     } else {
                                         if (detectionpatern > 0){
                                             targetVelocity = 540;
+                                            angleThing.setPosition(62/360.0);
                                             drive(0, 0, 0);
                                             state = states.SPIN_UP;
                                             detectionpattern -= 1
                                         }
                                         if (detectionpatern <= 0){
                                             targetVelocity = 1660
+                                            angleThing.setPosition(56/360.0);
                                             state = states.SPIN_UP;
                                             drive(0, 0, 0);
                                         }
