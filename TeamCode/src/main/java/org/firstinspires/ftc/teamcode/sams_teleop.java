@@ -84,7 +84,7 @@ public class sams_teleop extends OpMode {
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
-    private Servo RIGHT_LAUNCH_SERVO = null;
+    
     private Servo intake_ramp = null;
 
 
@@ -274,7 +274,6 @@ public class sams_teleop extends OpMode {
         AddTelemetry();
         Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
-        RIGHT_LAUNCH_SERVO.setPosition(targetAngle/360);
         launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.5, gamepad1.left_bumper); // MAPING
 
@@ -365,7 +364,6 @@ public class sams_teleop extends OpMode {
         telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition()*360);
-        telemetry.addData("R Servo Position: ", RIGHT_LAUNCH_SERVO.getPosition()*360);
         telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
         telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
@@ -411,7 +409,6 @@ public class sams_teleop extends OpMode {
     private void initialize_launcher(){
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
-        RIGHT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "right twideler");
         LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
     }
     private void initialize_feeder(){
