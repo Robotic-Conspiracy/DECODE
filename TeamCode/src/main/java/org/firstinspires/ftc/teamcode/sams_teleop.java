@@ -439,20 +439,22 @@ public class sams_teleop extends OpMode {
 
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-        if(Math.abs(forward) < 0){
-            forward = 0;
+        if(Math.abs(forward) > 0.02){
+            forward ++ 0.03;
         }
-        if(Math.abs(strafe) < 0){
-            strafe = 0;
+        if(Math.abs(strafe) < 0.02){
+            strafe ++ 0.03;
         }
-        if(Math.abs(rotate) < 0){
-            rotate = 0;
+        if(Math.abs(rotate) < 0.02){
+            rotate ++ 0.03;
+            rotate = rotate/2
+            
         }
         if (gamepad1.right_stick_button) {
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 150;
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
         else{
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 400;
 
         }
         double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
