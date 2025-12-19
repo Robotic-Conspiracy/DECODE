@@ -49,6 +49,7 @@ public class sams_teleop extends OpMode {
     private DcMotorEx backLeftMotor = null;
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
+    //private AnalogInput floodgateCurrent;
     private static double FL_MAX_RPM = 435;
     private static double FR_MAX_RPM = 435;
     private static double BL_MAX_RPM = 435;
@@ -369,8 +370,10 @@ public class sams_teleop extends OpMode {
         telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
+        telemetry.addData("current Power- launcher", launcher.getPower());
         telemetry.addData("intake target RPM", intake_speed);
         telemetry.addData("current INTAKE velocity", intake.getVelocity());
+        telemetry.addData("current INTAKE power", intake.getPower());
         telemetry.addData("","");
         telemetry.addData("front left wheel power", frontLeftMotor.getPower());
         telemetry.addData("front right wheel power", frontRightMotor.getPower());

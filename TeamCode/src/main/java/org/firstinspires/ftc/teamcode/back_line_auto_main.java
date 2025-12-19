@@ -51,14 +51,14 @@ public abstract class back_line_auto_main extends OpMode {
 
     @Override
     public void init(){
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "right_front_drive");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "right_back_drive");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "front_left_drive");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
+        leftBackDrive = hardwareMap.get(DcMotor.class, "back_left_drive");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "back_right_drive");
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        angleThing = hardwareMap.get(Servo.class, "bendy_servo_1");
+        angleThing = hardwareMap.get(Servo.class, "left_twideler");
         pod = hardwareMap.getAll(GoBildaPinpointDriver.class).get(0);
 
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -100,13 +100,13 @@ public abstract class back_line_auto_main extends OpMode {
         if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
             exposureControl.setMode(ExposureControl.Mode.Manual);
         }
-        exposureControl.setExposure((long)1, TimeUnit.MILLISECONDS);
+        exposureControl.setExposure((long)8, TimeUnit.MILLISECONDS);
     }
     @Override
     public void loop() {
         launcher.setVelocity(targetVelocity);
         launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
-        angleThing.setPosition(38/360.0);
+        angleThing.setPosition(56/360.0);
         pod.update();
         telemetry.addData("velocity ", launcher.getVelocity());
         telemetry.addData("position x", pod.getPosX(DistanceUnit.MM));
@@ -133,6 +133,7 @@ public abstract class back_line_auto_main extends OpMode {
 
                         AprilTagDetection detectionRed = null;
                         AprilTagDetection detectionBlue = null;
+                        double detectionpatern = null;
                         if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25 ) {
                             move();
                         }else if (detections.isEmpty()){
@@ -148,6 +149,15 @@ public abstract class back_line_auto_main extends OpMode {
                                     if (Detection.id == 20) {
                                         detectionBlue = Detection;
                                     }
+                                    if (Detection.id == 21) {
+                                        detectionpatern = 2;
+                                    }
+                                    if (Detection.id == 22) {
+                                        detectionpatern = 1;
+                                    }
+                                    if (Detection.id == 23) {
+                                        detectionpatern = 0;
+                                    }
                                 }
 
 
@@ -160,8 +170,20 @@ public abstract class back_line_auto_main extends OpMode {
                                         drive(0, 0, Range.clip(detectionBlue.ftcPose.z * -0.05, -0.15, 0.15));
                                         //1*|offset|/15
                                     } else {
-                                        state = states.SPIN_UP;
-                                        drive(0, 0, 0);
+                                        if (detectionpatern > 0){
+                                            targetVelocity = 540;
+                                            angleThing.setPosition(62/360.0);
+                                            drive(0, 0, 0);
+                                            state = states.SPIN_UP;
+                                            detectionpattern -= 1
+                                        }
+                                        if (detectionpatern <= 0){
+                                            targetVelocity = 1660
+                                            angleThing.setPosition(56/360.0);
+                                            state = states.SPIN_UP;
+                                            drive(0, 0, 0);
+                                        }
+                                        
                                     }
                                     telemetry.update();
                                 } else if (color.equals("Red") && detectionRed != null) {
@@ -200,7 +222,7 @@ public abstract class back_line_auto_main extends OpMode {
                     break;
                 case LAUNCHING:
                     telemetry.addData("Feed time", feedTimer.seconds());
-                    if (timesShot <= 4) {
+                    if (timesShot <= 6) {
                         if (feedTimer.seconds() > 0.3) {
                             state = states.SPIN_UP;
                             leftFeeder.setPower(0);
