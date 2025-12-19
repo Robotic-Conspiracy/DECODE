@@ -24,12 +24,44 @@ import java.util.concurrent.TimeUnit;
 @TeleOp(name = "Main Driver Preset")
 public class KylerPreset extends OpMode {
 
-    //Launch servo objects and vars
+    //finals (aka vars that wont change)
     private final double FEED_TIME_SECONDS = 0.20;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 50;
+    private final String CAMERA_NAME = "Webcam 1";
+    private final int CHANGE_SPEED_BY = 20;
+    private final int CHANGE_BY_MODIFIER = 5;
+    private final double AUTO_ROTATE_GAIN = 0.05;
+    private final double AUTO_ROTATE_MAX_POWER = 0.15;
+    private final int CAMERA_DECIMATION = 3;
+    private final long CAMERA_EXPOSURE_MS = 16;
+    private final double AUTO_ROTATE_ANGLE_THRESHOLD = 0.5;
+    private final int VELOCITY_TOLERANCE = 20;
+    private final double DRIVE_DEADBAND = 0.1;
+
+    // Hardware names
+    private final String MOTOR_FRONT_LEFT = "left_front_drive";
+    private final String MOTOR_BACK_LEFT = "left_back_drive";
+    private final String MOTOR_FRONT_RIGHT = "right_front_drive";
+    private final String MOTOR_BACK_RIGHT = "right_back_drive";
+    private final String LAUNCHER_NAME = "launcher";
+    private final String SERVO_BENDY_NAME = "bendy_servo_1";
+    private final String FEEDER_LEFT_NAME = "left_feeder";
+    private final String FEEDER_RIGHT_NAME = "right_feeder";
+
+    // AprilTag IDs
+    private final int GOAL_TAG_RED = 24;
+    private final int GOAL_TAG_BLUE = 20;
+
+    //launcher motor PIDF
+    private final double launchP = 203;
+    private final double launchI = 1.001;
+    private final double launchD = 0.0015;
+    private final double launchF = 0.1;
+
+    //Servos
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -39,26 +71,23 @@ public class KylerPreset extends OpMode {
     private DcMotor frontRightMotor = null;
     private DcMotor backRightMotor = null;
 
-    //launcher motor
-    private final double P = 203;
-    private final double I = 1.001;
-    private final double D = 0.0015;
-    private final double F = 0.1;
+
+    //nulls? (we will probably use these later)
 
     private DcMotorEx launcher = null;
     private Servo bendyServoOne = null;
 
 
-    //configurable vars
+    //configurable vars in FTC dashboard
     public static int targetSpeed = 1720;//launch motor speed
     public static double targetAngle = 38;
-
 
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
     private LaunchState launchState = null;
     private Preset selectedPreset = null;
 
+    //Vision
     private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
@@ -70,19 +99,19 @@ public class KylerPreset extends OpMode {
         launchState = LaunchState.IDLE;
         selectedPreset = Preset.BACK;
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        initialize_drive();
-        initialize_feeder();
-        initialize_launcher();
+        initializeDrive();
+        initializeFeeder();
+        initializeLauncher();
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
-        aprilTagProcessor.setDecimation(3);
+        aprilTagProcessor.setDecimation(CAMERA_DECIMATION);
 //        portal = new VisionPortal.Builder()
 //                .setCamera(BuiltinCameraDirection.BACK)
 //                .addProcessor(aprilTagProcessor)
 //                .build();
         portal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCamera(hardwareMap.get(WebcamName.class, CAMERA_NAME))
                 .addProcessor(aprilTagProcessor)
                 .build();
     }
@@ -94,22 +123,22 @@ public class KylerPreset extends OpMode {
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
             }
-            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure(CAMERA_EXPOSURE_MS, TimeUnit.MILLISECONDS);
         }
-        //chaing speed
+        //changing speed
         if(gamepad1.dpadUpWasPressed()){
-            targetSpeed += 20*(gamepad1.x ? 5 : 1);
+            targetSpeed += CHANGE_SPEED_BY * (gamepad1.x ? CHANGE_BY_MODIFIER: 1);
         }
         if(gamepad1.dpadDownWasPressed()){
-            targetSpeed -= 20*(gamepad1.x ? 5 : 1);
+            targetSpeed -= CHANGE_SPEED_BY * (gamepad1.x ? CHANGE_BY_MODIFIER : 1);
         }
 
         //changing servo rotation
         if(gamepad1.dpadRightWasPressed()){
-            targetAngle += (gamepad1.x ? 5 : 1);
+            targetAngle += (gamepad1.x ? CHANGE_BY_MODIFIER : 1);
         }
         if(gamepad1.dpadLeftWasPressed()){
-            targetAngle -= (gamepad1.x ? 5 : 1);
+            targetAngle -= (gamepad1.x ? CHANGE_BY_MODIFIER : 1);
         }
         if (targetAngle > SERVO_MAXIMUM_POSITION){
             targetAngle = SERVO_MAXIMUM_POSITION;
@@ -152,7 +181,8 @@ public class KylerPreset extends OpMode {
         AprilTagDetection detection = null;
         if(!detections.isEmpty()){
             for(AprilTagDetection Detection : detections){
-                if(Detection.id == 24 || Detection.id == 20){
+                //24 and 20 are the goal tags, so we realy only care about these ones
+                if(Detection.id == GOAL_TAG_RED || Detection.id == GOAL_TAG_BLUE){
                     detection = Detection;
                     telemetry.addData("detected id: ", detection.id);
                 }
@@ -161,8 +191,9 @@ public class KylerPreset extends OpMode {
                 telemetry.addData("angle offset ", detection.ftcPose.z);
             }
             if(gamepad1.b && detection != null){
-                if(Math.abs(detection.ftcPose.z) > 0.5) {
-                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.05, -0.15, 0.15));
+                if(Math.abs(detection.ftcPose.z) > AUTO_ROTATE_ANGLE_THRESHOLD) {
+                    // Auto-correct robot rotation to align with AprilTag yaw angle
+                    Drive(0, 0, Range.clip(detection.ftcPose.z * -AUTO_ROTATE_GAIN, -AUTO_ROTATE_MAX_POWER, AUTO_ROTATE_MAX_POWER));
                 }
             }
         }
@@ -190,7 +221,7 @@ public class KylerPreset extends OpMode {
                 break;
             case SPIN_UP:
                 double velocity = launcher.getVelocity();
-                if(velocity >= targetSpeed -20 && velocity <= targetSpeed +20){
+                if(velocity >= targetSpeed - VELOCITY_TOLERANCE && velocity <= targetSpeed + VELOCITY_TOLERANCE){
                     launchState = LaunchState.LAUNCH;
                 }
                 break;
@@ -224,11 +255,11 @@ public class KylerPreset extends OpMode {
         telemetry.update();
     }
 
-    private void initialize_drive(){
-        frontLeftMotor = hardwareMap.get(DcMotor.class, "left_front_drive");
-        backLeftMotor = hardwareMap.get(DcMotor.class, "left_back_drive");
-        frontRightMotor = hardwareMap.get(DcMotor.class, "right_front_drive");
-        backRightMotor = hardwareMap.get(DcMotor.class, "right_back_drive");
+    private void initializeDrive(){
+        frontLeftMotor = hardwareMap.get(DcMotor.class, MOTOR_FRONT_LEFT);
+        backLeftMotor = hardwareMap.get(DcMotor.class, MOTOR_BACK_LEFT);
+        frontRightMotor = hardwareMap.get(DcMotor.class, MOTOR_FRONT_RIGHT);
+        backRightMotor = hardwareMap.get(DcMotor.class, MOTOR_BACK_RIGHT);
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -242,14 +273,14 @@ public class KylerPreset extends OpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
     }
-    private void initialize_launcher(){
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        launcher.setVelocityPIDFCoefficients(P,I,D,F);
-        bendyServoOne = hardwareMap.get(Servo.class, "bendy_servo_1");
+    private void initializeLauncher(){
+        launcher = hardwareMap.get(DcMotorEx.class, LAUNCHER_NAME);
+        launcher.setVelocityPIDFCoefficients(launchP, launchI, launchD, launchF);
+        bendyServoOne = hardwareMap.get(Servo.class, SERVO_BENDY_NAME);
     }
-    private void initialize_feeder(){
-        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
-        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+    private void initializeFeeder(){
+        leftFeeder = hardwareMap.get(CRServo.class, FEEDER_LEFT_NAME);
+        rightFeeder = hardwareMap.get(CRServo.class, FEEDER_RIGHT_NAME);
 
         leftFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -258,13 +289,13 @@ public class KylerPreset extends OpMode {
 
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-        if(Math.abs(forward) < 0.1){
+        if(Math.abs(forward) < DRIVE_DEADBAND){
             forward = 0;
         }
-        if(Math.abs(strafe) < 0.1){
+        if(Math.abs(strafe) < DRIVE_DEADBAND){
             strafe = 0;
         }
-        if(Math.abs(rotate) < 0.1){
+        if(Math.abs(rotate) < DRIVE_DEADBAND){
             rotate = 0;
         }
 
