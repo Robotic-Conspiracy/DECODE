@@ -49,6 +49,7 @@ public class sams_teleop extends OpMode {
     private DcMotorEx backLeftMotor = null;
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
+    AnalogInput floodgate;
     //private AnalogInput floodgateCurrent;
     private static double FL_MAX_RPM = 435;
     private static double FR_MAX_RPM = 435;
@@ -107,7 +108,7 @@ public class sams_teleop extends OpMode {
 
     private Servo light1 = null;
     private Servo light2 = null;
-    private AnalogInput floodgate = null;
+    
 
 
     @Override
@@ -343,7 +344,10 @@ public class sams_teleop extends OpMode {
 
             case INTAKE:
                 intake_ramp.setPosition(INTAKE_POS / 360);
-                intake.setVelocity(intake_speed);
+                double TPS_IN = intake.getVelocity();
+                IN_RPM = (TPS_IN * 60) / TPR_1640;
+                double IN_TARGET_RPM = (intake_speed * TPR_1640);
+                intake.setVelocity(IN_TARGET_RPM);
 
                 if(Timer2.seconds() > REV_TIME){
                     Current_speed = STOP_SPEED;
@@ -360,6 +364,10 @@ public class sams_teleop extends OpMode {
         }
     }
     private void AddTelemetry() {
+        double voltage = floodgateCurrent.getVoltage();
+        double amps = (voltage / 3.3) * 40.0;
+        double TPS_IN = intake.getVelocity();
+        IN_RPM = (TPS_IN * 60) / TPR_1640;
         telemetry.addData("Current Preset: ", selectedPreset);
         telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
@@ -369,8 +377,9 @@ public class sams_teleop extends OpMode {
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
         telemetry.addData("current Power- launcher", launcher.getPower());
+        telemetry.addData("","");
         telemetry.addData("intake target RPM", intake_speed);
-        telemetry.addData("current INTAKE velocity", intake.getVelocity());
+        telemetry.addData("current INTAKE velocity", IN_RPM);
         telemetry.addData("current INTAKE power", intake.getPower());
         telemetry.addData("","");
         telemetry.addData("front left wheel power", frontLeftMotor.getPower());
@@ -382,8 +391,9 @@ public class sams_teleop extends OpMode {
         telemetry.addData("front right wheel speed", FR_RPM);
         telemetry.addData("back left wheel speed", BL_RPM);
         telemetry.addData("back right wheel speed", BR_RPM);
-        double voltage = floodgate.getVoltage();
-        telemetry.addData("Analog Voltage", voltage);
+        telemetry.addData("","");
+        telemetry.addData("Current (Amps)", "%.2f A", amps);
+        telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
 
         telemetry.update();
     }
