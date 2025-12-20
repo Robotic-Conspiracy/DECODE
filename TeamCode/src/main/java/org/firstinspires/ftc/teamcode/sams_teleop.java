@@ -51,10 +51,10 @@ public class sams_teleop extends OpMode {
     private DcMotorEx backRightMotor = null;
     AnalogInput floodgate;
     //private AnalogInput floodgateCurrent;
-    private static double FL_MAX_RPM = 435;
-    private static double FR_MAX_RPM = 435;
-    private static double BL_MAX_RPM = 435;
-    private static double BR_MAX_RPM = 435;
+    private static double FL_MAX_RPM = 400;
+    private static double FR_MAX_RPM = 400;
+    private static double BL_MAX_RPM = 400;
+    private static double BR_MAX_RPM = 400;
     private final double TPR_435 = 384.5;
     private final double TPR_6k = 28;
     private final double TPR_1640 = 145.6;
@@ -75,6 +75,7 @@ public class sams_teleop extends OpMode {
     double FR_RPM = 0;
     double BL_RPM = 0;
     double BR_RPM = 0;
+    double IN_RPM = 0;
 
     //launcher motor
     private final double P = 203;
@@ -364,7 +365,7 @@ public class sams_teleop extends OpMode {
         }
     }
     private void AddTelemetry() {
-        double voltage = floodgateCurrent.getVoltage();
+        double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
         double TPS_IN = intake.getVelocity();
         IN_RPM = (TPS_IN * 60) / TPR_1640;
@@ -440,14 +441,14 @@ public class sams_teleop extends OpMode {
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
         if(Math.abs(forward) > 0.02){
-            forward ++ 0.03;
+            forward += 0.03;
         }
         if(Math.abs(strafe) < 0.02){
-            strafe ++ 0.03;
+            strafe += 0.03;
         }
         if(Math.abs(rotate) < 0.02){
-            rotate ++ 0.03;
-            rotate = rotate/2
+            rotate += 0.03;
+            rotate = rotate/2;
             
         }
         if (gamepad1.right_stick_button) {
