@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 @TeleOp(name = "FloodgateCurrentTest", group = "Sensor")
-public class FloodgateCurrentTest extends LinearOpMode {
+public class floodgate extends LinearOpMode {
 
     // Declare an AnalogInput object
     AnalogInput floodgateCurrent;

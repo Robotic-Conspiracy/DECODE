@@ -41,6 +41,8 @@ public class sams_teleop extends OpMode {
     private final double LAUNCH_POS = 95;
     private final int spin_speed = -500;
     private double Current_speed = STOP_SPEED;
+    double TPS_IN = 0;
+    double IN_TARGET_RPM = 0;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -94,6 +96,7 @@ public class sams_teleop extends OpMode {
     public static int targetSpeed = 0;//launch motor speed
     public static double targetAngle = 38;
     public static int intake_speed = 1400;
+
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
     private ElapsedTime Timer2 = new ElapsedTime();
@@ -258,11 +261,16 @@ public class sams_teleop extends OpMode {
             if(detection != null){
                 telemetry.addData("angle offset ", detection.ftcPose.z);
             }
-            if(gamepad1.right_trigger > 0.5 && detection != null){// MAPPING
-                if(Math.abs(detection.ftcPose.z) > 0.5) {
-                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.25, -0.50, 0.50));//made -0.05 -0.10 to maybe increse speed, if broken revert value
+            if(gamepad1.right_trigger >= 0.2 && detection != null){// MAPPING
+                        if(Math.abs(detection.ftcPose.z) > 0.5) {
+                            Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, Range.clip(detection.ftcPose.z * -0.05, -0.5, 0.5));
                 }
+
             }
+
+
+
+
         }
 
 
@@ -274,7 +282,9 @@ public class sams_teleop extends OpMode {
         launcher.setVelocity(targetSpeed);
 
         AddTelemetry();
-        Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
+        if(!(gamepad1.right_trigger >= 0.2 && detection != null)) {
+            Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
+        }
         LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
         launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.5, gamepad1.left_bumper); // MAPING
@@ -345,9 +355,9 @@ public class sams_teleop extends OpMode {
 
             case INTAKE:
                 intake_ramp.setPosition(INTAKE_POS / 360);
-                double TPS_IN = intake.getVelocity();
+                TPS_IN = intake.getVelocity();
                 IN_RPM = (TPS_IN * 60) / TPR_1640;
-                double IN_TARGET_RPM = (intake_speed * TPR_1640);
+                IN_TARGET_RPM = (intake_speed * TPR_1640);
                 intake.setVelocity(IN_TARGET_RPM);
 
                 if(Timer2.seconds() > REV_TIME){
@@ -358,7 +368,11 @@ public class sams_teleop extends OpMode {
                 break;
 
             case SPIN:
-                intake.setVelocity(spin_speed);
+                TPS_IN = intake.getVelocity();
+                IN_RPM = (TPS_IN * 60) / TPR_1640;
+                IN_TARGET_RPM = (spin_speed * TPR_1640);
+                intake.setVelocity(IN_TARGET_RPM);
+
                 intake_ramp.setPosition(LAUNCH_POS/360);
                 break;
 
@@ -439,18 +453,35 @@ public class sams_teleop extends OpMode {
 
 
     private void Drive(double forward, double strafe, double rotate){
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-        if(Math.abs(forward) > 0.02){
-            forward += 0.03;
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate/1.5), 1);
+        if(Math.abs(forward) < 0.02){
+            forward = 0;
         }
         if(Math.abs(strafe) < 0.02){
-            strafe += 0.03;
+            strafe = 0;
         }
         if(Math.abs(rotate) < 0.02){
-            rotate += 0.03;
-            rotate = rotate/2;
-            
+            rotate = 0;
         }
+        if(forward < -1){
+            forward = -1;
+        }
+        if(strafe < -1){
+            strafe = -1;
+        }
+        if(rotate < -1) {
+            rotate = -1;
+        }
+        if(forward > 1){
+            forward = 1;
+        }
+        if(strafe > 1){
+            strafe = 1;
+        }
+        if(rotate > 1) {
+            rotate = 1;
+        }
+        rotate = rotate/1.5;
         if (gamepad1.right_stick_button) {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
