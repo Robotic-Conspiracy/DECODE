@@ -325,13 +325,13 @@ public class sams_teleop extends OpMode {
                     X_MOVE = Range.clip(x * -0.05, -1, 1);
                             //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
                 }
-                if (Math.abs(y-70) > 2) {
-                    Y_MOVE = Range.clip(y-70 * -0.02, -.5, .5);
+                if (Math.abs(y-70) > 1) {
+                    Y_MOVE = Range.clip((y-70) * -0.1, -.5, .5);
                 }
-                if(yaw > 3) {
-                    YAW_MOVE = Range.clip(yaw * 0.2, -.1, .1);
+                if(Math.abs(yaw-0) > 1) {
+                    YAW_MOVE = Range.clip((yaw-0) * 0.1, -.5, .5);
                 }
-                Drive(0,YAW_MOVE,X_MOVE);
+                Drive(Y_MOVE,YAW_MOVE,X_MOVE);
             }
         }
         if(targetAngle > SERVO_MAXIMUM_POSITION){
