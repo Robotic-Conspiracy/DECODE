@@ -1,6 +1,13 @@
+//READ ME
+ // VARIABLE NAMING CONVENTIONS USED
+ //PascalCase
+ //SCREAMING_SNAKE_CASE for FINALS
+ //
+ //
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -18,27 +25,26 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
 @Config
-@TeleOp(name = "Solo Op -sams code")
+@TeleOp(name = "Main Solo Op")
 public class sams_teleop extends OpMode {
 
-    //Launch servo objects and vars
-    private final double FEED_TIME_SECONDS = 0.30;
-    private final double REV_TIME = 0.5;  //how long the feeders spin reversse when intake starts
-    private final double REV_SPEED = -1.0;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
-    private final double SERVO_MAXIMUM_POSITION = 50;
+    private final double SERVO_MAXIMUM_POSITION = 90;
     private final double INTAKE_POS = 0;
-    private final double LAUNCH_POS = 95;
-    private final int spin_speed = -500;
+    private final int SPIN_SPEED = -500;
     private double Current_speed = STOP_SPEED;
+    double TPS_IN = 0;
+    double IN_TARGET_RPM = 0;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
 
@@ -47,11 +53,20 @@ public class sams_teleop extends OpMode {
     private DcMotorEx backLeftMotor = null;
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
-    //private AnalogInput floodgateCurrent;
-    private static double FL_MAX_RPM = 435;
-    private static double FR_MAX_RPM = 435;
-    private static double BL_MAX_RPM = 435;
-    private static double BR_MAX_RPM = 435;
+    AnalogInput floodgate;
+    private double X_MOVE = 0;
+    private double Y_MOVE = 0;
+    private double YAW_MOVE = 0;
+    private double x = 0;
+    private double y = 0;
+    private double z = 0;
+    private double roll = 0;
+    private double pitch = 0;
+    private double yaw = 0;
+    private static double FL_MAX_RPM = 400;
+    private static double FR_MAX_RPM = 400;
+    private static double BL_MAX_RPM = 400;
+    private static double BR_MAX_RPM = 400;
     private final double TPR_435 = 384.5;
     private final double TPR_6k = 28;
     private final double TPR_1640 = 145.6;
@@ -72,6 +87,7 @@ public class sams_teleop extends OpMode {
     double FR_RPM = 0;
     double BL_RPM = 0;
     double BR_RPM = 0;
+    double IN_RPM = 0;
 
     //launcher motor
     private final double P = 203;
@@ -82,28 +98,33 @@ public class sams_teleop extends OpMode {
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
-    private servo RIGHT_LAUNCH_SERVO = null;
-    private Servo bendyServoTwo = null;
+    
+    private Servo intake_ramp = null;
 
 
     //configurable vars
     public static int targetSpeed = 0;//launch motor speed
-    public static double targetAngle = 38;
+    public static double targetAngle = 90-38;
     public static int intake_speed = 1400;
+
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
     private ElapsedTime Timer2 = new ElapsedTime();
+    private ElapsedTime Timer3 = new ElapsedTime();
     private LaunchState launchState = null;
     private IntakeState intakeState = null;
     private Preset selectedPreset = null;
+    private CanLaunch canlaunch = null;
 
     private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
+
     private AprilTagDetection targetDetection = null;
 
     private Servo light1 = null;
     private Servo light2 = null;
+    
 
 
     @Override
@@ -118,6 +139,7 @@ public class sams_teleop extends OpMode {
         initialize_intake();
         light1 = hardwareMap.get(Servo.class, "preset light");
         light2 = hardwareMap.get(Servo.class, "launch light");
+        floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -129,6 +151,11 @@ public class sams_teleop extends OpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTagProcessor)
                 .build();
+                portal.setProcessorEnabled(aprilTagProcessor, true);
+
+
+
+        canlaunch = CanLaunch.ERROR;
     }
 
     @Override
@@ -138,8 +165,9 @@ public class sams_teleop extends OpMode {
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
             }
-            exposureControl.setExposure((long) 10, TimeUnit.MILLISECONDS);
+            exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
+
         //chaing speed
         if(gamepad1.dpadUpWasPressed()){// MAPPING
             targetSpeed += 20*(gamepad1.x ? 5 : 1); // MAPPING
@@ -168,37 +196,37 @@ public class sams_teleop extends OpMode {
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1080;
-                    targetAngle = 14;
+                    targetAngle = 90-14;
                     break;
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
                     targetSpeed = 1400;
-                    targetAngle = 31;
+                    targetAngle = 90-31;
                     break;
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
                     targetSpeed = 1720;
-                    targetAngle = 38;
+                    targetAngle = 90-38;
                     break;
                 case BACK:
                     selectedPreset = Preset.JUGGLE;
-                    targetSpeed = 500;
-                    targetAngle = 20;
+                    targetSpeed = 460;
+                    targetAngle = 90-22;
                     break;
                 case JUGGLE:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 0;
+                    targetAngle = 90-0;
                     break;
 
                 case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1080;
-                    targetAngle = 14;
+                    targetAngle = 90-14;
                     break;
             }
         }
-
+        canlaunch = CanLaunch.ERROR;
         switch (selectedPreset){
             case CUSTOM:
                 light1.setPosition(1);
@@ -219,7 +247,9 @@ public class sams_teleop extends OpMode {
                 light1.setPosition(0.722);
                 break;
         }
-        switch (canlaunch){
+        double ON_TIME = 0.5;
+        double OFF_TIME = 1;
+        switch (CanLaunch.ERROR){
             case OFF:
                 light2.setPosition(0);
                 break;
@@ -233,7 +263,16 @@ public class sams_teleop extends OpMode {
                 light2.setPosition(0.388);
                 break;
             case ERROR:
-                light2.setPosition(0.555);
+                if (Timer3.seconds() < ON_TIME) {
+                    light2.setPosition(0.277);
+                }
+                if (Timer3.seconds() > ON_TIME && Timer3.seconds() < OFF_TIME); {
+                    light2.setPosition(0);
+                }
+                if (Timer3.seconds() > OFF_TIME) {
+                    light2.setPosition(0.277);
+                    Timer3.reset();
+            }
                 break;
         }
 
@@ -246,18 +285,55 @@ public class sams_teleop extends OpMode {
                     detection = Detection;
                     telemetry.addData("detected id: ", detection.id);
                 }
-            }
-            if(detection != null){
+                // ✅ DISTANCE (in inches)
+                if (!detections.isEmpty()) {
+
+                    assert detection != null;
+                    double z = detection.ftcPose.x;   // left/right
+                    double y = detection.ftcPose.y;   // forward/back
+                    double x = detection.ftcPose.z;   // up/down
+
+                    // ✅ ROTATION (in degrees)
+                    double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
+                    double yaw = detection.ftcPose.pitch; // rotation around sideways axis
+                    double roll = detection.ftcPose.roll;  // rotation around forward axis
+
+                    telemetry.addLine("AprilTag Detected:");
+                    telemetry.addData("Distance X (in)", x);
+                    telemetry.addData("Distance Y (in)", y);
+                    telemetry.addData("Distance Z (in)", z);
+                    telemetry.addData("Yaw (deg)", yaw);
+                    telemetry.addData("Pitch (deg)", pitch);
+                    telemetry.addData("Roll (deg)", roll);
+                }else {
+                telemetry.addLine("No AprilTag detected");
+                }}
+
                 telemetry.addData("angle offset ", detection.ftcPose.z);
-            }
-            if(gamepad1.right_trigger > 0.5 && detection != null){// MAPPING
-                if(Math.abs(detection.ftcPose.z) > 0.5) {
-                    Drive(0, 0, Range.clip(detection.ftcPose.z * -0.25, -0.50, 0.50));//made -0.05 -0.10 to maybe increse speed, if broken revert value
+
+            if(gamepad1.right_trigger >= 0.2){// MAPPING
+
+                double z = detection.ftcPose.x;   // left/right
+                double y = detection.ftcPose.y;   // forward/back
+                double x = detection.ftcPose.z;   // up/down
+
+
+                double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
+                double yaw = detection.ftcPose.pitch; // rotation around sideways axis
+                double roll = detection.ftcPose.roll;
+                if(Math.abs(x) > 0.5) {
+                    X_MOVE = Range.clip(x * -0.05, -1, 1);
+                            //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
                 }
+                if (Math.abs(y-70) > 1) {
+                    Y_MOVE = Range.clip((y-70) * -0.1, -.5, .5);
+                }
+                if(Math.abs(yaw-0) > 1) {
+                    YAW_MOVE = Range.clip((yaw-0) * 0.1, -.5, .5);
+                }
+                Drive(Y_MOVE,YAW_MOVE,X_MOVE);
             }
         }
-
-
         if(targetAngle > SERVO_MAXIMUM_POSITION){
             targetAngle = SERVO_MAXIMUM_POSITION;
         } else if (targetAngle < SERVO_MINIMUM_POSITION){
@@ -266,9 +342,10 @@ public class sams_teleop extends OpMode {
         launcher.setVelocity(targetSpeed);
 
         AddTelemetry();
-        Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
+        if(!(gamepad1.right_trigger >= 0.2 && detection != null)) {
+            Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
+        }
         LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
-        RIGHT_LAUNCH_SERVO.setPosition(targetAngle/360);
         launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.5, gamepad1.left_bumper); // MAPING
 
@@ -276,6 +353,8 @@ public class sams_teleop extends OpMode {
     }
 
     private void launch(boolean launchRequested) {
+        //Launch servo objects and vars
+        double FEED_TIME_SECONDS = 0.30;
         switch  (launchState) {
             case IDLE:
                 launchState = launchRequested ? LaunchState.SPIN_UP : launchState;
@@ -309,10 +388,14 @@ public class sams_teleop extends OpMode {
     }
     private void intake(boolean intakeRequested, boolean spinRequested) {
         intakeState = IntakeState.READY;
-        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME/2 ?IntakeState.START_INTAKE : IntakeState.INTAKE): intakeState);
+        //how long the feeders spin reversse when intake starts
+        double REV_TIME = 0.5;
+        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME /2 ?IntakeState.START_INTAKE : IntakeState.INTAKE): IntakeState.READY);
+        double LAUNCH_POS = 95;
+        double REV_SPEED = -1.0;
         switch  (intakeState) {
             case READY:
-                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                intake_ramp.setPosition(LAUNCH_POS /360);
                 intake.setVelocity(0);
                 if(Current_speed == REV_SPEED){
                     Current_speed = STOP_SPEED;
@@ -328,17 +411,20 @@ public class sams_teleop extends OpMode {
                     Current_speed = REV_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
-                    //bendyServoTwo.setPosition(INTAKE_POS / 360);
+                    //intake_ramp.setPosition(INTAKE_POS / 360);
                     }
-                if(Timer2.seconds() > REV_TIME/2) {
+                if(Timer2.seconds() > REV_TIME /2) {
                     intakeState = IntakeState.INTAKE;
                 }
                 break;
 
 
             case INTAKE:
-                bendyServoTwo.setPosition(INTAKE_POS / 360);
-                intake.setVelocity(intake_speed);
+                intake_ramp.setPosition(INTAKE_POS / 360);
+                TPS_IN = intake.getVelocity();
+                IN_RPM = (TPS_IN * 60) / TPR_1640;
+                IN_TARGET_RPM = (intake_speed * TPR_1640);
+                intake.setVelocity(IN_TARGET_RPM);
 
                 if(Timer2.seconds() > REV_TIME){
                     Current_speed = STOP_SPEED;
@@ -348,25 +434,33 @@ public class sams_teleop extends OpMode {
                 break;
 
             case SPIN:
-                intake.setVelocity(spin_speed);
-                bendyServoTwo.setPosition(LAUNCH_POS/360);
+                TPS_IN = intake.getVelocity();
+                IN_RPM = (TPS_IN * 60) / TPR_1640;
+                IN_TARGET_RPM = (SPIN_SPEED * TPR_1640);
+                intake.setVelocity(IN_TARGET_RPM);
+
+                intake_ramp.setPosition(LAUNCH_POS /360);
                 break;
 
         }
     }
     private void AddTelemetry() {
+        double voltage = floodgate.getVoltage();
+        double amps = (voltage / 3.3) * 40.0;
+        double TPS_IN = intake.getVelocity();
+        IN_RPM = (TPS_IN * 60) / TPR_1640;
         telemetry.addData("Current Preset: ", selectedPreset);
         telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition()*360);
-        telemetry.addData("R Servo Position: ", RIGHT_LAUNCH_SERVO.getPosition()*360);
-        telemetry.addData("Servo 2 Position: ", bendyServoTwo.getPosition()*360);
+        telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
         telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
         telemetry.addData("current Power- launcher", launcher.getPower());
+        telemetry.addData("","");
         telemetry.addData("intake target RPM", intake_speed);
-        telemetry.addData("current INTAKE velocity", intake.getVelocity());
+        telemetry.addData("current INTAKE velocity", IN_RPM);
         telemetry.addData("current INTAKE power", intake.getPower());
         telemetry.addData("","");
         telemetry.addData("front left wheel power", frontLeftMotor.getPower());
@@ -378,6 +472,10 @@ public class sams_teleop extends OpMode {
         telemetry.addData("front right wheel speed", FR_RPM);
         telemetry.addData("back left wheel speed", BL_RPM);
         telemetry.addData("back right wheel speed", BR_RPM);
+        telemetry.addData("","");
+        telemetry.addData("Current (Amps)", "%.2f A", amps);
+        telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
+
         telemetry.update();
     }
 
@@ -402,7 +500,6 @@ public class sams_teleop extends OpMode {
     private void initialize_launcher(){
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
-        RIGHT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "right twideler");
         LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
     }
     private void initialize_feeder(){
@@ -415,28 +512,47 @@ public class sams_teleop extends OpMode {
     }
     private void initialize_intake(){
         intake = hardwareMap.get(DcMotorEx.class, "intake");
-        bendyServoTwo = hardwareMap.get(Servo.class, "bendy_servo_2");
+        intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
     }
 
 
     private void Drive(double forward, double strafe, double rotate){
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-        if(Math.abs(forward) < 0){
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate/1.5), 1);
+        if(Math.abs(forward) < 0.02){
             forward = 0;
         }
-        if(Math.abs(strafe) < 0){
+        if(Math.abs(strafe) < 0.02){
             strafe = 0;
         }
-        if(Math.abs(rotate) < 0){
+        if(Math.abs(rotate) < 0.02){
             rotate = 0;
         }
+        if(forward < -1){
+            forward = -1;
+        }
+        if(strafe < -1){
+            strafe = -1;
+        }
+        if(rotate < -1) {
+            rotate = -1;
+        }
+        if(forward > 1){
+            forward = 1;
+        }
+        if(strafe > 1){
+            strafe = 1;
+        }
+        if(rotate > 1) {
+            rotate = 1;
+        }
+        rotate = Math.pow(rotate,3);
         if (gamepad1.right_stick_button) {
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 150;
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
         else{
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 400;
 
         }
         double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
@@ -486,7 +602,7 @@ public class sams_teleop extends OpMode {
         BACK,
         OFF
     }
-    private enum canlaunch {
+    private enum CanLaunch {
         OFF,//LIGHT will be off,
         READY,//GREEN, RPM in range and AMPS not to high, intake off, everything is correct
         NOT_READY,//RED: if intake or RMP is wrong

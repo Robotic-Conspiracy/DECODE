@@ -133,7 +133,7 @@ public abstract class back_line_auto_main extends OpMode {
 
                         AprilTagDetection detectionRed = null;
                         AprilTagDetection detectionBlue = null;
-                        double detectionpatern = null;
+                        double detectionpattern = 0;
                         if (Math.abs(pod.getPosY(DistanceUnit.MM)) < 25 && Math.abs(pod.getPosX(DistanceUnit.MM)) < 25 ) {
                             move();
                         }else if (detections.isEmpty()){
@@ -150,13 +150,13 @@ public abstract class back_line_auto_main extends OpMode {
                                         detectionBlue = Detection;
                                     }
                                     if (Detection.id == 21) {
-                                        detectionpatern = 2;
+                                        detectionpattern = 2;
                                     }
                                     if (Detection.id == 22) {
-                                        detectionpatern = 1;
+                                        detectionpattern = 1;
                                     }
                                     if (Detection.id == 23) {
-                                        detectionpatern = 0;
+                                        detectionpattern = 0;
                                     }
                                 }
 
@@ -170,15 +170,15 @@ public abstract class back_line_auto_main extends OpMode {
                                         drive(0, 0, Range.clip(detectionBlue.ftcPose.z * -0.05, -0.15, 0.15));
                                         //1*|offset|/15
                                     } else {
-                                        if (detectionpatern > 0){
+                                        if (detectionpattern > 0){
                                             targetVelocity = 540;
                                             angleThing.setPosition(62/360.0);
                                             drive(0, 0, 0);
                                             state = states.SPIN_UP;
-                                            detectionpattern -= 1
+                                            detectionpattern -= 1;
                                         }
-                                        if (detectionpatern <= 0){
-                                            targetVelocity = 1660
+                                        if (detectionpattern <= 0){
+                                            targetVelocity = 1660;
                                             angleThing.setPosition(56/360.0);
                                             state = states.SPIN_UP;
                                             drive(0, 0, 0);
