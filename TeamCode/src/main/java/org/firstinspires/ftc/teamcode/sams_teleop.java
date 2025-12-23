@@ -40,7 +40,7 @@ public class sams_teleop extends OpMode {
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 90;
-    public final double INTAKE_POS = .85; // .87MAX
+    public final double INTAKE_POS = .84; // .87MAX
     public final int SPIN_SPEED = -500;
     private double Current_speed = STOP_SPEED;
     double TPS_IN = 0;
@@ -104,9 +104,9 @@ public class sams_teleop extends OpMode {
 
 
     //configurable vars
-    public static int targetSpeed = 0;//launch motor speed
+    public static int targetSpeed = 1680;//launch motor speed
     public static double targetAngle = 90-38;
-    public static int intake_speed = 1400;
+    public static int intake_speed = 1200;
 
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
@@ -141,7 +141,7 @@ public class sams_teleop extends OpMode {
         light1 = hardwareMap.get(Servo.class, "preset light");
         light2 = hardwareMap.get(Servo.class, "launch light");
         floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
-        intake_ramp.setPosition(INTAKE_RAMP_POS);
+
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -197,22 +197,22 @@ public class sams_teleop extends OpMode {
             switch(selectedPreset){
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1080;
-                    targetAngle = 90-14;
+                    targetSpeed = 1500;
+                    targetAngle = 90-17;
                     break;
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
-                    targetSpeed = 1400;
-                    targetAngle = 90-33;
+                    targetSpeed = 1980;
+                    targetAngle = 90-37;
                     break;
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
-                    targetSpeed = 1720;
+                    targetSpeed = 2360;
                     targetAngle = 90-38;
                     break;
                 case BACK:
                     selectedPreset = Preset.JUGGLE;
-                    targetSpeed = 460;
+                    targetSpeed = 660;
                     targetAngle = 90-22;
                     break;
                 case JUGGLE:
@@ -300,18 +300,18 @@ public class sams_teleop extends OpMode {
                     double yaw = detection.ftcPose.pitch; // rotation around sideways axis
                     double roll = detection.ftcPose.roll;  // rotation around forward axis
 
-                    telemetry.addLine("AprilTag Detected:");
-                    telemetry.addData("Distance X (in)", x);
-                    telemetry.addData("Distance Y (in)", y);
-                    telemetry.addData("Distance Z (in)", z);
-                    telemetry.addData("Yaw (deg)", yaw);
-                    telemetry.addData("Pitch (deg)", pitch);
-                    telemetry.addData("Roll (deg)", roll);
+                    //telemetry.addLine("AprilTag Detected:");
+                    //telemetry.addData("Distance X (in)", x);
+                    //telemetry.addData("Distance Y (in)", y);
+                    //telemetry.addData("Distance Z (in)", z);
+                    //telemetry.addData("Yaw (deg)", yaw);
+                    //telemetry.addData("Pitch (deg)", pitch);
+                    //telemetry.addData("Roll (deg)", roll);
                 }else {
-                telemetry.addLine("No AprilTag detected");
+                //telemetry.addLine("No AprilTag detected");
                 }}
 
-                telemetry.addData("angle offset ", detection.ftcPose.z);
+                //telemetry.addData("angle offset ", detection.ftcPose.z);
 
             if(gamepad1.right_trigger >= 0.2){// MAPPING
 
@@ -353,15 +353,16 @@ public class sams_teleop extends OpMode {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
         LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
+
         launch(gamepad1.rightBumperWasPressed());// MAPPING
-        intake(gamepad1.left_trigger > 0.5, gamepad1.left_bumper); // MAPING
+        intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPING
 
 
     }
 
     private void launch(boolean launchRequested) {
         //Launch servo objects and vars
-        double FEED_TIME_SECONDS = 0.75;
+        double FEED_TIME_SECONDS = 0.15;
         switch  (launchState) {
             case IDLE:
                 launchState = launchRequested ? LaunchState.SPIN_UP : launchState;
@@ -388,6 +389,7 @@ public class sams_teleop extends OpMode {
                     Current_speed = STOP_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
+
                 }
                 break;
 
@@ -429,9 +431,9 @@ public class sams_teleop extends OpMode {
 
             case INTAKE:
                 intake_ramp.setPosition(INTAKE_POS);
-                TPS_IN = intake.getVelocity();
-                IN_RPM = (TPS_IN * 60) / TPR_1640;
-                IN_TARGET_RPM = (intake_speed * TPR_1640);
+                IN_RPM = intake.getVelocity();
+
+                IN_TARGET_RPM = (intake_speed);
                 intake.setVelocity(IN_TARGET_RPM);
 
                 if(Timer2.seconds() > REV_TIME){
@@ -442,9 +444,8 @@ public class sams_teleop extends OpMode {
                 break;
 
             case SPIN:
-                TPS_IN = intake.getVelocity();
-                IN_RPM = (TPS_IN * 60) / TPR_1640;
-                IN_TARGET_RPM = (SPIN_SPEED * TPR_1640);
+                IN_RPM = intake.getVelocity();
+                IN_TARGET_RPM = (SPIN_SPEED);
                 intake.setVelocity(IN_TARGET_RPM);
 
                 intake_ramp.setPosition(LAUNCH_POS /360);
