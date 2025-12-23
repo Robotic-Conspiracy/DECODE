@@ -1,2 +1,3 @@
-# Adding Codeowners to require reviews from another coder before pushing to main
-* @Robotic-Conspiracy/Coders
+# Adding Codeowners to require reviews from another coder or mentor on protected branches
+
+* @Robotic-Conspiracy/Coders @Robotic-Conspiracy/Mentors
