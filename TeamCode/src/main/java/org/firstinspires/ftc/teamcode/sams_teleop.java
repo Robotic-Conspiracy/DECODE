@@ -352,9 +352,27 @@ public class sams_teleop extends OpMode {
         if(!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b) ) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
+        boolean LRB = false;
+        long LAST_FIRE_TIME = 0;
+        long FIRE_INTRRVAL = 500;
+        boolean RB = gamepad1.right_bumper;
+        long now = System.currentTimeMillis();
 
+        // --- FIRE ONCE WHEN PRESSED ---
+        if (RB && !LRB) {
+            launch(true);
+            LAST_FIRE_TIME = now;
+        }
 
-        launch(gamepad1.rightBumperWasPressed());// MAPPING
+        // --- CONTINUOUS FIRE WHEN HELD ---
+        if (RB && (now - LAST_FIRE_TIME > FIRE_INTRRVAL)) {
+            launch(true);
+            LAST_FIRE_TIME = now;
+        }
+
+        LRB = RB;
+
+        //launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPING
 
 
@@ -371,7 +389,7 @@ public class sams_teleop extends OpMode {
             case SPIN_UP:
 
                 double velocity = launcher.getVelocity();
-                if(velocity >= targetSpeed -20 && velocity <= targetSpeed +20){
+                if(velocity >= targetSpeed -60 && velocity <= targetSpeed +60){
                     launchState = LaunchState.LAUNCH;
                 }
                 break;
@@ -398,12 +416,13 @@ public class sams_teleop extends OpMode {
     private void intake(boolean intakeRequested, boolean spinRequested) {
         intakeState = IntakeState.READY;
         //how long the feeders spin reversse when intake starts
-        double REV_TIME = 0.5;
-        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME /2 ?IntakeState.START_INTAKE : IntakeState.INTAKE): IntakeState.READY);
+        double REV_TIME = 1;
+        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME ? IntakeState.START_INTAKE : IntakeState.INTAKE): IntakeState.READY);
         double LAUNCH_POS = 0.61;
         double REV_SPEED = -1.0;
         switch  (intakeState) {
             case READY:
+                Timer2.reset();
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
                 //intake_ramp.setPosition(INTAKE_RAMP_POS);
                 intake_ramp.setPosition(LAUNCH_POS);
@@ -417,8 +436,7 @@ public class sams_teleop extends OpMode {
                 break;
 
             case START_INTAKE:
-                if (Current_speed != REV_SPEED) {
-                    Timer2.reset();
+                if (Current_speed != REV_SPEED && !(Timer2.seconds() > REV_TIME)) {
                     Current_speed = REV_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
