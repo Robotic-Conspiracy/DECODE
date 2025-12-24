@@ -63,14 +63,14 @@ public class sams_teleop extends OpMode {
     private double roll = 0;
     private double pitch = 0;
     private double yaw = 0;
-    private static double FL_MAX_RPM = 400;
-    private static double FR_MAX_RPM = 400;
-    private static double BL_MAX_RPM = 400;
-    private static double BR_MAX_RPM = 400;
+    private static double FL_MAX_RPM = 435;
+    private static double FR_MAX_RPM = 435;
+    private static double BL_MAX_RPM = 435;
+    private static double BR_MAX_RPM = 435;
     private final double TPR_435 = 384.5;
     public static double INTAKE_RAMP_POS = .8;
     private final double TPR_6k = 28;
-    private final double TPR_1640 = 145.6;
+    private final double TPR_1620 = 103.8;
 //    //double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
 //    //double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
 //    //double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
@@ -106,7 +106,7 @@ public class sams_teleop extends OpMode {
     //configurable vars
     public static int targetSpeed = 1680;//launch motor speed
     public static double targetAngle = 90-38;
-    public static int intake_speed = 1200;
+    public static int INTAKE_SPEED = 900;
 
     // other vars and objects
     private ElapsedTime Timer = new ElapsedTime();
@@ -223,7 +223,7 @@ public class sams_teleop extends OpMode {
 
                 case OFF:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1080;
+                    targetSpeed = 1500;
                     targetAngle = 90-14;
                     break;
             }
@@ -352,7 +352,7 @@ public class sams_teleop extends OpMode {
         if(!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b) ) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
-        LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
+
 
         launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPING
@@ -404,6 +404,7 @@ public class sams_teleop extends OpMode {
         double REV_SPEED = -1.0;
         switch  (intakeState) {
             case READY:
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
                 //intake_ramp.setPosition(INTAKE_RAMP_POS);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
@@ -423,18 +424,22 @@ public class sams_teleop extends OpMode {
                     rightFeeder.setPower(Current_speed);
                     //intake_ramp.setPosition(INTAKE_POS / 360);
                     }
-                if(Timer2.seconds() > REV_TIME /2) {
+                if(Timer2.seconds() > REV_TIME) {
                     intakeState = IntakeState.INTAKE;
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
                 }
                 break;
 
 
             case INTAKE:
                 intake_ramp.setPosition(INTAKE_POS);
-                IN_RPM = intake.getVelocity();
+                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
 
-                IN_TARGET_RPM = (intake_speed);
+                IN_TARGET_RPM = ((INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
+                LEFT_LAUNCH_SERVO.setPosition(0);
 
                 if(Timer2.seconds() > REV_TIME){
                     Current_speed = STOP_SPEED;
@@ -444,8 +449,9 @@ public class sams_teleop extends OpMode {
                 break;
 
             case SPIN:
-                IN_RPM = intake.getVelocity();
-                IN_TARGET_RPM = (SPIN_SPEED);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
+                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
+                IN_TARGET_RPM = ((SPIN_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
 
                 intake_ramp.setPosition(LAUNCH_POS /360);
@@ -456,8 +462,9 @@ public class sams_teleop extends OpMode {
     private void AddTelemetry() {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
-        double TPS_IN = intake.getVelocity();
-        IN_RPM = (TPS_IN * 60) / TPR_1640;
+        IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
+
+        telemetry.addData("Current (Amps)", "%.2f A", amps);
         telemetry.addData("Current Preset: ", selectedPreset);
         telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
@@ -468,7 +475,7 @@ public class sams_teleop extends OpMode {
         telemetry.addData("current velocity", launcher.getVelocity());
         telemetry.addData("current Power- launcher", launcher.getPower());
         telemetry.addData("","");
-        telemetry.addData("intake target RPM", intake_speed);
+        telemetry.addData("intake target RPM", INTAKE_SPEED);
         telemetry.addData("current INTAKE velocity", IN_RPM);
         telemetry.addData("current INTAKE power", intake.getPower());
         telemetry.addData("","");
@@ -562,7 +569,7 @@ public class sams_teleop extends OpMode {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
         else{
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 400;
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
 
         }
         double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec

@@ -15,9 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 // Constants for 28139-A-RC (aka "Bot 2")
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(9.07185)//must be in kg
-            .forwardZeroPowerAcceleration(-24.21937016587423)
-            .lateralZeroPowerAcceleration(-40.852422414063504);
+            .mass(14.06)//must be in kg
+            .forwardZeroPowerAcceleration(-18.348)
+            .lateralZeroPowerAcceleration(-30.201);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
@@ -31,18 +31,17 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(41.7093505859375)
-            .yVelocity(33.222950131874384);
-
+            .xVelocity(74.542)
+            .yVelocity(64.375);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(6)
-            .strafePodX(-4.5)
+            .forwardPodY(1.375)
+            .strafePodX(-4.25)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("odometry")
-            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
-            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+            //.strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)
