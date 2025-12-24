@@ -20,13 +20,17 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.concurrent.TimeUnit;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.opencv.core.Mat;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
@@ -34,10 +38,11 @@ import java.util.List;
 
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
 @Config
-@TeleOp(name = "Main Solo Op")
-public class sams_teleop extends OpMode {
 
-
+@TeleOp(name = "Main Solo Op - run color")
+public class solo_op_MAIN extends OpMode {
+    protected String color = "None";
+    GoBildaPinpointDriver pinpoint;
 
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
@@ -67,10 +72,10 @@ public class sams_teleop extends OpMode {
     private double roll = 0;
     private double pitch = 0;
     private double yaw = 0;
-    private static double FL_MAX_RPM = 435;
-    private static double FR_MAX_RPM = 435;
-    private static double BL_MAX_RPM = 435;
-    private static double BR_MAX_RPM = 435;
+    private double FL_MAX_RPM = 435;
+    private double FR_MAX_RPM = 435;
+    private double BL_MAX_RPM = 435;
+    private double BR_MAX_RPM = 435;
     private final double TPR_435 = 384.5;
     public static double INTAKE_RAMP_POS = .8;
     private final double TPR_6k = 28;
@@ -142,6 +147,7 @@ public class sams_teleop extends OpMode {
         initialize_feeder();
         initialize_launcher();
         initialize_intake();
+        initialize_pinpoint();
         light1 = hardwareMap.get(Servo.class, "preset light");
         light2 = hardwareMap.get(Servo.class, "launch light");
         floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
@@ -280,6 +286,77 @@ public class sams_teleop extends OpMode {
                     Timer3.reset();
             }
                 break;
+        }
+        if (pinpoint == null) {
+            telemetry.addData("Pinpoint", "null - check hardware name in robot config (expected 'odometry')");
+        } else {
+            telemetry.addData("Pinpoint class", pinpoint.getClass().getName());
+            java.lang.reflect.Method[] methods = pinpoint.getClass().getMethods();
+            int shown = 0;
+            boolean foundPose = false;
+
+            for (java.lang.reflect.Method m : methods) {
+                if (shown >= 20) break; // avoid flooding telemetry
+                if (m.getParameterCount() != 0) continue; // only try no-arg methods
+                if (m.getReturnType() == void.class) continue;
+
+                String mName = m.getName();
+                try {
+                    Object ret = m.invoke(pinpoint);
+                    String retStr = (ret == null) ? "null" : ret.getClass().getName();
+                    telemetry.addData("method", "%s -> %s", mName, retStr);
+                    shown++;
+
+                    if (ret != null && !foundPose) {
+                        // try fields x,y
+                        try {
+                            java.lang.reflect.Field fx = ret.getClass().getField("x");
+                            java.lang.reflect.Field fy = ret.getClass().getField("y");
+                            double px = ((Number) fx.get(ret)).doubleValue();
+                            double py = ((Number) fy.get(ret)).doubleValue();
+                            telemetry.addData("Pose from %s", mName);
+                            telemetry.addData("X", "%.2f", px);
+                            telemetry.addData("Y", "%.2f", py);
+                            foundPose = true;
+                            break;
+                        } catch (Exception ignored) { }
+
+                        // try getters getX/getY
+                        try {
+                            java.lang.reflect.Method gx = ret.getClass().getMethod("getX");
+                            java.lang.reflect.Method gy = ret.getClass().getMethod("getY");
+                            double px = ((Number) gx.invoke(ret)).doubleValue();
+                            double py = ((Number) gy.invoke(ret)).doubleValue();
+                            telemetry.addData("Pose from %s", mName);
+                            telemetry.addData("X", "%.2f", px);
+                            telemetry.addData("Y", "%.2f", py);
+                            foundPose = true;
+                            break;
+                        } catch (Exception ignored) { }
+
+                        // try x()/y() methods
+                        try {
+                            java.lang.reflect.Method mx = ret.getClass().getMethod("x");
+                            java.lang.reflect.Method my = ret.getClass().getMethod("y");
+                            double px = ((Number) mx.invoke(ret)).doubleValue();
+                            double py = ((Number) my.invoke(ret)).doubleValue();
+                            telemetry.addData("Pose from %s", mName);
+                            telemetry.addData("X", "%.2f", px);
+                            telemetry.addData("Y", "%.2f", py);
+                            foundPose = true;
+                            break;
+                        } catch (Exception ignored) { }
+                    }
+                } catch (Exception e) {
+                    telemetry.addData("method", "%s -> ERROR %s", mName, e.getClass().getSimpleName());
+                    shown++;
+                }
+            }
+
+            if (!foundPose) {
+                telemetry.addData("Pinpoint", "pose not available - no usable no-arg method returned x/y");
+                telemetry.addData("Hints", "Check hardware name, call sequences, or API docs for this driver");
+            }
         }
 
 
@@ -556,7 +633,23 @@ public class sams_teleop extends OpMode {
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
     }
+    private void initialize_pinpoint(){
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
 
+        double FORWARD_OFFSET = 1.375;
+        double LATERAL_OFFSET = -4.25;
+
+
+        GoBildaPinpointDriver.GoBildaOdometryPods pods = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+
+        GoBildaPinpointDriver.EncoderDirection forwardDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        GoBildaPinpointDriver.EncoderDirection lateralDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+
+        pinpoint.setOffsets(FORWARD_OFFSET, LATERAL_OFFSET, DistanceUnit.INCH);
+        pinpoint.setEncoderResolution(pods);
+        pinpoint.setEncoderDirections(forwardDirection, lateralDirection);
+        pinpoint.initialize();
+    }
 
     private void Drive(double forward, double strafe, double rotate){
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate/1.5), 1);
