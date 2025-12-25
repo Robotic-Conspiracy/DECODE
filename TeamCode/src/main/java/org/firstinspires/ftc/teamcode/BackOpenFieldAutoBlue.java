@@ -103,6 +103,11 @@ public class BackOpenFieldAutoBlue extends OpMode {
 
     private int pathState;
 
+    // stabilization timer used after finishing the rotate-to-intake path
+    private ElapsedTime stabilizeTimer = new ElapsedTime();
+    private boolean stabilizeStarted = false;
+    private final double STABILIZE_SECONDS = 0.3; // pause after rotation to let robot settle
+
     private final Pose startPose = new Pose(56, 8, Math.toRadians(90)); // Start Pose of our robot.
     private final Pose scorePoseMid = new Pose(60, 83, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose scorePoseBack = new Pose(56, 12, Math.toRadians(113));
@@ -114,6 +119,9 @@ public class BackOpenFieldAutoBlue extends OpMode {
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
     // new helper paths for approaching intake after launch
     private PathChain advanceToPrePickup, prePickupToIntake;
+    // pre-pickup pose and offset (in inches) to give margin for error
+    private Pose prePickupPose;
+    private final double PRE_PICKUP_OFFSET = 30.0; // inches margin
     private double Current_speed = STOP_SPEED;
     // flag to indicate an in-progress launch cycle (shots in progress)
     private boolean launchingNow = false;
@@ -123,8 +131,8 @@ public class BackOpenFieldAutoBlue extends OpMode {
         scorePreload = new Path(new BezierLine(startPose, scorePoseBack));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePoseBack.getHeading());
 
-        // compute a pre-pickup pose: same Y as pickup1, X offset 10 inches toward the robot's side
-        Pose prePickupPose = new Pose(pickup1Pose.getX() + 10.0, pickup1Pose.getY(), scorePoseBack.getHeading());
+        // compute a pre-pickup pose: same Y as pickup1, X offset PRE_PICKUP_OFFSET inches toward the robot's side
+        prePickupPose = new Pose(pickup1Pose.getX() + PRE_PICKUP_OFFSET, pickup1Pose.getY(), scorePoseBack.getHeading());
 
         // Path: advance from scoring pose to a position 10" to the side of the pickup and aligned in Y
         advanceToPrePickup = follower.pathBuilder()
@@ -249,19 +257,54 @@ public class BackOpenFieldAutoBlue extends OpMode {
             nextPathState = 11;
             break;
             case 11:
-                // drive forward from scoring position to the pre-pickup coordinate (y aligned, x offset by 10")
+                // drive forward from scoring position to the pre-pickup coordinate (y aligned, x offset by PRE_PICKUP_OFFSET)
                 if (!follower.isBusy()) {
+                    // telemetry so you can confirm the computed pre-pickup position
+                    telemetry.addData("prePickupX", prePickupPose.getX());
+                    telemetry.addData("prePickupY", prePickupPose.getY());
+                    telemetry.addData("prePickupHeadingDeg", Math.toDegrees(prePickupPose.getHeading()));
+                    telemetry.update();
                     follower.followPath(advanceToPrePickup, true);
                     pathState = 12;
                 }
                 break;
             case 12:
-                // once at pre-pickup pose, rotate/drive into the pickup pose facing 180 degrees and then go to intake
+                // once at pre-pickup pose start the rotate/drive-to-intake path that ends facing 180°
                 if (!follower.isBusy()) {
                     follower.followPath(prePickupToIntake, true);
-                    // after reaching the intake approach we transition into the intake state (case 4)
-                    pathState = 4;
-                    nextPathState = 6; // keep existing sequence behaviour (after intake go to grabPickup1/scorePickup1 ...)
+                    // move to a short wait state so we don't immediately enter the intake logic
+                    pathState = 13; // wait for this path to complete
+                    // ensure stabilization flag is cleared when starting the path
+                    stabilizeStarted = false;
+                    // preserve where to go after intake
+                    nextPathState = 6; // keep existing sequence behaviour
+                }
+                break;
+
+            case 13:
+                // wait for the rotate/drive-to-intake path to finish, then enter the intake state
+                if (!follower.isBusy()) {
+                    // when the follower reports finished, start stabilize timer once
+                    if (!stabilizeStarted) {
+                        stabilizeTimer.reset();
+                        stabilizeStarted = true;
+                        double headingDeg = Math.toDegrees(follower.getPose().getHeading());
+                        telemetry.addData("post-rot heading deg", headingDeg);
+                        telemetry.addData("stabilize", "starting");
+                        telemetry.update();
+                    } else {
+                        // wait until stabilization time has elapsed
+                        if (stabilizeTimer.seconds() >= STABILIZE_SECONDS) {
+                            stabilizeStarted = false;
+                            telemetry.addData("stabilize", "done");
+                            telemetry.update();
+                            // now that we've completed the path and paused, go to intake
+                            pathState = 4;
+                        } else {
+                            telemetry.addData("stabilize_time", stabilizeTimer.seconds());
+                            telemetry.update();
+                        }
+                    }
                 }
                 break;
             case 2:
