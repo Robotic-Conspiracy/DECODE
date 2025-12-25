@@ -16,10 +16,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -28,19 +30,36 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Blue 12 ball -- no sort")
 public class BackOpenFieldAutoBlue extends OpMode {
     public static Follower follower;
+    double LAUNCH_POS = 0.61;
     private ElapsedTime feedTimer = new ElapsedTime();
     private ElapsedTime waitTimer = new ElapsedTime();
     private int nextPathState = 0;
     private int timesShot = 0;
+    double X_MOVE = 0;
+    private final double TPR_435 = 384.5;
+    double FL_RPM = 0;
+    double FR_RPM = 0;
+    double BL_RPM = 0;
+    double BR_RPM = 0;
+    double IN_RPM = 0;
     public final double INTAKE_POS = .84; // .87MAX
     public final int SPIN_SPEED = -500;
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
+    private double FL_MAX_RPM = 435;
+    private double FR_MAX_RPM = 435;
+    private double BL_MAX_RPM = 435;
+    private double BR_MAX_RPM = 435;
+    private DcMotorEx frontLeftMotor = null;
+    private DcMotorEx backLeftMotor = null;
+    private DcMotorEx frontRightMotor = null;
+    private DcMotorEx backRightMotor = null;
     private final double SERVO_MINIMUM_POSITION = 0;
     private final double SERVO_MAXIMUM_POSITION = 90;
     private final double TPR_1620 = 103.8;
@@ -61,9 +80,9 @@ public class BackOpenFieldAutoBlue extends OpMode {
     private ElapsedTime Timer = new ElapsedTime();
     private ElapsedTime Timer2 = new ElapsedTime();
     private ElapsedTime Timer3 = new ElapsedTime();
-    private LaunchState launchState = null;
+
     private solo_op_MAIN.IntakeState intakeState = null;
-    private Preset selectedPreset = null;
+
     private solo_op_MAIN.CanLaunch canlaunch = null;
     AnalogInput floodgate;
     private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
@@ -93,12 +112,31 @@ public class BackOpenFieldAutoBlue extends OpMode {
 
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
+    // new helper paths for approaching intake after launch
+    private PathChain advanceToPrePickup, prePickupToIntake;
     private double Current_speed = STOP_SPEED;
+    // flag to indicate an in-progress launch cycle (shots in progress)
+    private boolean launchingNow = false;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
         scorePreload = new Path(new BezierLine(startPose, scorePoseBack));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePoseBack.getHeading());
+
+        // compute a pre-pickup pose: same Y as pickup1, X offset 10 inches toward the robot's side
+        Pose prePickupPose = new Pose(pickup1Pose.getX() + 10.0, pickup1Pose.getY(), scorePoseBack.getHeading());
+
+        // Path: advance from scoring pose to a position 10" to the side of the pickup and aligned in Y
+        advanceToPrePickup = follower.pathBuilder()
+                .addPath(new BezierLine(scorePoseBack, prePickupPose))
+                .setLinearHeadingInterpolation(scorePoseBack.getHeading(), prePickupPose.getHeading())
+                .build();
+
+        // Path: from the pre-pickup pose rotate/drive to the pickup pose while facing 180 degrees (intake heading)
+        prePickupToIntake = follower.pathBuilder()
+                .addPath(new BezierLine(prePickupPose, pickup1Pose))
+                .setLinearHeadingInterpolation(prePickupPose.getHeading(), Math.toRadians(180.0))
+                .build();
 
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
@@ -205,16 +243,185 @@ public class BackOpenFieldAutoBlue extends OpMode {
     public void auton_path_update(){
         switch (pathState) {
         case 1:
-            follower.followPath(scorePreload);
+            follower.followPath(scorePreload,true);
             pathState = 2;
-            nextPathState = 3;
+            // after scoring/aiming+launch we will first advance to a pre-pickup approach sequence
+            nextPathState = 11;
             break;
+            case 11:
+                // drive forward from scoring position to the pre-pickup coordinate (y aligned, x offset by 10")
+                if (!follower.isBusy()) {
+                    follower.followPath(advanceToPrePickup, true);
+                    pathState = 12;
+                }
+                break;
+            case 12:
+                // once at pre-pickup pose, rotate/drive into the pickup pose facing 180 degrees and then go to intake
+                if (!follower.isBusy()) {
+                    follower.followPath(prePickupToIntake, true);
+                    // after reaching the intake approach we transition into the intake state (case 4)
+                    pathState = 4;
+                    nextPathState = 6; // keep existing sequence behaviour (after intake go to grabPickup1/scorePickup1 ...)
+                }
+                break;
             case 2:
-                if(!follower.isBusy()) {
-                    launch();
+                intake_ramp.setPosition(LAUNCH_POS);
+                intake.setVelocity(0);
+                LEFT_LAUNCH_SERVO.setPosition(.2);
 
+                // get the latest april tag detection (choose the relevant id if needed)
+                List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+                AprilTagDetection detection = null;
+                for (AprilTagDetection d : detections) {
+                    if (d.id == 20) {
+                        detection = d;
+                        break;
+                    }
                 }
 
+                // compute angle offset from the detection (use yaw from the detection.ftcPose which is in degrees)
+                double angleOffsetRad = 0.0;
+                double yawDeg = 0.0;
+                if (detection != null) {
+                    // use yaw (degrees) to compute heading offset
+                    yawDeg = detection.ftcPose.yaw;
+                    angleOffsetRad = Math.toRadians(yawDeg);
+                }
+
+                // build a temporary PathChain from current robot pose to the scoring pose with adjusted final heading
+                Pose current = follower.getPose();
+                Pose target = scorePoseBack;
+
+                PathChain dynamicScore = follower.pathBuilder()
+                        .addPath(new BezierLine(current, target))
+                        .setLinearHeadingInterpolation(current.getHeading(), target.getHeading() + angleOffsetRad)
+                        .build();
+
+                // start the aiming path only if the follower isn't already following something
+                if (!follower.isBusy()) {
+                    follower.followPath(dynamicScore, true);
+                }
+
+                // go to wait/verify state so we can check alignment before launching
+                pathState = 3;
+
+                break;
+            case 3:
+                // wait for the aiming path to complete; when finished, check tag alignment and either launch or re-aim
+                if(!follower.isBusy()) {
+                    // get newest detection
+                    List<AprilTagDetection> detections2 = aprilTagProcessor.getDetections();
+                    AprilTagDetection detection2 = null;
+                    for (AprilTagDetection d : detections2) {
+                        if (d.id == 20) {
+                            detection2 = d;
+                            break;
+                        }
+                    }
+
+                    boolean aligned = false;
+
+                    if (detection2 != null) {
+                        double yawDeg2 = detection2.ftcPose.yaw; // degrees
+                        telemetry.addData("tag yaw deg", yawDeg2);
+
+                        // if tag is within 5 degrees of center, consider aligned
+                        if (Math.abs(yawDeg2) <= 5.0) {
+                            aligned = true;
+                        } else {
+                            // re-aim: build a short path to correct heading and follow it
+                            double reaimOffset = Math.toRadians(yawDeg2);
+                            Pose cur = follower.getPose();
+                            Pose tgt = scorePoseBack;
+                            PathChain reaimPath = follower.pathBuilder()
+                                    .addPath(new BezierLine(cur, tgt))
+                                    .setLinearHeadingInterpolation(cur.getHeading(), tgt.getHeading() + reaimOffset)
+                                    .build();
+                            follower.followPath(reaimPath, true);
+
+                            // stay in state 3 to wait for the re-aim to finish
+                            pathState = 3;
+                        }
+                    } else {
+                        // if no tag found, proceed (optional: you can choose to retry instead)
+                        telemetry.addData("tag", "not found - launching anyway");
+                        aligned = true;
+                    }
+
+                    if (aligned) {
+                        // start the launch sequence only once
+                        if (!launchingNow) {
+                            launchingNow = true;
+                            timesShot = 0;            // reset shot counter for this cycle
+                            feedTimer.reset();       // ensure feed timing starts fresh
+                            waitTimer.reset();       // ensure the wait timer enforces the delay before first shot
+                            telemetry.addData("launching", "start");
+                        }
+
+                        // call launch() repeatedly until it increments timesShot to timesToShoot
+                        launch();
+
+                        // once finished, clear the flag and advance
+                        if (timesShot >= timesToShoot) {
+                            launchingNow = false;
+                            telemetry.addData("launching", "done");
+                            pathState = nextPathState;
+                        }
+                    }
+                }
+                break;
+            case 4://intake
+                intake_ramp.setPosition(INTAKE_POS);
+                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60);
+                IN_TARGET_RPM = ((INTAKE_SPEED / 60) * TPR_1620);
+                intake.setVelocity(IN_TARGET_RPM);
+                LEFT_LAUNCH_SERVO.setPosition(.2);
+                //LEFT_LAUNCH_SERVO.setPosition(0);
+                pathState = nextPathState;
+                break;
+            case 5:
+                if(!follower.isBusy()) {
+                    follower.followPath(grabPickup1, true);
+                    pathState = 4;
+                    nextPathState = 6;
+                }
+                break;
+            case 6:
+                if(!follower.isBusy()) {
+                    follower.followPath(scorePickup1, true);
+                    pathState = 2;
+                    nextPathState = 7;
+                }
+                break;
+            case 7:
+                if(!follower.isBusy()) {
+                    follower.followPath(grabPickup2, true);
+                    pathState = 4;
+                    nextPathState = 8;
+                }
+                break;
+            case 8:
+                if(!follower.isBusy()) {
+                    follower.followPath(scorePickup2, true);
+                    pathState = 2;
+                    nextPathState = 9;
+                }
+                break;
+            case 9:
+                if(!follower.isBusy()) {
+                    follower.followPath(grabPickup3, true);
+                    pathState = 4;
+                    nextPathState = 10;
+                }
+                break;
+            case 10:
+                if(!follower.isBusy()) {
+                    follower.followPath(scorePickup3, true);
+                    pathState = 2;
+                    nextPathState = 0;
+                }
+                break;
+                //grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
 
 
 
@@ -225,33 +432,34 @@ public class BackOpenFieldAutoBlue extends OpMode {
     /** These change the states of the paths and actions. It will also reset the timers of the individual switches **/
 
     private void launch() {
-        //Launch servo objects and vars
         double FEED_TIME_SECONDS = 0.15;
-        if (timesShot <= timesToShoot) {
-            if (feedTimer.seconds() > 0.15) {
-                double velocity = launcher.getVelocity();
-                if(velocity >= targetSpeed -200 && velocity <= targetSpeed +200){
-                    Current_speed = FULL_SPEED;
-                    leftFeeder.setPower(Current_speed);
-                    rightFeeder.setPower(Current_speed);
-                    Timer.reset();
-                    if(Timer.seconds() > FEED_TIME_SECONDS){
-                        Current_speed = STOP_SPEED;
-                        leftFeeder.setPower(Current_speed);
-                        rightFeeder.setPower(Current_speed);
 
-                    }
-                }
-                leftFeeder.setPower(0);
-                rightFeeder.setPower(0);
+        // If we've already shot enough for this launch call, do nothing
+        if (timesShot >= timesToShoot) {
+            return;
+        }
+
+        double velocity = launcher.getVelocity();
+
+        // Only start a feed cycle when launcher is up to speed and wait timer elapsed
+        if ((velocity >= targetSpeed - 200 && velocity <= targetSpeed + 200) && waitTimer.seconds() > 0.5) {
+            // Start feeding only if not already feeding
+            if (Current_speed != FULL_SPEED) {
+                Current_speed = FULL_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
+                feedTimer.reset(); // start timing the feed pulse once
+            }
+
+            // Stop feeding after FEED_TIME_SECONDS and count the shot
+            if (feedTimer.seconds() > FEED_TIME_SECONDS) {
+                Current_speed = STOP_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
                 timesShot += 1;
-                feedTimer.reset();
+                waitTimer.reset(); // enforce delay before next shot cycle
             }
-            if (timesShot >= timesToShoot) {
-                pathState = nextPathState;
-
-            }
-            }
+        }
 
     }
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
@@ -264,39 +472,8 @@ public class BackOpenFieldAutoBlue extends OpMode {
             }
             exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
         }
-            selectedPreset = Preset.BACK;
-            switch (selectedPreset) {
-                case CUSTOM:
 
-                    targetSpeed = 1500;
-                    targetAngle = 90 - 17;
-                    break;
-                case BACK:
 
-                    targetSpeed = 1980;
-                    targetAngle = 90 - 37;
-                    break;
-                case MIDDLE:
-
-                    targetSpeed = 2360;
-                    targetAngle = 90 - 38;
-                    break;
-                case JUGGLE:
-
-                    targetSpeed = 660;
-                    targetAngle = 90 - 22;
-                    break;
-                case OFF:
-
-                    targetSpeed = 0;
-                    targetAngle = 90 - 0;
-                    break;
-
-                case GOAL:
-                    targetSpeed = 1500;
-                    targetAngle = 90 - 14;
-                    break;
-            }
         launcher.setVelocity(targetSpeed);
                 // These loop the movements of the robot, these must be called continuously in order to work
                 follower.update();
@@ -324,6 +501,8 @@ public class BackOpenFieldAutoBlue extends OpMode {
         initialize_feeder();
         initialize_launcher();
         initialize_intake();
+        initialize_drive();
+        LEFT_LAUNCH_SERVO.setPosition(.2);
         light1 = hardwareMap.get(Servo.class, "preset light");
         light2 = hardwareMap.get(Servo.class, "launch light");
         floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
@@ -382,23 +561,82 @@ public class BackOpenFieldAutoBlue extends OpMode {
                 intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
             }
+    private void initialize_drive() {
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left_drive");// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, "back_left_drive");
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
+        backRightMotor = hardwareMap.get(DcMotorEx.class, "back_right_drive");
 
 
-    public enum LaunchState {
-        IDLE,
-        SPIN_UP,
-        LAUNCH,
-        LAUNCHING
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);// DRIVE SETUP
+        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);// DRIVE SETUP
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);//
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+    private void Drive(double forward, double strafe, double rotate) {
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate / 1.5), 1);
+        if (Math.abs(forward) < 0.02) {
+            forward = 0;
+        }
+        if (Math.abs(strafe) < 0.02) {
+            strafe = 0;
+        }
+        if (Math.abs(rotate) < 0.02) {
+            rotate = 0;
+        }
+        if (forward < -1) {
+            forward = -1;
+        }
+        if (strafe < -1) {
+            strafe = -1;
+        }
+        if (rotate < -1) {
+            rotate = -1;
+        }
+        if (forward > 1) {
+            forward = 1;
+        }
+        if (strafe > 1) {
+            strafe = 1;
+        }
+        if (rotate > 1) {
+            rotate = 1;
+        }
+        rotate = Math.pow(rotate, 3);
+        if (gamepad1.right_stick_button) {
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
+        } else {
+            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
 
-    private enum Preset {
-        CUSTOM,
-        GOAL,
-        MIDDLE,
-        JUGGLE,
-        BACK,
-        OFF
-    }
+        }
+        double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
+        double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
+        double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
+        double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
 
-}
+        BR_RPM = (TPS_BR * 60) / TPR_435;
+        BL_RPM = (TPS_BL * 60) / TPR_435;
+        FR_RPM = (TPS_FR * 60) / TPR_435;
+        FL_RPM = (TPS_FL * 60) / TPR_435;
+        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate) / denominator), 1) * FL_MAX_RPM) * TPR_435) / 60.0;
+        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate) / denominator), 1) * BL_MAX_RPM) * TPR_435) / 60.0;
+        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate) / denominator), 1) * BR_MAX_RPM) * TPR_435) / 60.0;
+        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate) / denominator), 1) * FR_MAX_RPM) * TPR_435) / 60.0;
 
+        //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
+        //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
+        //frontRightMotor.setPower((forward + strafe + rotate)/denominator);
+        //backRightMotor.setPower((forward - strafe + rotate)/denominator);
+        frontLeftMotor.setVelocity(FL_TARGET_RPM);
+        backLeftMotor.setVelocity(BL_TARGET_RPM);
+        frontRightMotor.setVelocity(FR_TARGET_RPM);
+        backRightMotor.setVelocity(BR_TARGET_RPM);
+
+
+    }}

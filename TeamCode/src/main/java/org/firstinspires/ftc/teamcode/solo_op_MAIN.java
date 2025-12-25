@@ -504,7 +504,7 @@ public class solo_op_MAIN extends OpMode {
                 IN_TARGET_RPM = ((SPIN_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
 
-                intake_ramp.setPosition(LAUNCH_POS /360);
+                intake_ramp.setPosition(LAUNCH_POS);
                 break;
 
         }
