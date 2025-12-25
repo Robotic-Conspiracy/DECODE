@@ -238,7 +238,7 @@ public class solo_op_MAIN extends OpMode {
                     break;
             }
         }
-        canlaunch = CanLaunch.ERROR;
+
         switch (selectedPreset){
             case CUSTOM:
                 light1.setPosition(1);
@@ -259,105 +259,56 @@ public class solo_op_MAIN extends OpMode {
                 light1.setPosition(0.722);
                 break;
         }
-        double ON_TIME = 0.5;
+        double ON_TIME = .5;
         double OFF_TIME = 1;
-        switch (CanLaunch.ERROR){
+        if((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.READY) {
+            canlaunch = CanLaunch.READY;
+        }
+        if (    ((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState != IntakeState.READY)
+                ||(!(launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState != IntakeState.READY)
+                || (!(launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.READY)
+                || ((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.READY)) {
+            canlaunch = CanLaunch.NOT_READY;
+        }
+        if((launcher.getVelocity() >= -100 && launcher.getVelocity() <= 100) || (intakeState == IntakeState.NOT_READY)) {
+            canlaunch = CanLaunch.ERROR;
+        }
+        if (    ((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)
+                ||(!(launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)){
+            canlaunch = CanLaunch.INTAKE;
+
+        }
+
+
+        switch (canlaunch){
             case OFF:
-                light2.setPosition(0);
+                light2.setPosition(1);
                 break;
             case READY:
-                light2.setPosition(0.277);
-                break;
-            case NOT_READY:
                 light2.setPosition(0.5);
                 break;
+            case NOT_READY:
+                light2.setPosition(0.28);
+                break;
             case LAUNCHING:
-                light2.setPosition(0.388);
+                light2.setPosition(0.611);
+                break;
+            case INTAKE:
+                light2.setPosition(0.722);
                 break;
             case ERROR:
-                if (Timer3.seconds() < ON_TIME) {
-                    light2.setPosition(0.277);
+                // Blink: ON for ON_TIME seconds, OFF for (OFF_TIME - ON_TIME) seconds
+                double t = Timer3.seconds();
+                if (t < ON_TIME) {
+                    light2.setPosition(0.28); // ON
+                } else if (t < OFF_TIME) {
+                    light2.setPosition(0); // OFF
+                } else {
+                    Timer3.reset(); // restart cycle
                 }
-                if (Timer3.seconds() > ON_TIME && Timer3.seconds() < OFF_TIME); {
-                    light2.setPosition(0);
-                }
-                if (Timer3.seconds() > OFF_TIME) {
-                    light2.setPosition(0.277);
-                    Timer3.reset();
-            }
                 break;
         }
-        if (pinpoint == null) {
-            telemetry.addData("Pinpoint", "null - check hardware name in robot config (expected 'odometry')");
-        } else {
-            telemetry.addData("Pinpoint class", pinpoint.getClass().getName());
-            java.lang.reflect.Method[] methods = pinpoint.getClass().getMethods();
-            int shown = 0;
-            boolean foundPose = false;
 
-            for (java.lang.reflect.Method m : methods) {
-                if (shown >= 20) break; // avoid flooding telemetry
-                if (m.getParameterCount() != 0) continue; // only try no-arg methods
-                if (m.getReturnType() == void.class) continue;
-
-                String mName = m.getName();
-                try {
-                    Object ret = m.invoke(pinpoint);
-                    String retStr = (ret == null) ? "null" : ret.getClass().getName();
-                    telemetry.addData("method", "%s -> %s", mName, retStr);
-                    shown++;
-
-                    if (ret != null && !foundPose) {
-                        // try fields x,y
-                        try {
-                            java.lang.reflect.Field fx = ret.getClass().getField("x");
-                            java.lang.reflect.Field fy = ret.getClass().getField("y");
-                            double px = ((Number) fx.get(ret)).doubleValue();
-                            double py = ((Number) fy.get(ret)).doubleValue();
-                            telemetry.addData("Pose from %s", mName);
-                            telemetry.addData("X", "%.2f", px);
-                            telemetry.addData("Y", "%.2f", py);
-                            foundPose = true;
-                            break;
-                        } catch (Exception ignored) { }
-
-                        // try getters getX/getY
-                        try {
-                            java.lang.reflect.Method gx = ret.getClass().getMethod("getX");
-                            java.lang.reflect.Method gy = ret.getClass().getMethod("getY");
-                            double px = ((Number) gx.invoke(ret)).doubleValue();
-                            double py = ((Number) gy.invoke(ret)).doubleValue();
-                            telemetry.addData("Pose from %s", mName);
-                            telemetry.addData("X", "%.2f", px);
-                            telemetry.addData("Y", "%.2f", py);
-                            foundPose = true;
-                            break;
-                        } catch (Exception ignored) { }
-
-                        // try x()/y() methods
-                        try {
-                            java.lang.reflect.Method mx = ret.getClass().getMethod("x");
-                            java.lang.reflect.Method my = ret.getClass().getMethod("y");
-                            double px = ((Number) mx.invoke(ret)).doubleValue();
-                            double py = ((Number) my.invoke(ret)).doubleValue();
-                            telemetry.addData("Pose from %s", mName);
-                            telemetry.addData("X", "%.2f", px);
-                            telemetry.addData("Y", "%.2f", py);
-                            foundPose = true;
-                            break;
-                        } catch (Exception ignored) { }
-                    }
-                } catch (Exception e) {
-                    telemetry.addData("method", "%s -> ERROR %s", mName, e.getClass().getSimpleName());
-                    shown++;
-                }
-            }
-
-            if (!foundPose) {
-                telemetry.addData("Pinpoint", "pose not available - no usable no-arg method returned x/y");
-                telemetry.addData("Hints", "Check hardware name, call sequences, or API docs for this driver");
-            }
-        }
 
 
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
@@ -712,7 +663,7 @@ public class solo_op_MAIN extends OpMode {
         backRightMotor.setVelocity(BR_TARGET_RPM);
 
     }
-    private enum IntakeState {
+    enum IntakeState {
         SPIN,
         INTAKE,
         READY,
@@ -720,14 +671,14 @@ public class solo_op_MAIN extends OpMode {
         START_INTAKE
     }
 
-    private enum LaunchState {
+    enum LaunchState {
         IDLE,
         SPIN_UP,
         LAUNCH,
         LAUNCHING
     }
 
-    private enum Preset {
+    enum Preset {
         CUSTOM,
         GOAL,
         MIDDLE,
@@ -735,11 +686,12 @@ public class solo_op_MAIN extends OpMode {
         BACK,
         OFF
     }
-    private enum CanLaunch {
+    enum CanLaunch {
         OFF,//LIGHT will be off,
         READY,//GREEN, RPM in range and AMPS not to high, intake off, everything is correct
         NOT_READY,//RED: if intake or RMP is wrong
         LAUNCHING,//PURPLE : state while launch is happening, it will turn purple
+        INTAKE,
         ERROR  //FLASHING RED : error indecates RPM drop and motor bog(power set higher than expected with no reason), voltage criticaly low, and AMP draw over set limit, launch dissabled until AMPS drop below set limit to prevent blowing FUSES
     }
 }

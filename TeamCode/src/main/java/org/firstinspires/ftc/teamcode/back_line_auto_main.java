@@ -222,7 +222,7 @@ public abstract class back_line_auto_main extends OpMode {
                     break;
                 case LAUNCHING:
                     telemetry.addData("Feed time", feedTimer.seconds());
-                    if (timesShot <= 6) {
+                    if (timesShot <= 4) {
                         if (feedTimer.seconds() > 0.3) {
                             state = states.SPIN_UP;
                             leftFeeder.setPower(0);
