@@ -35,6 +35,7 @@ public class BackOpenFieldAutoBlue extends OpMode {
     public static Follower follower;
     private ElapsedTime feedTimer = new ElapsedTime();
     private ElapsedTime waitTimer = new ElapsedTime();
+    private int nextPathState = 0;
     private int timesShot = 0;
     public final double INTAKE_POS = .84; // .87MAX
     public final int SPIN_SPEED = -500;
@@ -44,6 +45,7 @@ public class BackOpenFieldAutoBlue extends OpMode {
     private final double SERVO_MAXIMUM_POSITION = 90;
     private final double TPR_1620 = 103.8;
     double IN_TARGET_RPM = 0;
+    int timesToShoot = 4;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;private final double P = 203;
     private DcMotorEx launcher = null;
@@ -138,114 +140,118 @@ public class BackOpenFieldAutoBlue extends OpMode {
                 .build();
     }
 
-    public void autonomousPathUpdate() {
+//    public void autonomousPathUpdate() {
+//        switch (pathState) {
+//            case 0:
+//                follower.followPath(scorePreload);
+//                setPathState(1);
+//                timesShot = 0;
+//                break;
+//            case 1:
+//                if(!follower.isBusy()) {
+//                    // arrived at scorePreload -> fire
+//                    launch();
+//                    follower.followPath(grabPickup1, true);
+//                    setPathState(2);
+//                    timesShot = 0;
+//                }
+//                break;
+//            case 2:
+//                if(!follower.isBusy()) {
+//                    follower.followPath(scorePickup1, true);
+//                    setPathState(3);
+//                }
+//                break;
+//            case 3:
+//                if(!follower.isBusy()) {
+//                    // arrived at scorePickup1 -> fire
+//                    launch();
+//                    follower.followPath(grabPickup2, true);
+//                    setPathState(4);
+//                    timesShot = 0;
+//                }
+//                break;
+//            case 4:
+//                if(!follower.isBusy()) {
+//                    follower.followPath(scorePickup2, true);
+//                    setPathState(5);
+//                }
+//                break;
+//            case 5:
+//                if(!follower.isBusy()) {
+//                    // arrived at scorePickup2 -> fire
+//                    launch();
+//                    follower.followPath(grabPickup3, true);
+//                    setPathState(6);
+//                    timesShot = 0;
+//                }
+//                break;
+//            case 6:
+//                if(!follower.isBusy()) {
+//                    follower.followPath(scorePickup3, true);
+//                    // arrived at scorePickup3 -> fire
+//                    launch();
+//                    setPathState(7);
+//                }
+//                break;
+//            case 7:
+//                if(!follower.isBusy()) {
+//                    setPathState(-1);
+//                    timesShot = 0;
+//                }
+//                break;
+//        }
+//    }
+    public void auton_path_update(){
         switch (pathState) {
-            case 0:
-                follower.followPath(scorePreload);
-                setPathState(1);
-                break;
-            case 1:
-
-            /* You could check for
-            - Follower State: "if(!follower.isBusy()) {}"
-            - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-            - Robot Position: "if(follower.getPose().getX() > 36) {}"
-            */
-
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Preload */
-
-                            /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                            follower.followPath(grabPickup1, true);
-                            setPathState(2);
-                        }
-
-                break;
+        case 1:
+            follower.followPath(scorePreload);
+            pathState = 2;
+            nextPathState = 3;
+            break;
             case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
                 if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup1,true);
-                    setPathState(3);
-                }
-                break;
-            case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup2,true);
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup2,true);
-                    setPathState(5);
-                }
-                break;
-            case 5:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup3,true);
-                    setPathState(6);
-                }
-                break;
-            case 6:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup3, true);
                     launch();
-                    setPathState(7);
+
                 }
-                break;
-            case 7:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
-                }
-                break;
-        }
-    }
+
+
+
+
+
+
+    }}
 
     /** These change the states of the paths and actions. It will also reset the timers of the individual switches **/
-    public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
-    }
+
     private void launch() {
         //Launch servo objects and vars
         double FEED_TIME_SECONDS = 0.15;
+        if (timesShot <= timesToShoot) {
+            if (feedTimer.seconds() > 0.15) {
+                double velocity = launcher.getVelocity();
+                if(velocity >= targetSpeed -200 && velocity <= targetSpeed +200){
+                    Current_speed = FULL_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                    Timer.reset();
+                    if(Timer.seconds() > FEED_TIME_SECONDS){
+                        Current_speed = STOP_SPEED;
+                        leftFeeder.setPower(Current_speed);
+                        rightFeeder.setPower(Current_speed);
 
-        double velocity = launcher.getVelocity();
-        if(velocity >= targetSpeed -200 && velocity <= targetSpeed +200){
-            Current_speed = FULL_SPEED;
-            leftFeeder.setPower(Current_speed);
-            rightFeeder.setPower(Current_speed);
-            Timer.reset();
-            if(Timer.seconds() > FEED_TIME_SECONDS){
-                launchState = LaunchState.IDLE;
-                Current_speed = STOP_SPEED;
-                leftFeeder.setPower(Current_speed);
-                rightFeeder.setPower(Current_speed);
+                    }
+                }
+                leftFeeder.setPower(0);
+                rightFeeder.setPower(0);
+                timesShot += 1;
+                feedTimer.reset();
+            }
+            if (timesShot >= timesToShoot) {
+                pathState = nextPathState;
 
             }
-        }
+            }
 
     }
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
@@ -294,26 +300,10 @@ public class BackOpenFieldAutoBlue extends OpMode {
         launcher.setVelocity(targetSpeed);
                 // These loop the movements of the robot, these must be called continuously in order to work
                 follower.update();
-                timesShot = 0;
-                if (timesShot <= 4) {
-                    if (feedTimer.seconds() > 0.15) {
-                        launch();
-                        leftFeeder.setPower(0);
-                        rightFeeder.setPower(0);
-                        timesShot += 1;
-                        feedTimer.reset();
-                    }
-                }if (timesShot <= 4) {
-                    if (feedTimer.seconds() > 0.3) {
-                        launch();
-                        leftFeeder.setPower(0);
-                        rightFeeder.setPower(0);
-                        timesShot += 1;
-                        feedTimer.reset();
-                 }if (timesShot >= 4) {
-                autonomousPathUpdate();
-            }
-            }
+
+                auton_path_update();
+
+
                 double velocity = launcher.getVelocity();
                 // Feedback to Driver Hub for debugging
                 telemetry.addData("path state", pathState);
@@ -370,7 +360,7 @@ public class BackOpenFieldAutoBlue extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
-        setPathState(0);
+        pathState = 1;
     }
     private void initialize_launcher() {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
@@ -394,7 +384,7 @@ public class BackOpenFieldAutoBlue extends OpMode {
             }
 
 
-    private enum LaunchState {
+    public enum LaunchState {
         IDLE,
         SPIN_UP,
         LAUNCH,
