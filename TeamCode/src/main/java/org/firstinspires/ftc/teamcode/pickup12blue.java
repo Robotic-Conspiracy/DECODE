@@ -4,7 +4,6 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -49,24 +48,24 @@ public class pickup12blue extends OpMode {
 
     public static class Paths {
 
-        public PathChain Path1;
+        public PathChain shootPreload;
         public double Wait3;
-        public PathChain Path2;
-        public PathChain Path4;
-        public PathChain Path5;
+        public PathChain prePickup1;
+        public PathChain pickup1;
+        public PathChain shootPickup1;
         public double Wait7;
-        public PathChain Path6;
-        public PathChain Path8;
-        public PathChain Path9;
+        public PathChain prePickup2;
+        public PathChain pickUp2;
+        public PathChain shootPickup2;
         public double Wait10;
-        public PathChain Path11;
-        public PathChain Path12;
-        public PathChain Path13;
+        public PathChain prePickup3;
+        public PathChain pickup3;
+        public PathChain shootPickup3;
         public double Wait14;
         public PathChain Path15;
 
         public Paths(Follower follower) {
-            Path1 = follower
+            shootPreload = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(63.000, 8.000), new Pose(57.812, 15.882))
@@ -76,7 +75,7 @@ public class pickup12blue extends OpMode {
 
             Wait3 = 1000;
 
-            Path2 = follower
+            prePickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(57.812, 15.882), new Pose(52.729, 35.576))
@@ -84,7 +83,7 @@ public class pickup12blue extends OpMode {
                     .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(180))
                     .build();
 
-            Path4 = follower
+            pickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(52.729, 35.576), new Pose(16.729, 35.365))
@@ -92,7 +91,7 @@ public class pickup12blue extends OpMode {
                     .setTangentHeadingInterpolation()
                     .build();
 
-            Path5 = follower
+            shootPickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(16.729, 35.365), new Pose(58.024, 15.882))
@@ -102,15 +101,15 @@ public class pickup12blue extends OpMode {
 
             Wait7 = 1000;
 
-            Path6 = follower
+            prePickup2 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(58.024, 15.882), new Pose(52.518, 59.929))
+                            new BezierLine(new Pose(58, 16), new Pose(52.518, 59.929))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(180))
                     .build();
 
-            Path8 = follower
+            pickUp2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(52.518, 59.929), new Pose(17.365, 59.718))
@@ -118,7 +117,7 @@ public class pickup12blue extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
-            Path9 = follower
+            shootPickup2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(17.365, 59.718), new Pose(58.024, 15.882))
@@ -128,7 +127,7 @@ public class pickup12blue extends OpMode {
 
             Wait10 = 1000;
 
-            Path11 = follower
+            prePickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(58.024, 15.882), new Pose(50.824, 84.071))
@@ -136,7 +135,7 @@ public class pickup12blue extends OpMode {
                     .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(180))
                     .build();
 
-            Path12 = follower
+            pickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(50.824, 84.071), new Pose(17.365, 83.859))
@@ -144,7 +143,7 @@ public class pickup12blue extends OpMode {
                     .setTangentHeadingInterpolation()
                     .build();
 
-            Path13 = follower
+            shootPickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(new Pose(17.365, 83.859), new Pose(59.294, 84.282))
@@ -166,9 +165,47 @@ public class pickup12blue extends OpMode {
     }
 
     public int autonomousPathUpdate() {
-        // Add your state machine Here
-        // Access paths with paths.pathName
-        // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
+        switch (pathState) {
+            case 1:
+                if (!follower.isBusy()) {
+                    follower.followPath(Paths.shootPreload);
+                    pathState = 12;
+                }
+
+                break;
+            case 2:
+
+                break;
+            case 3:
+
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            case 7:
+                break;
+            case 8:
+                break;
+            case 9:
+                break;
+            case 10:
+                break;
+            case 11:
+                break;
+            case 12:
+                break;
+            case 13:
+                break;
+            case 14:
+                break;
+            case 15:
+                break;
+
+
+        }
         return pathState;
     }
 }
