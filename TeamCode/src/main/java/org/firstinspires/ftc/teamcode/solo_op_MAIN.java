@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 import java.util.concurrent.TimeUnit;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -30,7 +31,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.opencv.core.Mat;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
@@ -68,6 +68,7 @@ public class solo_op_MAIN extends OpMode {
     private DcMotorEx backLeftMotor = null;
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
+    double velocity = 0;
 
     AnalogInput floodgate;
     private double X_MOVE = 0;
@@ -125,7 +126,7 @@ public class solo_op_MAIN extends OpMode {
     public static int INTAKE_SPEED = 900;
 
     // other vars and objects
-    private ElapsedTime Timer = new ElapsedTime();
+    private ElapsedTime feedTimer = new ElapsedTime();
     private ElapsedTime Timer2 = new ElapsedTime();
     private ElapsedTime Timer3 = new ElapsedTime();
     private LaunchState launchState = null;
@@ -217,25 +218,23 @@ public class solo_op_MAIN extends OpMode {
             switch(selectedPreset){
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1500;
-                    targetAngle = 90-17;
+                    targetSpeed = 1480;
+                    targetAngle = 73;
                     break;
+
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
-                    targetSpeed = 1980;
-                    targetAngle = 90-37;
+                    targetSpeed = 2000;
+                    targetAngle = 55;
                     break;
+
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
-                    targetSpeed = 2360;
+                    targetSpeed = 2480;
                     targetAngle = 90-38;
                     break;
+
                 case BACK:
-                    selectedPreset = Preset.JUGGLE;
-                    targetSpeed = 660;
-                    targetAngle = 90-22;
-                    break;
-                case JUGGLE:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
                     targetAngle = 90-0;
@@ -244,7 +243,7 @@ public class solo_op_MAIN extends OpMode {
                 case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1500;
-                    targetAngle = 90-14;
+                    targetAngle = 48;
                     break;
             }
         }
@@ -328,25 +327,23 @@ public class solo_op_MAIN extends OpMode {
                 if(Detection.id == 24 || Detection.id == 20){
                     detection = Detection;
                     telemetry.addData("detected id: ", detection.id);
+                    AddTelemetry();
                 }
-                // ✅ DISTANCE (in inches)
-
-
-//
                 }
 
-                //telemetry.addData("angle offset ", detection.ftcPose.z);
+                telemetry.addData("angle offset ", detection.ftcPose.z);
 
             if(gamepad1.right_trigger >= 0.2){// MAPPING
 
-                double z = detection.ftcPose.x;   // left/right
+                assert detection != null;
+                //double z = detection.ftcPose.x;   // left/right
                 double y = detection.ftcPose.y;   // forward/back
                 double x = detection.ftcPose.z;   // up/down
 
 
-                double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
+//                double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
                 double yaw = detection.ftcPose.pitch; // rotation around sideways axis
-                double roll = detection.ftcPose.roll;
+//                double roll = detection.ftcPose.roll;
                 if(Math.abs(x) > 0.5) {
                     X_MOVE = Range.clip(x * -0.05, -1, 1);
                             //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
@@ -360,6 +357,7 @@ public class solo_op_MAIN extends OpMode {
                 Drive(Y_MOVE,YAW_MOVE,X_MOVE);
             }
             if (gamepad1.b) {
+                assert detection != null;
                 double x = detection.ftcPose.z;
                 X_MOVE = Range.clip(x * -0.05, -1, 1);
                 Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
@@ -406,103 +404,122 @@ public class solo_op_MAIN extends OpMode {
 
     }
 
+    private long spinUpStartMs = 0;
+    private static final long SPIN_UP_TIMEOUT_MS = 2000; // 2 seconds timeout for spin-up
+
     private void launch(boolean launchRequested) {
-        //Launch servo objects and vars
+        // If currently feeding, ignore new requests so we don't extend/reset the feed window
+        if (launchState == LaunchState.LAUNCHING) {
+            return;
+        }
+
         double FEED_TIME_SECONDS = 0.15;
-        switch  (launchState) {
+
+        switch (launchState) {
             case IDLE:
-                launchState = launchRequested ? LaunchState.SPIN_UP : launchState;
-
-                break;
-            case SPIN_UP:
-
-                double velocity = launcher.getVelocity();
-                if(velocity >= targetSpeed -60 && velocity <= targetSpeed +60){
-                    launchState = LaunchState.LAUNCH;
+                if (launchRequested) {
+                    launchState = LaunchState.SPIN_UP;
+                    spinUpStartMs = System.currentTimeMillis();
                 }
                 break;
+
+            case SPIN_UP:
+                double velocity = launcher.getVelocity();
+                // normal transition when launcher reaches target RPM
+                if (velocity >= targetSpeed - 60 && velocity <= targetSpeed + 60) {
+                    launchState = LaunchState.LAUNCH;
+                } else {
+                    // timeout to avoid getting stuck in SPIN_UP
+                    if (System.currentTimeMillis() - spinUpStartMs > SPIN_UP_TIMEOUT_MS) {
+                        launchState = LaunchState.IDLE;
+                    }
+                }
+                break;
+
             case LAUNCH:
                 Current_speed = FULL_SPEED;
                 leftFeeder.setPower(Current_speed);
                 rightFeeder.setPower(Current_speed);
-                Timer.reset();
+                feedTimer.reset(); // start feed duration
                 launchState = LaunchState.LAUNCHING;
-
                 break;
+
             case LAUNCHING:
-                if(Timer.seconds() > FEED_TIME_SECONDS){
+                if (feedTimer.seconds() > FEED_TIME_SECONDS) {
                     launchState = LaunchState.IDLE;
                     Current_speed = STOP_SPEED;
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
-
                 }
                 break;
-
         }
     }
     private void intake(boolean intakeRequested, boolean spinRequested) {
-        intakeState = IntakeState.READY;
-        //how long the feeders spin reversse when intake starts
-        double REV_TIME = 1;
-        intakeState = spinRequested ? IntakeState.SPIN : (intakeRequested ? (Timer2.seconds() > REV_TIME ? IntakeState.START_INTAKE : IntakeState.INTAKE): IntakeState.READY);
+        // how long the feeders spin reverse when intake starts
+        double REV_TIME = 1.0;
         double LAUNCH_POS = 0.61;
         double REV_SPEED = -1.0;
-        switch  (intakeState) {
-            case READY:
+
+        // If manual spin (hold bumper), go straight to SPIN
+        if (spinRequested) {
+            intakeState = IntakeState.SPIN;
+        } else if (intakeRequested) {
+            // If we just started requesting intake, reset the timer to begin the reverse window
+            if (intakeState != IntakeState.START_INTAKE && intakeState != IntakeState.INTAKE) {
                 Timer2.reset();
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
-                //intake_ramp.setPosition(INTAKE_RAMP_POS);
+            }
+            // While within the reverse window, use START_INTAKE
+            if (Timer2.seconds() < REV_TIME) {
+                intakeState = IntakeState.START_INTAKE;
+            } else {
+                intakeState = IntakeState.INTAKE;
+            }
+        } else {
+            // No intake requested -> READY and reset timer
+            intakeState = IntakeState.READY;
+            Timer2.reset();
+        }
+
+        switch (intakeState) {
+            case READY:
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
-                if(Current_speed == REV_SPEED){
-                    Current_speed = STOP_SPEED;
-                    leftFeeder.setPower(Current_speed);
-                    rightFeeder.setPower(Current_speed);
-                }
-
+                Current_speed = STOP_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
                 break;
 
             case START_INTAKE:
-                if (Current_speed != REV_SPEED && !(Timer2.seconds() > REV_TIME)) {
-                    Current_speed = REV_SPEED;
-                    leftFeeder.setPower(Current_speed);
-                    rightFeeder.setPower(Current_speed);
-                    //intake_ramp.setPosition(INTAKE_POS / 360);
-                    }
-                if(Timer2.seconds() > REV_TIME) {
-                    intakeState = IntakeState.INTAKE;
-                    Current_speed = STOP_SPEED;
-                    leftFeeder.setPower(Current_speed);
-                    rightFeeder.setPower(Current_speed);
-                }
+                // Spin feeders backwards during the reverse window
+                Current_speed = REV_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
+                // keep launcher servo in safe position
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
                 break;
-
 
             case INTAKE:
                 intake_ramp.setPosition(INTAKE_POS);
                 IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
-
                 IN_TARGET_RPM = ((INTAKE_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 LEFT_LAUNCH_SERVO.setPosition(0);
-
-                if(Timer2.seconds() > REV_TIME){
-                    Current_speed = STOP_SPEED;
-                    leftFeeder.setPower(Current_speed);
-                    rightFeeder.setPower(Current_speed);
-                }
+                Current_speed = STOP_SPEED;
+                leftFeeder.setPower(Current_speed);
+                rightFeeder.setPower(Current_speed);
                 break;
 
             case SPIN:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
-                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60);
                 IN_TARGET_RPM = ((SPIN_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
-
                 intake_ramp.setPosition(LAUNCH_POS);
                 break;
 
+            default:
+                break;
         }
     }
     private void AddTelemetry() {
