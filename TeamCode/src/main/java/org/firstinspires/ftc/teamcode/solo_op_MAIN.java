@@ -44,6 +44,13 @@ public class solo_op_MAIN extends OpMode {
     protected String color = "None";
     GoBildaPinpointDriver pinpoint;
 
+    // Performance optimization flags
+    private boolean lastRightBumper = false;
+    private long lastFireTime = 0;
+    private static final long FIRE_INTERVAL = 500;
+    private int loopCounter = 0;
+    private double cachedLauncherVelocity = 0;
+
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     private final double SERVO_MINIMUM_POSITION = 0;
@@ -265,23 +272,21 @@ public class solo_op_MAIN extends OpMode {
         double ON_TIME = .5;
         double OFF_TIME = 1;
 
-        double launcher_velocity = launcher.getVelocity();
-        if((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.READY) {
-            canlaunch = CanLaunch.READY;
-        }
-        if (    ((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState != IntakeState.READY)
-                ||(!(launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState != IntakeState.READY)
-                || (!(launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.READY)
-                || ((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.READY)) {
-            canlaunch = CanLaunch.NOT_READY;
-        }
-        if((launcher_velocity >= -100 && launcher_velocity <= 100) || (intakeState == IntakeState.NOT_READY)) {
-            canlaunch = CanLaunch.ERROR;
-        }
-        if (    ((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)
-                ||(!(launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)){
-            canlaunch = CanLaunch.INTAKE;
+        // Cache velocity once per loop to avoid multiple I2C reads
+        cachedLauncherVelocity = launcher.getVelocity();
 
+        // Fixed canlaunch logic - previous version always overwrote with NOT_READY
+        boolean velocityInRange = (cachedLauncherVelocity >= targetSpeed - 60) && (cachedLauncherVelocity <= targetSpeed + 60);
+        boolean velocityNearZero = (cachedLauncherVelocity >= -100) && (cachedLauncherVelocity <= 100);
+
+        if (intakeState == IntakeState.INTAKE) {
+            canlaunch = CanLaunch.INTAKE;
+        } else if (velocityNearZero || intakeState == IntakeState.NOT_READY) {
+            canlaunch = CanLaunch.ERROR;
+        } else if (velocityInRange && intakeState == IntakeState.READY) {
+            canlaunch = CanLaunch.READY;
+        } else {
+            canlaunch = CanLaunch.NOT_READY;
         }
 
 
@@ -367,29 +372,33 @@ public class solo_op_MAIN extends OpMode {
         }
         launcher.setVelocity(targetSpeed);
 
-        AddTelemetry();
+        // Throttle telemetry to every 5 loops to reduce lag
+        loopCounter++;
+        if (loopCounter >= 5) {
+            AddTelemetry();
+            loopCounter = 0;
+        }
+
         if(!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b) ) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
-        boolean LRB = false;
-        long LAST_FIRE_TIME = 0;
-        long FIRE_INTRRVAL = 500;
-        boolean RB = gamepad1.right_bumper;
+
+        boolean rightBumper = gamepad1.right_bumper;
         long now = System.currentTimeMillis();
 
-        // --- FIRE ONCE WHEN PRESSED ---
-        if (RB && !LRB) {
+        // Fire on initial press
+        if (rightBumper && !lastRightBumper) {
             launch(true);
-            LAST_FIRE_TIME = now;
+            lastFireTime = now;
         }
 
-        // --- CONTINUOUS FIRE WHEN HELD ---
-        if (RB && (now - LAST_FIRE_TIME > FIRE_INTRRVAL)) {
+        // Continuous fire when held (after interval)
+        if (rightBumper && (now - lastFireTime > FIRE_INTERVAL)) {
             launch(true);
-            LAST_FIRE_TIME = now;
+            lastFireTime = now;
         }
 
-        LRB = RB;
+        lastRightBumper = rightBumper;
 
         //launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPING
@@ -474,7 +483,7 @@ public class solo_op_MAIN extends OpMode {
                 intake_ramp.setPosition(INTAKE_POS);
                 IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
 
-                IN_TARGET_RPM = ((INTAKE_SPEED / 60) * TPR_1620);
+                IN_TARGET_RPM = ((INTAKE_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 LEFT_LAUNCH_SERVO.setPosition(0);
 
@@ -488,7 +497,7 @@ public class solo_op_MAIN extends OpMode {
             case SPIN:
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle/360);
                 IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
-                IN_TARGET_RPM = ((SPIN_SPEED / 60) * TPR_1620);
+                IN_TARGET_RPM = ((SPIN_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
 
                 intake_ramp.setPosition(LAUNCH_POS);
