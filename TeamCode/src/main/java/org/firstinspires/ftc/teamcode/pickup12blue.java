@@ -168,16 +168,13 @@ public class pickup12blue extends OpMode {
         switch (pathState) {
             case 1:
                 if (!follower.isBusy()) {
-                    follower.followPath(Paths.shootPreload);
+                    follower.followPath(paths.shootPreload);
                     pathState = 12;
                 }
-
                 break;
             case 2:
-
                 break;
             case 3:
-
                 break;
             case 4:
                 break;
@@ -203,8 +200,6 @@ public class pickup12blue extends OpMode {
                 break;
             case 15:
                 break;
-
-
         }
         return pathState;
     }
