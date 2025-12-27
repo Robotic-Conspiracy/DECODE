@@ -631,7 +631,7 @@ public class solo_op_MAIN extends OpMode {
         if(rotate > 1) {
             rotate = 1;
         }
-        rotate = Math.pow(rotate,3);
+        //rotate = Math.pow(rotate,3);
         if (gamepad1.right_stick_button) {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
