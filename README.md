@@ -1,5 +1,6 @@
 # DECODE Game Code for Robotic Conspiracy (FTC 28139)
-[![CI (Game-Ready-Code)](https://github.com/Robotic-Conspiracy/DECODE/actions/workflows/ci.yaml/badge.svg?branch=Game-Ready-Code)](https://github.com/Robotic-Conspiracy/DECODE/actions/workflows/ci.yaml) [![CI (master)](https://github.com/Robotic-Conspiracy/DECODE/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/Robotic-Conspiracy/DECODE/actions/workflows/ci.yaml)
+
+[![CI](https://github.com/Robotic-Conspiracy/DECODE/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/Robotic-Conspiracy/DECODE/actions/workflows/ci.yaml)
 
 ## NOTICE
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season as well as as Robotic Conspiracy (28139) Team code.
