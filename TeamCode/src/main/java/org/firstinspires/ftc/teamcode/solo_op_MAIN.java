@@ -264,20 +264,22 @@ public class solo_op_MAIN extends OpMode {
         }
         double ON_TIME = .5;
         double OFF_TIME = 1;
-        if((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.READY) {
+
+        double launcher_velocity = launcher.getVelocity();
+        if((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.READY) {
             canlaunch = CanLaunch.READY;
         }
-        if (    ((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState != IntakeState.READY)
-                ||(!(launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState != IntakeState.READY)
-                || (!(launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.READY)
-                || ((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.READY)) {
+        if (    ((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState != IntakeState.READY)
+                ||(!(launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState != IntakeState.READY)
+                || (!(launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.READY)
+                || ((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.READY)) {
             canlaunch = CanLaunch.NOT_READY;
         }
-        if((launcher.getVelocity() >= -100 && launcher.getVelocity() <= 100) || (intakeState == IntakeState.NOT_READY)) {
+        if((launcher_velocity >= -100 && launcher_velocity <= 100) || (intakeState == IntakeState.NOT_READY)) {
             canlaunch = CanLaunch.ERROR;
         }
-        if (    ((launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)
-                ||(!(launcher.getVelocity() >= targetSpeed -60 && launcher.getVelocity() <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)){
+        if (    ((launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)
+                ||(!(launcher_velocity >= targetSpeed -60 && launcher_velocity <= targetSpeed +60)&&intakeState == IntakeState.INTAKE)){
             canlaunch = CanLaunch.INTAKE;
 
         }
@@ -323,28 +325,10 @@ public class solo_op_MAIN extends OpMode {
                     telemetry.addData("detected id: ", detection.id);
                 }
                 // ✅ DISTANCE (in inches)
-                if (!detections.isEmpty()) {
 
-                    assert detection != null;
-                    double z = detection.ftcPose.x;   // left/right
-                    double y = detection.ftcPose.y;   // forward/back
-                    double x = detection.ftcPose.z;   // up/down
 
-                    // ✅ ROTATION (in degrees)
-                    double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
-                    double yaw = detection.ftcPose.pitch; // rotation around sideways axis
-                    double roll = detection.ftcPose.roll;  // rotation around forward axis
-
-                    //telemetry.addLine("AprilTag Detected:");
-                    //telemetry.addData("Distance X (in)", x);
-                    //telemetry.addData("Distance Y (in)", y);
-                    //telemetry.addData("Distance Z (in)", z);
-                    //telemetry.addData("Yaw (deg)", yaw);
-                    //telemetry.addData("Pitch (deg)", pitch);
-                    //telemetry.addData("Roll (deg)", roll);
-                }else {
-                //telemetry.addLine("No AprilTag detected");
-                }}
+//
+                }
 
                 //telemetry.addData("angle offset ", detection.ftcPose.z);
 
@@ -519,31 +503,31 @@ public class solo_op_MAIN extends OpMode {
 
         telemetry.addData("Current (Amps)", "%.2f A", amps);
         telemetry.addData("Current Preset: ", selectedPreset);
-        telemetry.addData("","");
+        //telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition()*360);
-        telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
-        telemetry.addData("","");
+        //telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
+        //telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
-        telemetry.addData("current Power- launcher", launcher.getPower());
-        telemetry.addData("","");
-        telemetry.addData("intake target RPM", INTAKE_SPEED);
-        telemetry.addData("current INTAKE velocity", IN_RPM);
-        telemetry.addData("current INTAKE power", intake.getPower());
-        telemetry.addData("","");
-        telemetry.addData("front left wheel power", frontLeftMotor.getPower());
-        telemetry.addData("front right wheel power", frontRightMotor.getPower());
-        telemetry.addData("back left wheel power", backLeftMotor.getPower());
-        telemetry.addData("back right wheel power", backRightMotor.getPower());
-        telemetry.addData("","");
-        telemetry.addData("front left wheel speed", FL_RPM);
-        telemetry.addData("front right wheel speed", FR_RPM);
-        telemetry.addData("back left wheel speed", BL_RPM);
-        telemetry.addData("back right wheel speed", BR_RPM);
-        telemetry.addData("","");
-        telemetry.addData("Current (Amps)", "%.2f A", amps);
-        telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
+       // telemetry.addData("current Power- launcher", launcher.getPower());
+//        telemetry.addData("","");
+//        telemetry.addData("intake target RPM", INTAKE_SPEED);
+//        telemetry.addData("current INTAKE velocity", IN_RPM);
+//        telemetry.addData("current INTAKE power", intake.getPower());
+//        telemetry.addData("","");
+//        telemetry.addData("front left wheel power", frontLeftMotor.getPower());
+//        telemetry.addData("front right wheel power", frontRightMotor.getPower());
+//        telemetry.addData("back left wheel power", backLeftMotor.getPower());
+//        telemetry.addData("back right wheel power", backRightMotor.getPower());
+//        telemetry.addData("","");
+//        telemetry.addData("front left wheel speed", FL_RPM);
+//        telemetry.addData("front right wheel speed", FR_RPM);
+//        telemetry.addData("back left wheel speed", BL_RPM);
+//        telemetry.addData("back right wheel speed", BR_RPM);
+//        telemetry.addData("","");
+       // telemetry.addData("Current (Amps)", "%.2f A", amps);
+      //  telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
 
         telemetry.update();
     }
