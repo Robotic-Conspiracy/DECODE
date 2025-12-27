@@ -135,6 +135,8 @@ public class solo_op_MAIN extends OpMode {
     private Servo light1 = null;
     private Servo light2 = null;
 
+    private boolean exposure_set = false;
+
 
 
     @Override
@@ -172,12 +174,13 @@ public class solo_op_MAIN extends OpMode {
 
     @Override
     public void loop() {
-        if(portal.getCameraState() == VisionPortal.CameraState.STREAMING) {
+        if(portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
             }
             exposureControl.setExposure((long) 16, TimeUnit.MILLISECONDS);
+            exposure_set = true;
         }
 
         //chaing speed
