@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "the 12 blue balls of the holy pantheon")
 public class blue12 extends OpMode {
-    private final Pose STARTING_POSE = new Pose(56, 8);
+    private final Pose STARTING_POSE = new Pose(56, 8, Math.toRadians(90));
     private Follower follower;
     private PathChain shootPath1;
     private PathChain changablePath;
@@ -34,7 +34,7 @@ public class blue12 extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         PanelsConfigurables.INSTANCE.refreshClass(this);
         shootPath1 = follower.pathBuilder()
-                .addPath(new BezierLine(STARTING_POSE, new Pose(55, 12, Math.toRadians(90))))
+                .addPath(new BezierLine(STARTING_POSE, new Pose(55, 12, Math.toRadians(111))))
                 .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(111))
                 .build();
         Drawing.init();
@@ -43,6 +43,8 @@ public class blue12 extends OpMode {
     @Override
     public void start(){
         follower.setStartingPose(STARTING_POSE);
+
+
         follower.followPath(shootPath1);
     }
 
@@ -52,7 +54,9 @@ public class blue12 extends OpMode {
         Drawing.drawDebug(follower);
         switch(currentPath){
             case MOVE_TO_SHOOT:
-                System.out.println("Following path 1");
+                System.out.println("rad: " + follower.getHeading());
+                System.out.println("deg: " + Math.toDegrees(follower.getHeading()));
+                System.out.println();
 
 //                if(follower.atParametricEnd()){
 //                    follower.followPath(shootPath1);
