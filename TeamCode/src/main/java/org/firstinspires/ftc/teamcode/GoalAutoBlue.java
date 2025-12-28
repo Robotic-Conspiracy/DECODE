@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Red goal")
+@Autonomous(name = "Blue goal")
 
-public class The_Fourth_Auto_Red extends The_Fourth_Auto{
+public class GoalAutoBlue extends GoalAutoMain {
   @Override
   void move() {
     double forward  = 1;
-    double strafe = -1;
+    double strafe = 1;
     double rotate = 0;
 
     double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
