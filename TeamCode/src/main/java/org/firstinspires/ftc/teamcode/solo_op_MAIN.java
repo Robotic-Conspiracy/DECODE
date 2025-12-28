@@ -316,12 +316,24 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         // Always add AprilTag telemetry for consistent display (prevents flickering)
-        if (detection != null) {
-            telemetry.addData("Detected Tag ID", detection.id);
-            telemetry.addData("Angle Offset", "%.2f", detection.ftcPose.z);
+        // Show all detected tags, not just the target
+        if (!detections.isEmpty()) {
+            StringBuilder tagIds = new StringBuilder();
+            StringBuilder angles = new StringBuilder();
+            for (int i = 0; i < detections.size(); i++) {
+                AprilTagDetection d = detections.get(i);
+                if (i > 0) {
+                    tagIds.append(", ");
+                    angles.append(", ");
+                }
+                tagIds.append(d.id);
+                angles.append(String.format("%.2f", d.ftcPose.z));
+            }
+            telemetry.addData("Detected Tag IDs", tagIds.toString());
+            telemetry.addData("Angle Offsets", angles.toString());
         } else {
-            telemetry.addData("Detected Tag ID", "None");
-            telemetry.addData("Angle Offset", "N/A");
+            telemetry.addData("Detected Tag IDs", "None");
+            telemetry.addData("Angle Offsets", "N/A");
         }
 
         if (detection != null) {
