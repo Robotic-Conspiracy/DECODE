@@ -24,12 +24,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-@Autonomous(name = "the 12 blue balls", group = "Autonomous")
+@Autonomous(name = "the 12 blue balls of the holy pantheon")
 public class blue12 extends OpMode {
     private final Pose STARTING_POSE = new Pose(56, 8, Math.toRadians(90));
     private Follower follower;
     private PathChain shootPath1;
     private PathChain collectPath1;
+    private PathChain collectPath2;
     private int timesShot = 0;
     private Servo angle_thing;
     private DcMotorEx launcher;
@@ -38,6 +39,7 @@ public class blue12 extends OpMode {
     private Servo intakeRamp;
     private CRServo leftFeeder;
     private CRServo rightFeeder;
+    private boolean collected1 = false;
 
     private ElapsedTime feedTimer = new ElapsedTime();
 
@@ -65,12 +67,12 @@ public class blue12 extends OpMode {
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
         leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        follower.setStartingPose(STARTING_POSE);
     }
 
     @Override
     public void start(){
-        follower.setStartingPose(STARTING_POSE);
+
 
 
         follower.followPath(shootPath1);
@@ -83,9 +85,6 @@ public class blue12 extends OpMode {
         switch(currentPath){
             case MOVE_TO_SHOOT:
                 follower.followPath(shootPath1);
-                System.out.println("rad: " + follower.getHeading());
-                System.out.println("deg: " + Math.toDegrees(follower.getHeading()));
-                System.out.println();
                 if(follower.atParametricEnd()){
 
                     launcher.setVelocity(2480);
@@ -101,12 +100,16 @@ public class blue12 extends OpMode {
                             timesShot++;
                         }
                         if(timesShot == 4){
+                            System.out.println("collecting");
                             collectPath1 = follower.pathBuilder()
                                     .addPath(new BezierLine(follower.getPose(), new Pose(45, 35, Math.toRadians(180))))
-                                    .setLinearHeadingInterpolation(111, 180)
-                                    .addPath(new BezierLine(new Pose(45, 35, Math.toRadians(180)), new Pose(15, 36, Math.toRadians(180))))
-                                    .setLinearHeadingInterpolation(180, 180)
+                                    .setLinearHeadingInterpolation(Math.toRadians(111), Math.toRadians(180))
                                     .build();
+                            collectPath2 = follower.pathBuilder()
+                                    .addPath(new BezierLine(new Pose(45, 35, Math.toRadians(180)), new Pose(15, 36, Math.toRadians(180))))
+                                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                                    .build();
+                            follower.followPath(collectPath1);
                             currentPath = path.COLLECT_BALLS_1;
                             timesShot = 0;
                         }
@@ -128,7 +131,13 @@ public class blue12 extends OpMode {
 
                 break;
             case COLLECT_BALLS_1:
-                follower.followPath(collectPath1);
+                if(!follower.atParametricEnd() && !collected1){
+                    follower.followPath(collectPath1);
+                } else {
+                    follower.followPath(collectPath2);
+                    collected1 = true;
+                }
+
                 // Logic for collecting balls 1
                 break;
             case COLLECT_BALLS_2:
