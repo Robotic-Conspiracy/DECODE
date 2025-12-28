@@ -1,10 +1,11 @@
 //READ ME
- // VARIABLE NAMING CONVENTIONS USED
- //PascalCase
- //SCREAMING_SNAKE_CASE for FINALS
- //
- //
+// VARIABLE NAMING CONVENTIONS USED
+//PascalCase
+//SCREAMING_SNAKE_CASE for FINALS
+//
+//
 package org.firstinspires.ftc.teamcode;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -42,6 +43,7 @@ import java.util.List;
 //@TeleOp(name = "Main Solo Op - run color")
 public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
+
     abstract void set_color();
 
     GoBildaPinpointDriver pinpoint;
@@ -81,7 +83,7 @@ public abstract class solo_op_MAIN extends OpMode {
     public static double INTAKE_RAMP_POS = .8;
     private final double TPR_6k = 28;
     private final double TPR_1620 = 103.8;
-//    //double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
+    //    //double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
 //    //double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
 //    //double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
 //    double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
@@ -109,7 +111,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     //configurable vars
     public static int targetSpeed = 2480;//launch motor speed
-    public static double targetAngle = 90-38;
+    public static double targetAngle = 90 - 38;
     public static int INTAKE_SPEED = 900;
 
     // other vars and objects
@@ -131,7 +133,6 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo light2 = null;
 
     private boolean exposure_set = false;
-
 
 
     @Override
@@ -161,8 +162,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTagProcessor)
                 .build();
-                portal.setProcessorEnabled(aprilTagProcessor, true);
-
+        portal.setProcessorEnabled(aprilTagProcessor, true);
 
 
         canlaunch = CanLaunch.ERROR;
@@ -170,7 +170,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     @Override
     public void loop() {
-        if(portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
+        if (portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
@@ -180,30 +180,30 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         //chaing speed
-        if(gamepad1.dpadUpWasPressed()){// MAPPING
-            targetSpeed += 20*(gamepad1.x ? 5 : 1); // MAPPING
+        if (gamepad1.dpadUpWasPressed()) {// MAPPING
+            targetSpeed += 20 * (gamepad1.x ? 5 : 1); // MAPPING
         }
-        if(gamepad1.dpadDownWasPressed()){// MAPPING
-            targetSpeed -= 20*(gamepad1.x ? 5 : 1);// MAPPING
+        if (gamepad1.dpadDownWasPressed()) {// MAPPING
+            targetSpeed -= 20 * (gamepad1.x ? 5 : 1);// MAPPING
         }
 
         //changing servo rotation
-        if(gamepad1.dpadRightWasPressed()){// MAPPING
+        if (gamepad1.dpadRightWasPressed()) {// MAPPING
             targetAngle += (gamepad1.x ? 5 : 1);// MAPPING
         }
-        if(gamepad1.dpadLeftWasPressed()){// MAPPING
+        if (gamepad1.dpadLeftWasPressed()) {// MAPPING
             targetAngle -= (gamepad1.x ? 5 : 1);// MAPPING
         }
-        if (targetAngle > SERVO_MAXIMUM_POSITION){
+        if (targetAngle > SERVO_MAXIMUM_POSITION) {
             targetAngle = SERVO_MAXIMUM_POSITION;
-        } else if (targetAngle < SERVO_MINIMUM_POSITION){
+        } else if (targetAngle < SERVO_MINIMUM_POSITION) {
             targetAngle = SERVO_MINIMUM_POSITION;
         }
-        if(gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {// MAPPING
+        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {// MAPPING
             selectedPreset = Preset.CUSTOM;
         }
-        if(gamepad1.yWasPressed()){// MAPPING
-            switch(selectedPreset){
+        if (gamepad1.yWasPressed()) {// MAPPING
+            switch (selectedPreset) {
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1480;
@@ -236,7 +236,7 @@ public abstract class solo_op_MAIN extends OpMode {
             }
         }
 
-        switch (selectedPreset){
+        switch (selectedPreset) {
             case CUSTOM:
                 light1.setPosition(1);
                 break;
@@ -277,7 +277,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
 
-        switch (canlaunch){
+        switch (canlaunch) {
             case OFF:
                 light2.setPosition(1);
                 break;
@@ -307,55 +307,56 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
 
-
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
         AprilTagDetection detection = null;
-        if(!detections.isEmpty()){
-            for(AprilTagDetection Detection : detections){
-                if(color.equals("red") ? Detection.id == 24 : color.equals("blue") ? Detection.id == 20 : Detection.id == 24 || Detection.id == 20){
+        if (!detections.isEmpty()) {
+            for (AprilTagDetection Detection : detections) {
+                //if (color.equals("red")) {
+
+                //}
+
+                if (color.equals("red") ? Detection.id == 24 : color.equals("blue") ? Detection.id == 20 : Detection.id == 24 || Detection.id == 20) {
                     detection = Detection;
-                    telemetry.addData("detected id: ", detection.id);
-                    AddTelemetry();
+                    //telemetry.addData("detected id: ", detection.id);
                 }
-                }
+            }
+            if (detection != null) {
 
 
-            assert detection != null;
-            telemetry.addData("angle offset ", detection.ftcPose.z);
+                //telemetry.addData("angle offset ", detection.ftcPose.z);
 
-
-
-            if(gamepad1.right_trigger >= 0.2){// MAPPING
-                //double z = detection.ftcPose.x;   // left/right
-                double y = detection.ftcPose.y;   // forward/back
-                double x = detection.ftcPose.z;   // up/down
+                if (gamepad1.right_trigger >= 0.2) {// MAPPING
+                    //double z = detection.ftcPose.x;   // left/right
+                    double y = detection.ftcPose.y;   // forward/back
+                    double x = detection.ftcPose.z;   // up/down
 
 
 //                double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
-                double yaw = detection.ftcPose.pitch; // rotation around sideways axis
+                    double yaw = detection.ftcPose.pitch; // rotation around sideways axis
 //                double roll = detection.ftcPose.roll;
-                if(Math.abs(x) > 0.5) {
-                    X_MOVE = Range.clip(x * -0.05, -1, 1);
-                            //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
+                    if (Math.abs(x) > 0.5) {
+                        X_MOVE = Range.clip(x * -0.05, -1, 1);
+                        //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
+                    }
+                    if (Math.abs(y - 120) > 1) {
+                        Y_MOVE = Range.clip((y - 120) * -0.05, -.5, .5);
+                    }
+                    if (Math.abs(yaw + 25) > 1) {
+                        YAW_MOVE = Range.clip((yaw + 25) * 0.05, -.5, .5);
+                    }
+                    Drive(Y_MOVE, YAW_MOVE, X_MOVE);
                 }
-                if (Math.abs(y-120) > 1) {
-                    Y_MOVE = Range.clip((y-120) * -0.05, -.5, .5);
-                }
-                if(Math.abs(yaw+25) > 1) {
-                    YAW_MOVE = Range.clip((yaw+ 25) * 0.05, -.5, .5);
-                }
-                Drive(Y_MOVE,YAW_MOVE,X_MOVE);
-            }
-            if (gamepad1.b) {
+                if (gamepad1.b) {
 
-                double x = detection.ftcPose.z;
-                X_MOVE = Range.clip(x * -0.05, -1, 1);
-                Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+                    double x = detection.ftcPose.z;
+                    X_MOVE = Range.clip(x * -0.05, -1, 1);
+                    Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+                }
             }
         }
-        if(targetAngle > SERVO_MAXIMUM_POSITION){
+        if (targetAngle > SERVO_MAXIMUM_POSITION) {
             targetAngle = SERVO_MAXIMUM_POSITION;
-        } else if (targetAngle < SERVO_MINIMUM_POSITION){
+        } else if (targetAngle < SERVO_MINIMUM_POSITION) {
             targetAngle = SERVO_MINIMUM_POSITION;
         }
         launcher.setVelocity(targetSpeed);
@@ -367,7 +368,7 @@ public abstract class solo_op_MAIN extends OpMode {
             loopCounter = 0;
         }
 
-        if(!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b) ) {
+        if (!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b)) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
 
@@ -434,6 +435,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
         }
     }
+
     private void intake(boolean intakeRequested, boolean spinRequested) {
         // how long the feeders spin reverse when intake starts
         double REV_TIME = 1.0;
@@ -465,9 +467,11 @@ public abstract class solo_op_MAIN extends OpMode {
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
-                Current_speed = STOP_SPEED;
-                leftFeeder.setPower(Current_speed);
-                rightFeeder.setPower(Current_speed);
+                if (Current_speed == REV_SPEED) {
+                    Current_speed = STOP_SPEED;
+                    leftFeeder.setPower(Current_speed);
+                    rightFeeder.setPower(Current_speed);
+                }
                 break;
 
             case START_INTAKE:
@@ -502,6 +506,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
         }
     }
+
     private void AddTelemetry() {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
@@ -511,12 +516,12 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("Current Preset: ", selectedPreset);
         //telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
-        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition()*360);
+        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition() * 360);
         //telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
         //telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", launcher.getVelocity());
-       // telemetry.addData("current Power- launcher", launcher.getPower());
+        // telemetry.addData("current Power- launcher", launcher.getPower());
 //        telemetry.addData("","");
 //        telemetry.addData("intake target RPM", INTAKE_SPEED);
 //        telemetry.addData("current INTAKE velocity", IN_RPM);
@@ -532,13 +537,13 @@ public abstract class solo_op_MAIN extends OpMode {
 //        telemetry.addData("back left wheel speed", BL_RPM);
 //        telemetry.addData("back right wheel speed", BR_RPM);
 //        telemetry.addData("","");
-       // telemetry.addData("Current (Amps)", "%.2f A", amps);
-      //  telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
+        // telemetry.addData("Current (Amps)", "%.2f A", amps);
+        //  telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
 
         telemetry.update();
     }
 
-    private void initialize_drive(){
+    private void initialize_drive() {
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left_drive");// DRIVE SETUP
         backLeftMotor = hardwareMap.get(DcMotorEx.class, "back_left_drive");
         frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
@@ -557,7 +562,8 @@ public abstract class solo_op_MAIN extends OpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
-    private void initialize_launcher(){
+
+    private void initialize_launcher() {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         //launcher motor
         double p = 203;
@@ -568,7 +574,8 @@ public abstract class solo_op_MAIN extends OpMode {
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
         LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
     }
-    private void initialize_feeder(){
+
+    private void initialize_feeder() {
         leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
 
@@ -576,13 +583,15 @@ public abstract class solo_op_MAIN extends OpMode {
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
-    private void initialize_intake(){
+
+    private void initialize_intake() {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
     }
-    private void initialize_pinpoint(){
+
+    private void initialize_pinpoint() {
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
 
         double FORWARD_OFFSET = 1.375;
@@ -600,33 +609,33 @@ public abstract class solo_op_MAIN extends OpMode {
         pinpoint.initialize();
     }
 
-    private void Drive(double forward, double strafe, double rotate){
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate/1.5), 1);
-        if(Math.abs(forward) < 0.02){
+    private void Drive(double forward, double strafe, double rotate) {
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate / 1.5), 1);
+        if (Math.abs(forward) < 0.02) {
             forward = 0;
         }
-        if(Math.abs(strafe) < 0.02){
+        if (Math.abs(strafe) < 0.02) {
             strafe = 0;
         }
-        if(Math.abs(rotate) < 0.02){
+        if (Math.abs(rotate) < 0.02) {
             rotate = 0;
         }
-        if(forward < -1){
+        if (forward < -1) {
             forward = -1;
         }
-        if(strafe < -1){
+        if (strafe < -1) {
             strafe = -1;
         }
-        if(rotate < -1) {
+        if (rotate < -1) {
             rotate = -1;
         }
-        if(forward > 1){
+        if (forward > 1) {
             forward = 1;
         }
-        if(strafe > 1){
+        if (strafe > 1) {
             strafe = 1;
         }
-        if(rotate > 1) {
+        if (rotate > 1) {
             rotate = 1;
         }
         //rotate = Math.pow(rotate,3);
@@ -636,8 +645,7 @@ public abstract class solo_op_MAIN extends OpMode {
         double BR_MAX_RPM = 435;
         if (gamepad1.right_stick_button) {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
-        }
-        else{
+        } else {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
 
         }
@@ -651,10 +659,10 @@ public abstract class solo_op_MAIN extends OpMode {
         BL_RPM = (TPS_BL * 60) / TPR_435;
         FR_RPM = (TPS_FR * 60) / TPR_435;
         FL_RPM = (TPS_FL * 60) / TPR_435;
-        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate)/denominator),1)* FL_MAX_RPM)   * TPR_435) / 60.0;
-        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate)/denominator),1)* BL_MAX_RPM) * TPR_435) / 60.0;
-        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate)/denominator),1)* BR_MAX_RPM) * TPR_435) / 60.0;
-        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate)/denominator),1)* FR_MAX_RPM) * TPR_435) / 60.0;
+        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate) / denominator), 1) * FL_MAX_RPM) * TPR_435) / 60.0;
+        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate) / denominator), 1) * BL_MAX_RPM) * TPR_435) / 60.0;
+        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate) / denominator), 1) * BR_MAX_RPM) * TPR_435) / 60.0;
+        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate) / denominator), 1) * FR_MAX_RPM) * TPR_435) / 60.0;
 
         //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
         //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
@@ -698,6 +706,7 @@ public abstract class solo_op_MAIN extends OpMode {
         BACK,
         OFF
     }
+
     enum CanLaunch {
         OFF,//LIGHT will be off,
         READY,//GREEN, RPM in range and AMPS not to high, intake off, everything is correct
