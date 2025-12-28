@@ -10,7 +10,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -55,8 +54,8 @@ public abstract class solo_op_MAIN extends OpMode {
     private boolean launchRequested = false;
     private long lastFireTime = 0;
     private static final long FIRE_INTERVAL = 500;
-    private int loopCounter = 0;
     private double cachedLauncherVelocity = 0;
+    private double cachedIntakeVelocity = 0;
 
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
@@ -75,7 +74,6 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx backLeftMotor = null;
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
-    double velocity = 0;
 
     AnalogInput floodgate;
     private double X_MOVE = 0;
@@ -260,8 +258,9 @@ public abstract class solo_op_MAIN extends OpMode {
         double ON_TIME = .5;
         double OFF_TIME = 1;
 
-        // Cache velocity once per loop to avoid multiple I2C reads
+        // Cache velocities once per loop to avoid multiple I2C reads
         cachedLauncherVelocity = launcher.getVelocity();
+        cachedIntakeVelocity = intake.getVelocity();
 
         // Fixed canlaunch logic - previous version always overwrote with NOT_READY
         boolean velocityInRange = (cachedLauncherVelocity >= targetSpeed - 60) && (cachedLauncherVelocity <= targetSpeed + 60);
@@ -314,9 +313,19 @@ public abstract class solo_op_MAIN extends OpMode {
                     detection = Detection;
                 }
             }
+        }
 
-            if (detection != null) {
-                if (gamepad1.right_trigger >= 0.2) {// MAPPING
+        // Always add AprilTag telemetry for consistent display (prevents flickering)
+        if (detection != null) {
+            telemetry.addData("Detected Tag ID", detection.id);
+            telemetry.addData("Angle Offset", "%.2f", detection.ftcPose.z);
+        } else {
+            telemetry.addData("Detected Tag ID", "None");
+            telemetry.addData("Angle Offset", "N/A");
+        }
+
+        if (detection != null) {
+            if (gamepad1.right_trigger >= 0.2) {// MAPPING
                     //double z = detection.ftcPose.x;   // left/right
                     double y = detection.ftcPose.y;   // forward/back
                     double x = detection.ftcPose.z;   // up/down
@@ -343,21 +352,13 @@ public abstract class solo_op_MAIN extends OpMode {
                     X_MOVE = Range.clip(x * -0.05, -1, 1);
                     Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
                 }
-            }
         }
-        if (targetAngle > SERVO_MAXIMUM_POSITION) {
-            targetAngle = SERVO_MAXIMUM_POSITION;
-        } else if (targetAngle < SERVO_MINIMUM_POSITION) {
-            targetAngle = SERVO_MINIMUM_POSITION;
-        }
+
         launcher.setVelocity(targetSpeed);
 
-        // Throttle telemetry to every 5 loops to reduce lag
-        loopCounter++;
-        if (loopCounter >= 5) {
-            AddTelemetry();
-            loopCounter = 0;
-        }
+        // Always add telemetry data and update for consistent display
+        AddTelemetry();
+        telemetry.update();
 
         if (!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b)) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
@@ -401,9 +402,8 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
 
             case SPIN_UP:
-                double velocity = launcher.getVelocity();
-                // normal transition when launcher reaches target RPM
-                if (velocity >= targetSpeed - 60 && velocity <= targetSpeed + 60) {
+                // Use cached velocity - normal transition when launcher reaches target RPM
+                if (cachedLauncherVelocity >= targetSpeed - 60 && cachedLauncherVelocity <= targetSpeed + 60) {
                     launchState = LaunchState.LAUNCH;
                 }
                 break;
@@ -476,7 +476,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
             case INTAKE:
                 intake_ramp.setPosition(INTAKE_POS);
-                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
+                IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60); // tps / tpr * 60(sec to min)
                 IN_TARGET_RPM = ((INTAKE_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 LEFT_LAUNCH_SERVO.setPosition(0);
@@ -487,7 +487,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
             case SPIN:
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
-                IN_RPM = ((intake.getVelocity() / TPR_1620) * 60);
+                IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60);
                 IN_TARGET_RPM = ((SPIN_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 intake_ramp.setPosition(LAUNCH_POS);
@@ -501,7 +501,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private void AddTelemetry() {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
-        IN_RPM = ((intake.getVelocity() / TPR_1620) * 60); // tps / tpr * 60(sec to min)
+        IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60); // tps / tpr * 60(sec to min)
 
         telemetry.addData("Current (Amps)", "%.2f A", amps);
         telemetry.addData("Current Preset: ", selectedPreset);
@@ -511,7 +511,7 @@ public abstract class solo_op_MAIN extends OpMode {
         //telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
         //telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
-        telemetry.addData("current velocity", launcher.getVelocity());
+        telemetry.addData("current velocity", cachedLauncherVelocity);
         // telemetry.addData("current Power- launcher", launcher.getPower());
 //        telemetry.addData("","");
 //        telemetry.addData("intake target RPM", INTAKE_SPEED);
@@ -530,8 +530,7 @@ public abstract class solo_op_MAIN extends OpMode {
 //        telemetry.addData("","");
         // telemetry.addData("Current (Amps)", "%.2f A", amps);
         //  telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
-
-        telemetry.update();
+        // Don't call telemetry.update() here - it's called at the end of loop()
     }
 
     private void initialize_drive() {
