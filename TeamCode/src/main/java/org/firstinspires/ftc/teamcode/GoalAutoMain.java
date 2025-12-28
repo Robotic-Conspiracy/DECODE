@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 @Config
-public abstract class The_Fourth_Auto extends OpMode {
+public abstract class GoalAutoMain extends OpMode {
   protected DcMotor leftFrontDrive;
   protected DcMotor rightFrontDrive;
   protected DcMotor leftBackDrive;
