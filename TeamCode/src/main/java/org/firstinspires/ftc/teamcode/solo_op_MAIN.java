@@ -49,6 +49,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     // Performance optimization flags
     private boolean lastRightBumper = false;
+    private boolean launchRequested = false;
     private long lastFireTime = 0;
     private static final long FIRE_INTERVAL = 500;
     private int loopCounter = 0;
@@ -375,40 +376,35 @@ public abstract class solo_op_MAIN extends OpMode {
 
         // Fire on initial press
         if (rightBumper && !lastRightBumper) {
-            launch(true);
+            launchRequested = true;
             lastFireTime = now;
         }
 
         // Continuous fire when held (after interval)
-        if (rightBumper && (now - lastFireTime > FIRE_INTERVAL)) {
-            launch(true);
+        if (rightBumper && (now - lastFireTime > FIRE_INTERVAL) && launchState == LaunchState.IDLE) {
+            launchRequested = true;
             lastFireTime = now;
         }
 
         lastRightBumper = rightBumper;
 
+        // Always call launch() to process the state machine
+        launch();
+
         //launch(gamepad1.rightBumperWasPressed());// MAPPING
-        intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPING
+        intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPPING
 
 
     }
 
-    private long spinUpStartMs = 0;
-    private static final long SPIN_UP_TIMEOUT_MS = 2000; // 2 seconds timeout for spin-up
-
-    private void launch(boolean launchRequested) {
-        // If currently feeding, ignore new requests so we don't extend/reset the feed window
-        if (launchState == LaunchState.LAUNCHING) {
-            return;
-        }
-
+    private void launch() {
         double FEED_TIME_SECONDS = 0.15;
 
         switch (launchState) {
             case IDLE:
                 if (launchRequested) {
+                    launchRequested = false;  // Consume the request
                     launchState = LaunchState.SPIN_UP;
-                    spinUpStartMs = System.currentTimeMillis();
                 }
                 break;
 
@@ -417,11 +413,6 @@ public abstract class solo_op_MAIN extends OpMode {
                 // normal transition when launcher reaches target RPM
                 if (velocity >= targetSpeed - 60 && velocity <= targetSpeed + 60) {
                     launchState = LaunchState.LAUNCH;
-                } else {
-                    // timeout to avoid getting stuck in SPIN_UP
-                    if (System.currentTimeMillis() - spinUpStartMs > SPIN_UP_TIMEOUT_MS) {
-                        launchState = LaunchState.IDLE;
-                    }
                 }
                 break;
 
@@ -713,6 +704,6 @@ public abstract class solo_op_MAIN extends OpMode {
         NOT_READY,//RED: if intake or RMP is wrong
         LAUNCHING,//PURPLE : state while launch is happening, it will turn purple
         INTAKE,
-        ERROR  //FLASHING RED : error indecates RPM drop and motor bog(power set higher than expected with no reason), voltage criticaly low, and AMP draw over set limit, launch dissabled until AMPS drop below set limit to prevent blowing FUSES
+        ERROR  //FLASHING RED : error indicates RPM drop and motor bog(power set higher than expected with no reason), voltage criticaly low, and AMP draw over set limit, launch dissabled until AMPS drop below set limit to prevent blowing FUSES
     }
 }
