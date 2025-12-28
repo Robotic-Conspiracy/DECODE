@@ -6,4 +6,8 @@ public class solo_op_BLUE extends solo_op_MAIN{
     public void set_color(){
         color = "blue";
     }
+
+    public int target_goal_tag() {
+      return 20;
+    }
 }

@@ -45,6 +45,7 @@ public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
 
     abstract void set_color();
+    abstract int target_goal_tag();
 
     GoBildaPinpointDriver pinpoint;
 
@@ -276,7 +277,6 @@ public abstract class solo_op_MAIN extends OpMode {
             canlaunch = CanLaunch.NOT_READY;
         }
 
-
         switch (canlaunch) {
             case OFF:
                 light2.setPosition(1);
@@ -306,25 +306,16 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
         }
 
-
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
         AprilTagDetection detection = null;
         if (!detections.isEmpty()) {
             for (AprilTagDetection Detection : detections) {
-                //if (color.equals("red")) {
-
-                //}
-
-                if (color.equals("red") ? Detection.id == 24 : color.equals("blue") ? Detection.id == 20 : Detection.id == 24 || Detection.id == 20) {
+                if (Detection.id == target_goal_tag()) {
                     detection = Detection;
-                    //telemetry.addData("detected id: ", detection.id);
                 }
             }
+
             if (detection != null) {
-
-
-                //telemetry.addData("angle offset ", detection.ftcPose.z);
-
                 if (gamepad1.right_trigger >= 0.2) {// MAPPING
                     //double z = detection.ftcPose.x;   // left/right
                     double y = detection.ftcPose.y;   // forward/back
