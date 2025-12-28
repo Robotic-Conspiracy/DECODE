@@ -429,7 +429,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     private void intake(boolean intakeRequested, boolean spinRequested) {
         // how long the feeders spin reverse when intake starts
-        double REV_TIME = 1.0;
+        double REV_TIME = 0.2;
         double LAUNCH_POS = 0.61;
         double REV_SPEED = -1.0;
 
