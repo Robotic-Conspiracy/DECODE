@@ -39,9 +39,11 @@ import java.util.List;
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
 @Config
 
-@TeleOp(name = "Main Solo Op - run color")
-public class solo_op_MAIN extends OpMode {
+//@TeleOp(name = "Main Solo Op - run color")
+public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
+    abstract void set_color();
+
     GoBildaPinpointDriver pinpoint;
 
 
@@ -133,6 +135,7 @@ public class solo_op_MAIN extends OpMode {
 
     @Override
     public void init() {
+        set_color();
         launchState = LaunchState.IDLE;
         intakeState = IntakeState.READY;
         selectedPreset = Preset.BACK;
@@ -322,7 +325,7 @@ public class solo_op_MAIN extends OpMode {
 
 
             if(gamepad1.right_trigger >= 0.2){// MAPPING
-                double z = detection.ftcPose.x;   // left/right
+                //double z = detection.ftcPose.x;   // left/right
                 double y = detection.ftcPose.y;   // forward/back
                 double x = detection.ftcPose.z;   // up/down
 
