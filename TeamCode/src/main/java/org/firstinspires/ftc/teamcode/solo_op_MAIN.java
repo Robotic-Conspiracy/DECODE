@@ -316,7 +316,8 @@ public class solo_op_MAIN extends OpMode {
                 }
 
 
-                telemetry.addData("angle offset ", detection.ftcPose.z);
+            assert detection != null;
+            telemetry.addData("angle offset ", detection.ftcPose.z);
 
 
 
