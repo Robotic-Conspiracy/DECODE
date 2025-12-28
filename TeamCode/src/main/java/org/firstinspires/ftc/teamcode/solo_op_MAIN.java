@@ -217,8 +217,8 @@ public abstract class solo_op_MAIN extends OpMode {
 
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
-                    targetSpeed = 2480;
-                    targetAngle = 48;
+                    targetSpeed = 2440;
+                    targetAngle = 52;
                     break;
 
                 case BACK:
