@@ -15,6 +15,11 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.PoseHistory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -24,8 +29,18 @@ public class blue12 extends OpMode {
     private final Pose STARTING_POSE = new Pose(56, 8, Math.toRadians(90));
     private Follower follower;
     private PathChain shootPath1;
-    private PathChain changablePath;
+    private PathChain collectPath1;
     private int timesShot = 0;
+    private Servo angle_thing;
+    private DcMotorEx launcher;
+    private DcMotorEx intake;
+    private Servo leftLaunchServo;
+    private Servo intakeRamp;
+    private CRServo leftFeeder;
+    private CRServo rightFeeder;
+
+    private ElapsedTime feedTimer = new ElapsedTime();
+
 
     private path currentPath = path.MOVE_TO_SHOOT;
     private states currentState = states.NOT_READY;
@@ -37,7 +52,20 @@ public class blue12 extends OpMode {
                 .addPath(new BezierLine(STARTING_POSE, new Pose(55, 12, Math.toRadians(111))))
                 .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(111))
                 .build();
+
         Drawing.init();
+        angle_thing = hardwareMap.get(Servo.class, "left twideler");
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher.setVelocityPIDFCoefficients(203, 1.001, 0.0015, 0.1);
+        launcher.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRamp = hardwareMap.get(Servo.class, "intake ramp");
+        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
+        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
+
     }
 
     @Override
@@ -54,10 +82,40 @@ public class blue12 extends OpMode {
         Drawing.drawDebug(follower);
         switch(currentPath){
             case MOVE_TO_SHOOT:
+                follower.followPath(shootPath1);
                 System.out.println("rad: " + follower.getHeading());
                 System.out.println("deg: " + Math.toDegrees(follower.getHeading()));
                 System.out.println();
+                if(follower.atParametricEnd()){
 
+                    launcher.setVelocity(2480);
+                    angle_thing.setPosition((48)/360.0);
+                    if(launcher.getVelocity() <= 2480+20 && launcher.getVelocity() >= 2480-20){
+                        if(feedTimer.seconds() <= 0.1){
+                            leftFeeder.setPower(1);
+                            rightFeeder.setPower(1);
+                        } else {
+                            leftFeeder.setPower(0);
+                            rightFeeder.setPower(0);
+                            feedTimer.reset();
+                            timesShot++;
+                        }
+                        if(timesShot == 4){
+                            collectPath1 = follower.pathBuilder()
+                                    .addPath(new BezierLine(follower.getPose(), new Pose(45, 35, Math.toRadians(180))))
+                                    .setLinearHeadingInterpolation(111, 180)
+                                    .addPath(new BezierLine(new Pose(45, 35, Math.toRadians(180)), new Pose(15, 36, Math.toRadians(180))))
+                                    .setLinearHeadingInterpolation(180, 180)
+                                    .build();
+                            currentPath = path.COLLECT_BALLS_1;
+                            timesShot = 0;
+                        }
+                    } else {
+                        leftFeeder.setPower(0);
+                        rightFeeder.setPower(0);
+                        feedTimer.reset();
+                    }
+                }
 //                if(follower.atParametricEnd()){
 //                    follower.followPath(shootPath1);
 //                } else if (timesShot < 3){
@@ -70,6 +128,7 @@ public class blue12 extends OpMode {
 
                 break;
             case COLLECT_BALLS_1:
+                follower.followPath(collectPath1);
                 // Logic for collecting balls 1
                 break;
             case COLLECT_BALLS_2:
