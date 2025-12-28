@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-@Autonomous(name = "the 12 blue balls of the holy pantheon")
+@Autonomous(name = "the 12 blue balls", group = "Autonomous")
 public class blue12 extends OpMode {
     private final Pose STARTING_POSE = new Pose(56, 8);
     private Follower follower;

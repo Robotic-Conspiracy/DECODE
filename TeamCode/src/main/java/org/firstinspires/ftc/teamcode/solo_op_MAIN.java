@@ -44,6 +44,7 @@ public class solo_op_MAIN extends OpMode {
     protected String color = "None";
     GoBildaPinpointDriver pinpoint;
 
+
     // Performance optimization flags
     private boolean lastRightBumper = false;
     private long lastFireTime = 0;
@@ -74,17 +75,6 @@ public class solo_op_MAIN extends OpMode {
     private double X_MOVE = 0;
     private double Y_MOVE = 0;
     private double YAW_MOVE = 0;
-    private double x = 0;
-    private double y = 0;
-    private double z = 0;
-    private double roll = 0;
-    private double pitch = 0;
-    private double yaw = 0;
-    private double FL_MAX_RPM = 435;
-    private double FR_MAX_RPM = 435;
-    private double BL_MAX_RPM = 435;
-    private double BR_MAX_RPM = 435;
-    private final double TPR_435 = 384.5;
     public static double INTAKE_RAMP_POS = .8;
     private final double TPR_6k = 28;
     private final double TPR_1620 = 103.8;
@@ -107,12 +97,6 @@ public class solo_op_MAIN extends OpMode {
     double BR_RPM = 0;
     double IN_RPM = 0;
 
-    //launcher motor
-    private final double P = 203;
-    private final double I = 1.001;
-    private final double D = 0.0015;
-    private final double F = 0.1;
-
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
@@ -121,20 +105,20 @@ public class solo_op_MAIN extends OpMode {
 
 
     //configurable vars
-    public static int targetSpeed = 1680;//launch motor speed
+    public static int targetSpeed = 2480;//launch motor speed
     public static double targetAngle = 90-38;
     public static int INTAKE_SPEED = 900;
 
     // other vars and objects
-    private ElapsedTime feedTimer = new ElapsedTime();
-    private ElapsedTime Timer2 = new ElapsedTime();
-    private ElapsedTime Timer3 = new ElapsedTime();
+    private final ElapsedTime feedTimer = new ElapsedTime();
+    private final ElapsedTime Timer2 = new ElapsedTime();
+    private final ElapsedTime Timer3 = new ElapsedTime();
     private LaunchState launchState = null;
     private IntakeState intakeState = null;
     private Preset selectedPreset = null;
     private CanLaunch canlaunch = null;
 
-    private AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
+    private final AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
 
@@ -231,19 +215,19 @@ public class solo_op_MAIN extends OpMode {
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
                     targetSpeed = 2480;
-                    targetAngle = 90-38;
+                    targetAngle = 48;
                     break;
 
                 case BACK:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 90-0;
+                    targetAngle = 90;
                     break;
 
                 case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = 1500;
-                    targetAngle = 48;
+                    targetAngle = 73;
                     break;
             }
         }
@@ -324,19 +308,20 @@ public class solo_op_MAIN extends OpMode {
         AprilTagDetection detection = null;
         if(!detections.isEmpty()){
             for(AprilTagDetection Detection : detections){
-                if(Detection.id == 24 || Detection.id == 20){
+                if(color.equals("red") ? Detection.id == 24 : color.equals("blue") ? Detection.id == 20 : Detection.id == 24 || Detection.id == 20){
                     detection = Detection;
                     telemetry.addData("detected id: ", detection.id);
                     AddTelemetry();
                 }
                 }
 
+
                 telemetry.addData("angle offset ", detection.ftcPose.z);
 
-            if(gamepad1.right_trigger >= 0.2){// MAPPING
 
-                assert detection != null;
-                //double z = detection.ftcPose.x;   // left/right
+
+            if(gamepad1.right_trigger >= 0.2){// MAPPING
+                double z = detection.ftcPose.x;   // left/right
                 double y = detection.ftcPose.y;   // forward/back
                 double x = detection.ftcPose.z;   // up/down
 
@@ -357,7 +342,7 @@ public class solo_op_MAIN extends OpMode {
                 Drive(Y_MOVE,YAW_MOVE,X_MOVE);
             }
             if (gamepad1.b) {
-                assert detection != null;
+
                 double x = detection.ftcPose.z;
                 X_MOVE = Range.clip(x * -0.05, -1, 1);
                 Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
@@ -579,7 +564,12 @@ public class solo_op_MAIN extends OpMode {
     }
     private void initialize_launcher(){
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        launcher.setVelocityPIDFCoefficients(P,I,D,F);
+        //launcher motor
+        double p = 203;
+        double f = 0.1;
+        double i = 1.001;
+        double d = 0.0015;
+        launcher.setVelocityPIDFCoefficients(p, i, d, f);
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
         LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
     }
@@ -645,6 +635,10 @@ public class solo_op_MAIN extends OpMode {
             rotate = 1;
         }
         //rotate = Math.pow(rotate,3);
+        double FL_MAX_RPM = 435;
+        double FR_MAX_RPM = 435;
+        double BL_MAX_RPM = 435;
+        double BR_MAX_RPM = 435;
         if (gamepad1.right_stick_button) {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
@@ -657,14 +651,15 @@ public class solo_op_MAIN extends OpMode {
         double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
         double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
 
+        double TPR_435 = 384.5;
         BR_RPM = (TPS_BR * 60) / TPR_435;
         BL_RPM = (TPS_BL * 60) / TPR_435;
         FR_RPM = (TPS_FR * 60) / TPR_435;
         FL_RPM = (TPS_FL * 60) / TPR_435;
-        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate)/denominator),1)*FL_MAX_RPM)   * TPR_435) / 60.0;
-        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate)/denominator),1)*BL_MAX_RPM) * TPR_435) / 60.0;
-        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate)/denominator),1)*BR_MAX_RPM) * TPR_435) / 60.0;
-        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate)/denominator),1)*FR_MAX_RPM) * TPR_435) / 60.0;
+        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate)/denominator),1)* FL_MAX_RPM)   * TPR_435) / 60.0;
+        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate)/denominator),1)* BL_MAX_RPM) * TPR_435) / 60.0;
+        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate)/denominator),1)* BR_MAX_RPM) * TPR_435) / 60.0;
+        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate)/denominator),1)* FR_MAX_RPM) * TPR_435) / 60.0;
 
         //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
         //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
@@ -676,6 +671,15 @@ public class solo_op_MAIN extends OpMode {
         backRightMotor.setVelocity(BR_TARGET_RPM);
 
     }
+
+    public AprilTagDetection getTargetDetection() {
+        return targetDetection;
+    }
+
+    public void setTargetDetection(AprilTagDetection targetDetection) {
+        this.targetDetection = targetDetection;
+    }
+
     enum IntakeState {
         SPIN,
         INTAKE,
