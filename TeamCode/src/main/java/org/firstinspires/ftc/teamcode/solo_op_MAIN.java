@@ -43,9 +43,13 @@ import java.util.List;
 public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
 
+    // expose a pair of coordinates for subclasses to use; leave undefined (default 0.0) until set at runtime
+    protected double x;
+    protected double y;
+
     abstract void set_color();
     abstract int target_goal_tag();
-
+    abstract double[] back_line_pos();
     GoBildaPinpointDriver pinpoint;
 
 
@@ -59,8 +63,6 @@ public abstract class solo_op_MAIN extends OpMode {
 
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
-    private final double SERVO_MINIMUM_POSITION = 0;
-    private final double SERVO_MAXIMUM_POSITION = 90;
     public final double INTAKE_POS = .84; // .87MAX
     public final int SPIN_SPEED = -500;
     private double Current_speed = STOP_SPEED;
@@ -79,40 +81,21 @@ public abstract class solo_op_MAIN extends OpMode {
     private double X_MOVE = 0;
     private double Y_MOVE = 0;
     private double YAW_MOVE = 0;
-    public static double INTAKE_RAMP_POS = .8;
     private final double TPR_6k = 28;
     private final double TPR_1620 = 103.8;
-    //    //double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
-//    //double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
-//    //double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
-//    double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
-//    double BR_RPM = (TPS_BR * 60) / TPR_435;
-//    double BL_RPM = (TPS_BL * 60) / TPR_435;
-//    double FR_RPM = (TPS_FR * 60) / TPR_435;
-//    double FL_RPM = (TPS_FL * 60) / TPR_435;
-//    private  double FL_TARGET_RPM = (0 * TPR_435) / 60.0;
-//
-//    private double FR_TARGET_RPM = (0 * TPR_435) / 60.0;
-//    private double BL_TARGET_RPM = (0 * TPR_435) / 60.0;
-//    private double BR_TARGET_RPM = (0 * TPR_435) / 60.0;
     double FL_RPM = 0;
     double FR_RPM = 0;
     double BL_RPM = 0;
     double BR_RPM = 0;
     double IN_RPM = 0;
-
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
-
     private Servo intake_ramp = null;
-
-
     //configurable vars
     public static int targetSpeed = 2480;//launch motor speed
     public static double targetAngle = 90 - 38;
     public static int INTAKE_SPEED = 900;
-
     // other vars and objects
     private final ElapsedTime feedTimer = new ElapsedTime();
     private final ElapsedTime Timer2 = new ElapsedTime();
@@ -121,16 +104,12 @@ public abstract class solo_op_MAIN extends OpMode {
     private IntakeState intakeState = null;
     private Preset selectedPreset = null;
     private CanLaunch canlaunch = null;
-
     private final AprilTagProcessor.Builder aprilTagProcessorBuilder = new AprilTagProcessor.Builder();
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
-
     private AprilTagDetection targetDetection = null;
-
     private Servo light1 = null;
     private Servo light2 = null;
-
     private boolean exposure_set = false;
 
 
@@ -193,6 +172,8 @@ public abstract class solo_op_MAIN extends OpMode {
         if (gamepad1.dpadLeftWasPressed()) {// MAPPING
             targetAngle -= (gamepad1.x ? 5 : 1);// MAPPING
         }
+        double SERVO_MAXIMUM_POSITION = 90;
+        double SERVO_MINIMUM_POSITION = 0;
         if (targetAngle > SERVO_MAXIMUM_POSITION) {
             targetAngle = SERVO_MAXIMUM_POSITION;
         } else if (targetAngle < SERVO_MINIMUM_POSITION) {
@@ -595,16 +576,11 @@ public abstract class solo_op_MAIN extends OpMode {
 
     private void initialize_pinpoint() {
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
-
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
-
-
         GoBildaPinpointDriver.GoBildaOdometryPods pods = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
-
         GoBildaPinpointDriver.EncoderDirection forwardDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
         GoBildaPinpointDriver.EncoderDirection lateralDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
-
         pinpoint.setOffsets(FORWARD_OFFSET, LATERAL_OFFSET, DistanceUnit.INCH);
         pinpoint.setEncoderResolution(pods);
         pinpoint.setEncoderDirections(forwardDirection, lateralDirection);
@@ -612,34 +588,16 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void Drive(double forward, double strafe, double rotate) {
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate / 1.5), 1);
-        if (Math.abs(forward) < 0.02) {
-            forward = 0;
-        }
-        if (Math.abs(strafe) < 0.02) {
-            strafe = 0;
-        }
-        if (Math.abs(rotate) < 0.02) {
-            rotate = 0;
-        }
-        if (forward < -1) {
-            forward = -1;
-        }
-        if (strafe < -1) {
-            strafe = -1;
-        }
-        if (rotate < -1) {
-            rotate = -1;
-        }
-        if (forward > 1) {
-            forward = 1;
-        }
-        if (strafe > 1) {
-            strafe = 1;
-        }
-        if (rotate > 1) {
-            rotate = 1;
-        }
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
+        if (Math.abs(forward) < 0.02) {forward = 0;}
+        if (Math.abs(strafe) < 0.02) {strafe = 0;}
+        if (Math.abs(rotate) < 0.02) {rotate = 0;}
+        if (forward < -1) {forward = -1;}
+        if (strafe < -1) {strafe = -1;}
+        if (rotate < -1) {rotate = -1;}
+        if (forward > 1) {forward = 1;}
+        if (strafe > 1) {strafe = 1;}
+        if (rotate > 1) {rotate = 1;}
         //rotate = Math.pow(rotate,3);
         double FL_MAX_RPM = 435;
         double FR_MAX_RPM = 435;
@@ -647,15 +605,11 @@ public abstract class solo_op_MAIN extends OpMode {
         double BR_MAX_RPM = 435;
         if (gamepad1.right_stick_button) {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
-        } else {
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 435;
-
         }
         double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
         double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
         double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
         double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
-
         double TPR_435 = 384.5;
         BR_RPM = (TPS_BR * 60) / TPR_435;
         BL_RPM = (TPS_BL * 60) / TPR_435;
@@ -665,11 +619,6 @@ public abstract class solo_op_MAIN extends OpMode {
         double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate) / denominator), 1) * BL_MAX_RPM) * TPR_435) / 60.0;
         double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate) / denominator), 1) * BR_MAX_RPM) * TPR_435) / 60.0;
         double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate) / denominator), 1) * FR_MAX_RPM) * TPR_435) / 60.0;
-
-        //frontLeftMotor.setPower((forward - strafe - rotate)/denominator);  //old method of power, keeping untill velocity is proven to work, may implement as a fallback if encoders are lost ie; wire gets cut/removed
-        //backLeftMotor.setPower((forward + strafe - rotate)/denominator);
-        //frontRightMotor.setPower((forward + strafe + rotate)/denominator);
-        //backRightMotor.setPower((forward - strafe + rotate)/denominator);
         frontLeftMotor.setVelocity(FL_TARGET_RPM);
         backLeftMotor.setVelocity(BL_TARGET_RPM);
         frontRightMotor.setVelocity(FR_TARGET_RPM);

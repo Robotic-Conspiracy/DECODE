@@ -11,4 +11,8 @@ public class solo_op_RED extends solo_op_MAIN{
     public int target_goal_tag() {
       return 24;
     }
+
+    public double[] back_line_pos() {
+        return new double[]{1,1};
+    }
 }

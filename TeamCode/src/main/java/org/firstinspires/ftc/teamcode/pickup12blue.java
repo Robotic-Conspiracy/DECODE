@@ -11,13 +11,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Pedro Pathing Autonomous coded by visualizer", group = "Autonomous")
+@Autonomous(name = "the 12 bluest of blue balls of the holiest holly pantheist pantheon", group = "Autonomous")
 @Configurable // Panels
 public class pickup12blue extends OpMode {
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
     private int pathState; // Current autonomous path state (state machine)
+    private int nextPathState;
     private Paths paths; // Paths defined in the Paths class
 
     @Override
@@ -63,6 +64,7 @@ public class pickup12blue extends OpMode {
         public PathChain shootPickup3;
         public double Wait14;
         public PathChain Path15;
+
 
         public Paths(Follower follower) {
             shootPreload = follower
@@ -169,7 +171,9 @@ public class pickup12blue extends OpMode {
             case 1:
                 if (!follower.isBusy()) {
                     follower.followPath(paths.shootPreload);
-                    pathState = 12;
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
                 }
                 break;
             case 2:
@@ -199,6 +203,17 @@ public class pickup12blue extends OpMode {
             case 14:
                 break;
             case 15:
+                break;
+            case 100:
+                // TODO use case 100 for aiming to launch
+                pathState = 101;
+                break;
+            case 101:
+                // TODO use case 101 for launch
+                pathState = nextPathState;
+                break;
+            case 102:
+                // TODO use case 102 as a pause to start the intake
                 break;
         }
         return pathState;
