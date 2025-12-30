@@ -10,7 +10,8 @@ public class solo_op_BLUE extends solo_op_MAIN{
     public int target_goal_tag() {
       return 20;
     }
-    public double[] back_line_pos() {
-        return new double[]{1,1};
+    public void back_line_pos() {
+        back_x = 0;
+        back_y = 0;
     }
 }

@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit;
 public class BackOpenFieldAutoBlue extends OpMode {
     public static Follower follower;
     double LAUNCH_POS = 0.61;
-    private ElapsedTime feedTimer = new ElapsedTime();
-    private ElapsedTime waitTimer = new ElapsedTime();
+    private final ElapsedTime feedTimer = new ElapsedTime();
+    private final ElapsedTime waitTimer = new ElapsedTime();
     private int nextPathState = 0;
     private int timesShot = 0;
     double X_MOVE = 0;
@@ -66,14 +66,16 @@ public class BackOpenFieldAutoBlue extends OpMode {
     double IN_TARGET_RPM = 0;
     int timesToShoot = 4;
     private CRServo leftFeeder = null;
-    private CRServo rightFeeder = null;private final double P = 203;
+    private CRServo rightFeeder = null;
+
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
-    public static int targetSpeed = 1680;//launch motor speed
+    public static int targetSpeed = 2440;//launch motor speed
     private Servo intake_ramp = null;
-    public static double targetAngle = 90-38;
+    public static double targetAngle = 52;
     public static int INTAKE_SPEED = 900;
+    private final double P = 203;
     private final double I = 1.001;
     private final double D = 0.0015;
     private final double F = 0.1;
@@ -476,6 +478,10 @@ public class BackOpenFieldAutoBlue extends OpMode {
 
     private void launch() {
         double FEED_TIME_SECONDS = 0.15;
+        final ElapsedTime feedTimer = new ElapsedTime();
+        final ElapsedTime waitTimer = new ElapsedTime();
+        int timesShot = 0;
+        double LAUNCH_POS = 0.61;
 
         // If we've already shot enough for this launch call, do nothing
         if (timesShot >= timesToShoot) {

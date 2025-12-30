@@ -6,6 +6,8 @@
 //
 package org.firstinspires.ftc.teamcode;
 
+import android.annotation.SuppressLint;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -45,12 +47,12 @@ public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
 
     // expose a pair of coordinates for subclasses to use; leave undefined (default 0.0) until set at runtime
-    protected double x;
-    protected double y;
+    protected double back_x;
+    protected double back_y;
 
     abstract void set_color();
     abstract int target_goal_tag();
-    abstract double[] back_line_pos();
+    abstract void back_line_pos();
     GoBildaPinpointDriver pinpoint;
 
 
@@ -147,6 +149,7 @@ public abstract class solo_op_MAIN extends OpMode {
         canlaunch = CanLaunch.ERROR;
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
         pinpoint.update();
@@ -260,17 +263,11 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         switch (canlaunch) {
-            case OFF:
-                light2.setPosition(1);
-                break;
             case READY:
                 light2.setPosition(0.5);
                 break;
             case NOT_READY:
                 light2.setPosition(0.28);
-                break;
-            case LAUNCHING:
-                light2.setPosition(0.611);
                 break;
             case INTAKE:
                 light2.setPosition(0.722);
@@ -580,6 +577,7 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_pinpoint() {
+        back_line_pos();
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
