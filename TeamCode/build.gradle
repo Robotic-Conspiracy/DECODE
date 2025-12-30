@@ -33,9 +33,6 @@ android {
 
     packagingOptions {
         jniLibs.useLegacyPackaging true
-        jniLibs {
-            pickFirsts += ['**/*.so']
-        }
     }
 }
 repositories {

@@ -18,10 +18,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "BLUE 12 balls BACK", group = "Autonomous")
+@Autonomous(name = "RED 12 balls BACK", group = "Autonomous")
 @Configurable // Panels
-public class pickup12blue extends OpMode {
+public class pickup12red  extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
+
     int timesToShoot = 3;
     int timesShot = 0;
     final ElapsedTime feedTimer = new ElapsedTime();
@@ -87,8 +88,8 @@ public class pickup12blue extends OpMode {
         initialize_intake();
         initialize_feeder();
         follower = Constants.createFollower(hardwareMap);
-        // set starting pose to match the first path point (was 72,8) so the follower won't reject the path
-        follower.setStartingPose(new Pose(63, 8, Math.toRadians(90)));
+        // mirrored starting pose across x=72: old x=63 => new x=81
+        follower.setStartingPose(new Pose(81, 8, Math.toRadians(90)));
 
         paths = new Paths(follower); // Build paths
 
@@ -256,33 +257,35 @@ public class pickup12blue extends OpMode {
 
 
         public Paths(Follower follower) {
-            // shootPreload
-            shootPreloadStart = new Pose(63.000, 8.000);
-            shootPreloadEnd = new Pose(57.812, 15.882);
+            // shootPreload (mirrored x: 63 -> 81, 57.812 -> 86.188)
+            shootPreloadStart = new Pose(81.000, 8.000);
+            shootPreloadEnd = new Pose(86.188, 15.882);
             shootPreload = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPreloadStart, shootPreloadEnd)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(113))
+                    // headings mirrored: 90 -> 90, 113 -> 67 (180-113)
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(67))
                     .build();
 
             Wait3 = 1000;
 
-            // prePickup1
-            prePickup1Start = new Pose(57.812, 15.882);
-            prePickup1End = new Pose(52.729, 35.576);
+            // prePickup1 (57.812 -> 86.188, 52.729 -> 91.271)
+            prePickup1Start = new Pose(86.188, 15.882);
+            prePickup1End = new Pose(91.271, 35.576);
             prePickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(prePickup1Start, prePickup1End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(180))
+                    // headings mirrored: 113 -> 67, 180 -> 0
+                    .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(0))
                     .build();
 
-            // pickup1
-            pickup1Start = new Pose(52.729, 35.576);
-            pickup1End = new Pose(16.729, 35.365);
+            // pickup1 (52.729 -> 91.271, 16.729 -> 127.271)
+            pickup1Start = new Pose(91.271, 35.576);
+            pickup1End = new Pose(127.271, 35.365);
             pickup1 = follower
                     .pathBuilder()
                     .addPath(
@@ -291,68 +294,72 @@ public class pickup12blue extends OpMode {
                     .setTangentHeadingInterpolation()
                     .build();
 
-            // shootPickup1
-            shootPickup1Start = new Pose(16.729, 35.365);
-            shootPickup1End = new Pose(58.024, 15.882);
+            // shootPickup1 (16.729 -> 127.271, 58.024 -> 85.976)
+            shootPickup1Start = new Pose(127.271, 35.365);
+            shootPickup1End = new Pose(85.976, 15.882);
             shootPickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPickup1Start, shootPickup1End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(113))
+                    // headings mirrored: 180 -> 0, 113 -> 67
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(67))
                     .build();
 
             Wait7 = 1000;
 
-            // prePickup2
-            prePickup2Start = new Pose(58, 16);
-            prePickup2End = new Pose(52.518, 59.929);
+            // prePickup2 (58 -> 86, 52.518 -> 91.482)
+            prePickup2Start = new Pose(86.000, 16.000);
+            prePickup2End = new Pose(91.482, 59.929);
             prePickup2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(prePickup2Start, prePickup2End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(180))
+                    // headings mirrored: 113 -> 67, 180 -> 0
+                    .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(0))
                     .build();
 
-            // pickUp2
-            pickUp2Start = new Pose(52.518, 59.929);
-            pickUp2End = new Pose(17.365, 59.718);
+            // pickUp2 (52.518 -> 91.482, 17.365 -> 126.635)
+            pickUp2Start = new Pose(91.482, 59.929);
+            pickUp2End = new Pose(126.635, 59.718);
             pickUp2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(pickUp2Start, pickUp2End)
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
-            // shootPickup2
-            shootPickup2Start = new Pose(17.365, 59.718);
-            shootPickup2End = new Pose(58.024, 15.882);
+            // shootPickup2 (17.365 -> 126.635, 58.024 -> 85.976)
+            shootPickup2Start = new Pose(126.635, 59.718);
+            shootPickup2End = new Pose(85.976, 15.882);
             shootPickup2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPickup2Start, shootPickup2End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(113))
+                    // headings mirrored: 180 -> 0, 113 -> 67
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(67))
                     .build();
 
             Wait10 = 1000;
 
-            // prePickup3
-            prePickup3Start = new Pose(58.024, 15.882);
-            prePickup3End = new Pose(50.824, 84.071);
+            // prePickup3 (58.024 -> 85.976, 50.824 -> 93.176)
+            prePickup3Start = new Pose(85.976, 15.882);
+            prePickup3End = new Pose(93.176, 84.071);
             prePickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(prePickup3Start, prePickup3End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(180))
+                    // headings mirrored: 113 -> 67, 180 -> 0
+                    .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(0))
                     .build();
 
-            // pickup3
-            pickup3Start = new Pose(50.824, 84.071);
-            pickup3End = new Pose(17.365, 83.859);
+            // pickup3 (50.824 -> 93.176, 17.365 -> 126.635)
+            pickup3Start = new Pose(93.176, 84.071);
+            pickup3End = new Pose(126.635, 83.859);
             pickup3 = follower
                     .pathBuilder()
                     .addPath(
@@ -361,28 +368,30 @@ public class pickup12blue extends OpMode {
                     .setTangentHeadingInterpolation()
                     .build();
 
-            // shootPickup3
-            shootPickup3Start = new Pose(17.365, 83.859);
-            shootPickup3End = new Pose(59.294, 84.282);
+            // shootPickup3 (17.365 -> 126.635, 59.294 -> 84.706)
+            shootPickup3Start = new Pose(126.635, 83.859);
+            shootPickup3End = new Pose(84.706, 84.282);
             shootPickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPickup3Start, shootPickup3End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                    // headings mirrored: 180 -> 0, 135 -> 45
+
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
                     .build();
 
             Wait14 = 1000;
 
-            Path15Start = new Pose(59.506, 70.518);
-            Path15End = new Pose(25.200, 70.941);
+            Path15Start = new Pose(84.494, 70.518);
+            Path15End = new Pose(118.800, 70.941);
             Path15 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(Path15Start, Path15End)
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
         }
     }
@@ -624,6 +633,7 @@ public class pickup12blue extends OpMode {
                     nextPathState = 2;
                 }
                 break;
+
             case 100:
                 // TODO use case 100 for aiming to launch
                 pathState = 101;
@@ -633,6 +643,8 @@ public class pickup12blue extends OpMode {
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
+
+                // TODO use case 101 for launch
                 doneLaunching = launch();
                 if (doneLaunching){
                     pathState = nextPathState;
@@ -640,6 +652,7 @@ public class pickup12blue extends OpMode {
                 }
                 break;
             case 200:
+                // TODO use case 200 as a pause to start the intake
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
