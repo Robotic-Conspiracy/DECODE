@@ -8,6 +8,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -17,13 +18,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Autonomous(name = "RED 12 balls BACK", group = "Autonomous")
 @Configurable // Panels
-public class pickup12main extends OpMode {
+public class pickup12red2 extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
+
     int timesToShoot = 3;
     int timesShot = 0;
-    public String color;
     final ElapsedTime feedTimer = new ElapsedTime();
     final ElapsedTime waitTimer = new ElapsedTime();
     boolean doneLaunching = false;
@@ -38,7 +39,7 @@ public class pickup12main extends OpMode {
     public static int targetSpeed = 2440;//launch motor speed
     private Servo intake_ramp = null;
     public static double targetAngle = 0.1444;
-    public static int INTAKE_SPEED = 1200;
+    public static int INTAKE_SPEED = 900;
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -87,8 +88,8 @@ public class pickup12main extends OpMode {
         initialize_intake();
         initialize_feeder();
         follower = Constants.createFollower(hardwareMap);
-        // set starting pose to match the first path point (was 72,8) so the follower won't reject the path
-        follower.setStartingPose(new Pose(63, 8, Math.toRadians(90)));
+        // mirrored starting pose across x=72: old x=63 => new x=81
+        follower.setStartingPose(new Pose(81, 8, Math.toRadians(90)));
 
         paths = new Paths(follower); // Build paths
 
@@ -226,20 +227,20 @@ public class pickup12main extends OpMode {
     public static class Paths {
 
         public PathChain shootPreload;
-
+        public double Wait3;
         public PathChain prePickup1;
         public PathChain pickup1;
         public PathChain shootPickup1;
-
+        public double Wait7;
         public PathChain prePickup2;
         public PathChain pickUp2;
         public PathChain shootPickup2;
-
+        public double Wait10;
         public PathChain prePickup3;
         public PathChain pickup3;
         public PathChain shootPickup3;
-
-        public PathChain park;
+        public double Wait14;
+        public PathChain Path15;
 
         // expose start/end poses for diagnostics
         public Pose shootPreloadStart, shootPreloadEnd;
@@ -252,137 +253,145 @@ public class pickup12main extends OpMode {
         public Pose prePickup3Start, prePickup3End;
         public Pose pickup3Start, pickup3End;
         public Pose shootPickup3Start, shootPickup3End;
-        public Pose parkStart, parkEnd;
-        public  int headShootPreload1;
-        public  int headShootPreload2;
-        public int headprePickup11;
-        public int headprePickup12;
-        public int headpickup1;
-        public int headshootPickup11;
-        public int headshootPickup12;
-        public int headprePickup21;
-        public int headprePickup22;
-        public int headpickUp2;
-        public int headshootPickup21;
-        public int headshootPickup22;
-        public int headprePickup31;
-        public int headprePickup32;
-        public int headpickup3;
-        public int headshootPickup31;
-        public int headshootPickup32;
-        public int headpark;
-
+        public Pose Path15Start, Path15End;
 
 
         public Paths(Follower follower) {
-            // shootPreload
+            // shootPreload (mirrored x: 63 -> 81, 57.812 -> 86.188)
+            shootPreloadStart = new Pose(81.000, 8.000);
+            shootPreloadEnd = new Pose(86.188, 15.882);
             shootPreload = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPreloadStart, shootPreloadEnd)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headShootPreload1),Math.toRadians(headShootPreload2))
+                    // headings mirrored: 90 -> 90, 113 -> 67 (180-113)
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(67))
                     .build();
-            // prePickup1
+
+            Wait3 = 1000;
+
+            // prePickup1 (57.812 -> 86.188, 52.729 -> 91.271)
+            prePickup1Start = new Pose(86.188, 15.882);
+            prePickup1End = new Pose(91.271, 35.576);
             prePickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(prePickup1Start, prePickup1End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headprePickup11), Math.toRadians(headprePickup12))
+                    // headings mirrored: 113 -> 67, 180 -> 0
+                    .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(0))
                     .build();
 
-            // pickup1
-
+            // pickup1 (52.729 -> 91.271, 16.729 -> 127.271)
+            pickup1Start = new Pose(91.271, 35.576);
+            pickup1End = new Pose(127.271, 35.365);
             pickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(pickup1Start, pickup1End)
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(headpickup1))
+                    .setTangentHeadingInterpolation()
                     .build();
 
-            // shootPickup1
-
+            // shootPickup1 (16.729 -> 127.271, 58.024 -> 85.976)
+            shootPickup1Start = new Pose(127.271, 35.365);
+            shootPickup1End = new Pose(85.976, 15.882);
             shootPickup1 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPickup1Start, shootPickup1End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headshootPickup11), Math.toRadians(headshootPickup12))
+                    // headings mirrored: 180 -> 0, 113 -> 67
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(67))
                     .build();
 
+            Wait7 = 1000;
 
-
-            // prePickup2
-
+            // prePickup2 (58 -> 86, 52.518 -> 91.482)
+            prePickup2Start = new Pose(86.000, 16.000);
+            prePickup2End = new Pose(91.482, 59.929);
             prePickup2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(prePickup2Start, prePickup2End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headprePickup21), Math.toRadians(headprePickup22))
+                    // headings mirrored: 113 -> 67, 180 -> 0
+                    .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(0))
                     .build();
 
-            // pickUp2
-
+            // pickUp2 (52.518 -> 91.482, 17.365 -> 126.635)
+            pickUp2Start = new Pose(91.482, 59.929);
+            pickUp2End = new Pose(126.635, 59.718);
             pickUp2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(pickUp2Start, pickUp2End)
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(headpickUp2))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
-            // shootPickup2
-
+            // shootPickup2 (17.365 -> 126.635, 58.024 -> 85.976)
+            shootPickup2Start = new Pose(126.635, 59.718);
+            shootPickup2End = new Pose(85.976, 15.882);
             shootPickup2 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPickup2Start, shootPickup2End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headshootPickup21), Math.toRadians(headshootPickup22))
+                    // headings mirrored: 180 -> 0, 113 -> 67
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(67))
                     .build();
 
+            Wait10 = 1000;
 
-
-            // prePickup3
-
+            // prePickup3 (58.024 -> 85.976, 50.824 -> 93.176)
+            prePickup3Start = new Pose(85.976, 15.882);
+            prePickup3End = new Pose(93.176, 84.071);
             prePickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(prePickup3Start, prePickup3End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headprePickup31), Math.toRadians(headprePickup32))
+                    // headings mirrored: 113 -> 67, 180 -> 0
+                    .setLinearHeadingInterpolation(Math.toRadians(67), Math.toRadians(0))
                     .build();
 
-            // pickup3
-
+            // pickup3 (50.824 -> 93.176, 17.365 -> 126.635)
+            pickup3Start = new Pose(93.176, 84.071);
+            pickup3End = new Pose(126.635, 83.859);
             pickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(pickup3Start, pickup3End)
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(headpickup3))
+                    .setTangentHeadingInterpolation()
                     .build();
 
-            // shootPickup3
-
+            // shootPickup3 (17.365 -> 126.635, 59.294 -> 84.706)
+            shootPickup3Start = new Pose(126.635, 83.859);
+            shootPickup3End = new Pose(84.706, 84.282);
             shootPickup3 = follower
                     .pathBuilder()
                     .addPath(
                             new BezierLine(shootPickup3Start, shootPickup3End)
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(headshootPickup31), Math.toRadians(headshootPickup32))
+                    // headings mirrored: 180 -> 0, 135 -> 45
+
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
                     .build();
 
-            park = follower
+            Wait14 = 1000;
+
+            Path15Start = new Pose(84.494, 70.518);
+            Path15End = new Pose(118.800, 70.941);
+            Path15 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(parkStart, parkEnd)
+                            new BezierLine(Path15Start, Path15End)
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(headpark))
+                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
         }
     }
@@ -390,12 +399,6 @@ public class pickup12main extends OpMode {
     public void autonomousPathUpdate() {
         double TPR_1620 = 103.8;
         double LAUNCH_POS = 0.61;
-
-        if(pathState == 3 || pathState == 6 || pathState == 9){
-            follower.setMaxPower(0.35);
-        } else {
-            follower.setMaxPower(1);
-        }
         switch (pathState) {
             case 1:
                 // start the path once and wait for it to complete
@@ -597,13 +600,13 @@ public class pickup12main extends OpMode {
             case 11:
                 if (!waitingForPath && follower != null && !follower.isBusy()) {
                     panelsTelemetry.debug("Action", "Following Path15");
-                    panelsTelemetry.debug("Path NonNull", paths != null && paths.park != null);
-                    double dx = follower.getPose().getX() - paths.parkStart.getX();
-                    double dy = follower.getPose().getY() - paths.parkStart.getY();
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.Path15 != null);
+                    double dx = follower.getPose().getX() - paths.Path15Start.getX();
+                    double dy = follower.getPose().getY() - paths.Path15Start.getY();
                     panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                     panelsTelemetry.update(telemetry);
 
-                    tryFollowWithPoseRetry(paths.park, paths.parkStart, "Path15");
+                    tryFollowWithPoseRetry(paths.Path15, paths.Path15Start, "Path15");
                     waitingForPath = true;
                 }
                 if (waitingForPath && !follower.isBusy()) {
@@ -630,6 +633,7 @@ public class pickup12main extends OpMode {
                     nextPathState = 2;
                 }
                 break;
+
             case 100:
                 // TODO use case 100 for aiming to launch
                 pathState = 101;
@@ -639,6 +643,8 @@ public class pickup12main extends OpMode {
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
+
+                // TODO use case 101 for launch
                 doneLaunching = launch();
                 if (doneLaunching){
                     pathState = nextPathState;
@@ -646,6 +652,7 @@ public class pickup12main extends OpMode {
                 }
                 break;
             case 200:
+                // TODO use case 200 as a pause to start the intake
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
