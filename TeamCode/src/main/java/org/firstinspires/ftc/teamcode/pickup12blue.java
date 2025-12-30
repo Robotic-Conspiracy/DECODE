@@ -167,8 +167,7 @@ public class pickup12blue extends OpMode {
             panelsTelemetry.update(telemetry);
             return;
         }
-        launcher.setVelocity(targetSpeed);
-        LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+
         // Log values to Panels and Driver Station
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Follower Busy", follower.isBusy());
@@ -466,6 +465,10 @@ public class pickup12blue extends OpMode {
                     double dy = follower.getPose().getY() - paths.shootPickup1Start.getY();
                     panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                     panelsTelemetry.update(telemetry);
+                    launcher.setVelocity(targetSpeed);
+                    LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                    intake_ramp.setPosition(LAUNCH_POS);
+                    intake.setVelocity(0);
 
                     tryFollowWithPoseRetry(paths.shootPickup1, paths.shootPickup1Start, "shootPickup1");
                     waitingForPath = true;
@@ -520,6 +523,10 @@ public class pickup12blue extends OpMode {
                     double dy = follower.getPose().getY() - paths.shootPickup2Start.getY();
                     panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                     panelsTelemetry.update(telemetry);
+                    launcher.setVelocity(targetSpeed);
+                    LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                    intake_ramp.setPosition(LAUNCH_POS);
+                    intake.setVelocity(0);
 
                     tryFollowWithPoseRetry(paths.shootPickup2, paths.shootPickup2Start, "shootPickup2");
                     waitingForPath = true;
@@ -574,6 +581,10 @@ public class pickup12blue extends OpMode {
                     double dy = follower.getPose().getY() - paths.shootPickup3Start.getY();
                     panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                     panelsTelemetry.update(telemetry);
+                    launcher.setVelocity(targetSpeed);
+                    LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                    intake_ramp.setPosition(LAUNCH_POS);
+                    intake.setVelocity(0);
 
                     tryFollowWithPoseRetry(paths.shootPickup3, paths.shootPickup3Start, "shootPickup3");
                     waitingForPath = true;
@@ -631,9 +642,11 @@ public class pickup12blue extends OpMode {
                 pathState = 101;
                 break;
             case 101:
+                launcher.setVelocity(targetSpeed);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+
                 // TODO use case 101 for launch
                 doneLaunching = launch();
                 if (doneLaunching){
