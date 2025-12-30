@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import kotlin.NotImplementedError;
 
-@Autonomous(name = "Red Shoot 3 from back no sort no intake")
+@Autonomous(name = "Red 12 ball -- no sort")
 public class BackOpenFieldAutoRed extends BackOpenFieldAuto {
   @Override
   public void move() {
