@@ -19,10 +19,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Configurable // Panels
-public class pickup12main extends OpMode {
+public abstract class pickup12main extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
     int timesToShoot = 3;
     int timesShot = 0;
+    abstract void set_color();
     public String color;
     final ElapsedTime feedTimer = new ElapsedTime();
     final ElapsedTime waitTimer = new ElapsedTime();
@@ -44,7 +45,7 @@ public class pickup12main extends OpMode {
     public Follower follower; // Pedro Pathing follower instance
     private int pathState; // Current autonomous path state (state machine)
     private int nextPathState;
-    private Paths paths; // Paths defined in the Paths class
+    public Paths paths; // Paths defined in the Paths class
     // flag to indicate we've issued a followPath and are waiting for it to finish
     private boolean waitingForPath = false;
 
@@ -102,6 +103,8 @@ public class pickup12main extends OpMode {
         panelsTelemetry.debug("Paths Null?", paths == null);
         panelsTelemetry.debug("Starting Path State", pathState);
         panelsTelemetry.update(telemetry);
+
+        set_color();
     }
     private boolean launch() {
         double FEED_TIME_SECONDS = 0.15;
@@ -271,6 +274,8 @@ public class pickup12main extends OpMode {
         public int headshootPickup31;
         public int headshootPickup32;
         public int headpark;
+
+
 
 
 

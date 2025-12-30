@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED 12 balls BACK", group = "Autonomous")
+@Autonomous(name = "do not run", group = "Autonomous")
 @Configurable // Panels
 public class pickup12red2 extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
