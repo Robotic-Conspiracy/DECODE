@@ -51,7 +51,7 @@ public class blue12 extends OpMode {
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setConstants();
+
         PanelsConfigurables.INSTANCE.refreshClass(this);
         shootPath1 = follower.pathBuilder()
                 .addPath(new BezierLine(STARTING_POSE, new Pose(55, 12, Math.toRadians(111))))
