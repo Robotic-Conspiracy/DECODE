@@ -496,32 +496,11 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", cachedLauncherVelocity);
         telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
-        telemetry.addData("gamepad1 right stick x and y", gamepad1.right_stick_x + " " + gamepad1.left_stick_y);
+        telemetry.addData("gamepad1 right stick x and y", gamepad1.right_stick_x + " " + gamepad1.right_stick_y);
 
 
         // AprilTag telemetry - show all detected tags for consistent display (prevents flickering)
-        if (currentDetections != null && !currentDetections.isEmpty()) {
-            StringBuilder tagIds = new StringBuilder();
-            StringBuilder angles = new StringBuilder();
-            for (int i = 0; i < currentDetections.size(); i++) {
-                AprilTagDetection d = currentDetections.get(i);
-                if (i > 0) {
-                    tagIds.append(", ");
-                    angles.append(", ");
-                }
-                if (d != null) {
-                  tagIds.append(d.id);
-                  if (d.ftcPose != null) {
-                    angles.append(String.format("%.2f", d.ftcPose.z));
-                  }
-                }
-            }
-            telemetry.addData("Detected Tag IDs", tagIds.toString());
-            telemetry.addData("Angle Offsets", angles.toString());
-        } else {
-            telemetry.addData("Detected Tag IDs", "None");
-            telemetry.addData("Angle Offsets", "N/A");
-        }
+
         telemetry.update();
     }
 
