@@ -31,10 +31,26 @@ public class pickup12red extends pickup12main {
     public Pose prePickup3Start, prePickup3End;
     public Pose pickup3Start, pickup3End;
     public Pose shootPickup3Start, shootPickup3End;
-    public Pose Path15Start, Path15End;
-    // ensure heading variables exist (match base class names)
-    public int headShootPreload1;
-    public int headShootPreload2;
+    public Pose parkStart, parkEnd;
+    public  int headShootPreload1;
+    public  int headShootPreload2;
+    public int headprePickup11;
+    public int headprePickup12;
+    public int headpickup1;
+    public int headshootPickup11;
+    public int headshootPickup12;
+    public int headprePickup21;
+    public int headprePickup22;
+    public int headpickUp2;
+    public int headshootPickup21;
+    public int headshootPickup22;
+    public int headprePickup31;
+    public int headprePickup32;
+    public int headpickup3;
+
+    public int headshootPickup31;
+    public int headshootPickup32;
+    public int headpark;
     public void set_color(){
         String color = "red";
         shootPreloadStart = new Pose(81.000, 8.000);
@@ -57,6 +73,38 @@ public class pickup12red extends pickup12main {
         pickup3End = new Pose(126.635, 83.859);
         shootPickup3Start = new Pose(126.635, 83.859);
         shootPickup3End = new Pose(84.706, 84.282);
-        Path15Start = new Pose(84.494, 70.518);
-        Path15End = new Pose(118.800, 70.941);
+        parkStart = new Pose(84.494, 70.518);
+        parkEnd = new Pose(118.800, 70.941);
+
+
+
+
+        headShootPreload1 = 90;
+        headShootPreload2 = 67;
+
+        headprePickup11 = 67;
+        headprePickup12 = 0;
+
+        headpickup1 = 0;
+
+        headshootPickup11 = 0;
+        headshootPickup12 = 67;
+
+        headprePickup21 = 67;
+        headprePickup22 = 0;
+
+        headpickUp2 = 0;
+
+        headshootPickup21 = 0;
+        headshootPickup22 = 67;
+
+        headprePickup31 = 67;
+        headprePickup32 = 0;
+
+        headpickup3 = 0;
+
+        headshootPickup31 = 0;
+        headshootPickup32 = 45;
+
+        headpark = 180;
     }}
