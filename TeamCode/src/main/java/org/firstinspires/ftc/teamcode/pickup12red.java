@@ -18,25 +18,20 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "the 12 redist of red balls of the unholiest unholy pantheon", group = "Autonomous")
+@Autonomous(name = "RED 12 balls BACK", group = "Autonomous")
 @Configurable // Panels
 public class pickup12red  extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
-    private final double TPR_1620 = 103.8;
-    double IN_RPM = 0;
-    private final double LAUNCH_POS = 0.61;
+
     int timesToShoot = 3;
     int timesShot = 0;
     final ElapsedTime feedTimer = new ElapsedTime();
     final ElapsedTime waitTimer = new ElapsedTime();
     boolean doneLaunching = false;
-    public final int SPIN_SPEED = -500;
     private Servo LEFT_LAUNCH_SERVO = null;
     private final double STOP_SPEED = 0.0;
-    private final double FULL_SPEED = 1.0;
     private double Current_speed = STOP_SPEED;
 
-    private double IN_TARGET_RPM = 0;
     private CRServo leftFeeder = null;
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
@@ -113,7 +108,7 @@ public class pickup12red  extends OpMode {
         double FEED_TIME_SECONDS = 0.15;
 
 
-        double LAUNCH_POS = 0.61;
+
 
         // If we've already shot enough for this launch call, do nothing
         if (timesShot >= timesToShoot) {
@@ -125,6 +120,7 @@ public class pickup12red  extends OpMode {
         // Only start a feed cycle when launcher is up to speed and wait timer elapsed
         if ((velocity >= targetSpeed - 200 && velocity <= targetSpeed + 200) && waitTimer.seconds() > 0.5) {
             // Start feeding only if not already feeding
+            double FULL_SPEED = 1.0;
             if (Current_speed != FULL_SPEED) {
                 Current_speed = FULL_SPEED;
                 leftFeeder.setPower(Current_speed);
@@ -141,13 +137,7 @@ public class pickup12red  extends OpMode {
                 waitTimer.reset(); // enforce delay before next shot cycle
             }
         }
-        if (timesShot == timesToShoot) {
-            return true;
-        }
-        if (timesShot < timesToShoot) {
-            return false;
-        }
-        return false;
+        return timesShot == timesToShoot;
     }
 
     @Override
@@ -407,6 +397,8 @@ public class pickup12red  extends OpMode {
     }
 
     public void autonomousPathUpdate() {
+        double TPR_1620 = 103.8;
+        double LAUNCH_POS = 0.61;
         switch (pathState) {
             case 1:
                 // start the path once and wait for it to complete
@@ -559,6 +551,8 @@ public class pickup12red  extends OpMode {
                 }
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
+                    targetSpeed = 2000;
+                    targetAngle = (double) 55 /360;
                     pathState = 200;
                     nextPathState = 9;
                 }
@@ -639,12 +633,7 @@ public class pickup12red  extends OpMode {
                     nextPathState = 2;
                 }
                 break;
-            case 13:
-                break;
-            case 14:
-                break;
-            case 15:
-                break;
+
             case 100:
                 // TODO use case 100 for aiming to launch
                 pathState = 101;
@@ -665,7 +654,7 @@ public class pickup12red  extends OpMode {
             case 200:
                 // TODO use case 200 as a pause to start the intake
                 intake_ramp.setPosition(INTAKE_POS);
-                IN_TARGET_RPM = ((INTAKE_SPEED / 60) * TPR_1620);
+                double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 LEFT_LAUNCH_SERVO.setPosition(0);
                 pathState = nextPathState;
