@@ -91,7 +91,14 @@ public abstract class pickup12main extends OpMode {
         // set starting pose to match the first path point (was 72,8) so the follower won't reject the path
         follower.setStartingPose(new Pose(63, 8, Math.toRadians(90)));
 
-        paths = new Paths(follower); // Build paths
+        // Create Paths object first (without building paths yet)
+        paths = new Paths();
+
+        // set_color() populates the path coordinates on the paths object
+        set_color();
+
+        // Now build the paths using the populated coordinates
+        paths.buildPaths(follower);
 
         // start the autonomous state machine at step 1
         pathState = 1;
@@ -103,8 +110,6 @@ public abstract class pickup12main extends OpMode {
         panelsTelemetry.debug("Paths Null?", paths == null);
         panelsTelemetry.debug("Starting Path State", pathState);
         panelsTelemetry.update(telemetry);
-
-        set_color();
     }
     private boolean launch() {
         double FEED_TIME_SECONDS = 0.15;
@@ -276,10 +281,12 @@ public abstract class pickup12main extends OpMode {
         public int headpark;
 
 
+        // No-arg constructor - fields will be populated by set_color() before buildPaths() is called
+        public Paths() {
+        }
 
-
-
-        public Paths(Follower follower) {
+        // Build all paths using the populated pose/heading fields
+        public void buildPaths(Follower follower) {
             // shootPreload
             shootPreload = follower
                     .pathBuilder()
