@@ -111,6 +111,8 @@ public abstract class solo_op_MAIN extends OpMode {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal portal;
     private AprilTagDetection targetDetection = null;
+    private List<AprilTagDetection> currentDetections = null;
+
     private Servo light1 = null;
     private Servo light2 = null;
     private boolean exposure_set = false;
@@ -223,22 +225,22 @@ public abstract class solo_op_MAIN extends OpMode {
 
         switch (selectedPreset) {
             case CUSTOM:
-                light1.setPosition(1);
+                setLightColor(light1, StatusLightColor.WHITE);
                 break;
             case OFF:
-                light1.setPosition(0.277);
+                setLightColor(light1, StatusLightColor.OFF);
                 break;
             case GOAL:
-                light1.setPosition(0.5);
+                setLightColor(light1, StatusLightColor.ORANGE);
                 break;
             case MIDDLE:
-                light1.setPosition(0.388);
+                setLightColor(light1, StatusLightColor.AZURE);
                 break;
             case JUGGLE:
-                light1.setPosition(0.555);
+                setLightColor(light1, StatusLightColor.SAGE);
                 break;
             case BACK:
-                light1.setPosition(0.722);
+                setLightColor(light1, StatusLightColor.VIOLET);
                 break;
         }
         double ON_TIME = .5;
@@ -263,22 +265,25 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         switch (canlaunch) {
+            case OFF:
+                setLightColor(light2, StatusLightColor.OFF);
+                break;
             case READY:
-                light2.setPosition(0.5);
+                setLightColor(light2, StatusLightColor.GREEN);
                 break;
             case NOT_READY:
-                light2.setPosition(0.28);
+                setLightColor(light2, StatusLightColor.YELLOW);
                 break;
             case INTAKE:
-                light2.setPosition(0.722);
+                setLightColor(light2, StatusLightColor.RED);
                 break;
             case ERROR:
                 // Blink: ON for ON_TIME seconds, OFF for (OFF_TIME - ON_TIME) seconds
                 double t = Timer3.seconds();
                 if (t < ON_TIME) {
-                    light2.setPosition(0.28); // ON
+                    setLightColor(light2, StatusLightColor.RED); // ON
                 } else if (t < OFF_TIME) {
-                    light2.setPosition(0); // OFF
+                    setLightColor(light2, StatusLightColor.OFF); // OFF
                 } else {
                     Timer3.reset(); // restart cycle
                 }
@@ -286,6 +291,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+        currentDetections = detections;  // Store for telemetry
         AprilTagDetection detection = null;
         if (!detections.isEmpty()) {
             for (AprilTagDetection Detection : detections) {
@@ -295,26 +301,6 @@ public abstract class solo_op_MAIN extends OpMode {
             }
         }
 
-        // Always add AprilTag telemetry for consistent display (prevents flickering)
-        // Show all detected tags, not just the target
-        if (!detections.isEmpty()) {
-            StringBuilder tagIds = new StringBuilder();
-            StringBuilder angles = new StringBuilder();
-            for (int i = 0; i < detections.size(); i++) {
-                AprilTagDetection d = detections.get(i);
-                if (i > 0) {
-                    tagIds.append(", ");
-                    angles.append(", ");
-                }
-                tagIds.append(d.id);
-                angles.append(String.format("%.2f", d.ftcPose.z));
-            }
-            telemetry.addData("Detected Tag IDs", tagIds.toString());
-            telemetry.addData("Angle Offsets", angles.toString());
-        } else {
-            telemetry.addData("Detected Tag IDs", "None");
-            telemetry.addData("Angle Offsets", "N/A");
-        }
 
         if (detection != null) {
             if (gamepad1.right_trigger >= 0.2) {// MAPPING
@@ -350,7 +336,6 @@ public abstract class solo_op_MAIN extends OpMode {
 
         // Always add telemetry data and update for consistent display
         AddTelemetry();
-        telemetry.update();
 
         if (!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b)) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
@@ -373,13 +358,10 @@ public abstract class solo_op_MAIN extends OpMode {
 
         lastRightBumper = rightBumper;
 
-        // Always call launch() to process the state machine
+        // Always call launch() to process the launch state machine
         launch();
 
-        //launch(gamepad1.rightBumperWasPressed());// MAPPING
         intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPPING
-
-
     }
 
     private void launch() {
@@ -500,32 +482,35 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("position y", pinpoint.getPosY(DistanceUnit.MM));
         telemetry.addData("angle", pinpoint.getHeading(AngleUnit.DEGREES));
         telemetry.addData("Current Preset: ", selectedPreset);
-        //telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition() * 360);
-        //telemetry.addData("Servo 2 Position: ", intake_ramp.getPosition()*360);
-        //telemetry.addData("","");
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", cachedLauncherVelocity);
-        // telemetry.addData("current Power- launcher", launcher.getPower());
-//        telemetry.addData("","");
-//        telemetry.addData("intake target RPM", INTAKE_SPEED);
-//        telemetry.addData("current INTAKE velocity", IN_RPM);
-//        telemetry.addData("current INTAKE power", intake.getPower());
-//        telemetry.addData("","");
-//        telemetry.addData("front left wheel power", frontLeftMotor.getPower());
-//        telemetry.addData("front right wheel power", frontRightMotor.getPower());
-//        telemetry.addData("back left wheel power", backLeftMotor.getPower());
-//        telemetry.addData("back right wheel power", backRightMotor.getPower());
-//        telemetry.addData("","");
-//        telemetry.addData("front left wheel speed", FL_RPM);
-//        telemetry.addData("front right wheel speed", FR_RPM);
-//        telemetry.addData("back left wheel speed", BL_RPM);
-//        telemetry.addData("back right wheel speed", BR_RPM);
-//        telemetry.addData("","");
-        // telemetry.addData("Current (Amps)", "%.2f A", amps);
-        //  telemetry.addData("Voltage (Sensor)", "%.2f V", voltage);
-        // Don't call telemetry.update() here - it's called at the end of loop()
+
+        // AprilTag telemetry - show all detected tags for consistent display (prevents flickering)
+        if (currentDetections != null && !currentDetections.isEmpty()) {
+            StringBuilder tagIds = new StringBuilder();
+            StringBuilder angles = new StringBuilder();
+            for (int i = 0; i < currentDetections.size(); i++) {
+                AprilTagDetection d = currentDetections.get(i);
+                if (i > 0) {
+                    tagIds.append(", ");
+                    angles.append(", ");
+                }
+                if (d != null) {
+                  tagIds.append(d.id);
+                  if (d.ftcPose != null) {
+                    angles.append(String.format("%.2f", d.ftcPose.z));
+                  }
+                }
+            }
+            telemetry.addData("Detected Tag IDs", tagIds.toString());
+            telemetry.addData("Angle Offsets", angles.toString());
+        } else {
+            telemetry.addData("Detected Tag IDs", "None");
+            telemetry.addData("Angle Offsets", "N/A");
+        }
+        telemetry.update();
     }
 
     private void initialize_drive() {
@@ -566,14 +551,12 @@ public abstract class solo_op_MAIN extends OpMode {
 
         leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
-
     }
 
     private void initialize_intake() {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
-
     }
 
     private void initialize_pinpoint() {
@@ -581,6 +564,7 @@ public abstract class solo_op_MAIN extends OpMode {
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
+
         GoBildaPinpointDriver.GoBildaOdometryPods pods = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
         GoBildaPinpointDriver.EncoderDirection forwardDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
         GoBildaPinpointDriver.EncoderDirection lateralDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
@@ -609,6 +593,7 @@ public abstract class solo_op_MAIN extends OpMode {
         if (gamepad1.right_stick_button) {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
+
         double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
         double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
         double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
@@ -662,11 +647,42 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     enum CanLaunch {
-        OFF,//LIGHT will be off,
-        READY,//GREEN, RPM in range and AMPS not to high, intake off, everything is correct
-        NOT_READY,//RED: if intake or RMP is wrong
-        LAUNCHING,//PURPLE : state while launch is happening, it will turn purple
-        INTAKE,
-        ERROR  //FLASHING RED : error indicates RPM drop and motor bog(power set higher than expected with no reason), voltage criticaly low, and AMP draw over set limit, launch dissabled until AMPS drop below set limit to prevent blowing FUSES
+        OFF, //LIGHT will be off,
+        READY, // RPM in range and AMPS not to high, intake off, everything is correct
+        NOT_READY, // if RMP is wrong
+        //LAUNCHING,// State while launch is happening, it will turn blue
+        INTAKE, // Intake is active
+        ERROR  // Error indicates RPM drop and motor bog(power set higher than expected with no reason), voltage criticaly low, and AMP draw over set limit, launch dissabled until AMPS drop below set limit to prevent blowing FUSES
+    }
+
+    // GoBilda Status Light colors - servo positions map to colors
+    // See: https://www.gobilda.com/rgb-indicator-light-pwm-controlled/
+    enum StatusLightColor {
+        OFF(0.0),
+        RED(0.280),
+        ORANGE(0.333),
+        YELLOW(0.388),
+        SAGE(0.444),
+        GREEN(0.5),
+        AZURE(0.555),
+        BLUE(0.611),
+        INDIGO(0.666),
+        VIOLET(0.722),
+        WHITE(1.0);
+
+        private final double position;
+
+        StatusLightColor(double position) {
+            this.position = position;
+        }
+
+        public double getPosition() {
+            return position;
+        }
+    }
+
+    // Helper method to set light color
+    private void setLightColor(Servo light, StatusLightColor color) {
+        light.setPosition(color.getPosition());
     }
 }
