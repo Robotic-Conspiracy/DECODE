@@ -27,6 +27,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -148,6 +149,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     @Override
     public void loop() {
+        pinpoint.update();
         if (portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
@@ -497,6 +499,9 @@ public abstract class solo_op_MAIN extends OpMode {
         IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60); // tps / tpr * 60(sec to min)
 
         telemetry.addData("Current (Amps)", "%.2f A", amps);
+        telemetry.addData("position x", pinpoint.getPosX(DistanceUnit.MM));
+        telemetry.addData("position y", pinpoint.getPosY(DistanceUnit.MM));
+        telemetry.addData("angle", pinpoint.getHeading(AngleUnit.DEGREES));
         telemetry.addData("Current Preset: ", selectedPreset);
         //telemetry.addData("","");
         telemetry.addData("Servo Target Position: ", targetAngle);

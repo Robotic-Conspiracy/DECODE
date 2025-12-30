@@ -182,13 +182,13 @@ public class pickup12blue extends OpMode {
                     follower.followPath(paths.prePickup1);
                 }
                 if (!follower.isBusy()) {
-                    pathState = 100;
-                    nextPathState = 2;
+                    pathState = 200;
+                    nextPathState = 3;
                 }
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.shootPreload);
+                    follower.followPath(paths.pickup1);
                 }
                 if (!follower.isBusy()) {
                     pathState = 100;
