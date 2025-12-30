@@ -510,6 +510,11 @@ public abstract class solo_op_MAIN extends OpMode {
         frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
         backRightMotor = hardwareMap.get(DcMotorEx.class, "back_right_drive");
 
+        // Set run mode to RUN_USING_ENCODER for velocity control and proper braking
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);// DRIVE SETUP
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
