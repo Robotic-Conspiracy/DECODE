@@ -11,6 +11,10 @@ import android.annotation.SuppressLint;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.PanelsConfigurables;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -31,6 +35,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -80,6 +85,8 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
 
+    public Follower follower;
+
     AnalogInput floodgate;
     private double X_MOVE = 0;
     private double Y_MOVE = 0;
@@ -120,6 +127,10 @@ public abstract class solo_op_MAIN extends OpMode {
 
     @Override
     public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        PanelsConfigurables.INSTANCE.refreshClass(this);
+        Drawing.init();
+        follower.setStartingPose(this.getStartPosition());
         set_color();
         launchState = LaunchState.IDLE;
         intakeState = IntakeState.READY;
@@ -155,6 +166,8 @@ public abstract class solo_op_MAIN extends OpMode {
     @Override
     public void loop() {
         pinpoint.update();
+        follower.updatePose();
+        moveToPoint(gamepad1.a);
         if (portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
@@ -313,16 +326,11 @@ public abstract class solo_op_MAIN extends OpMode {
                     double yaw = detection.ftcPose.pitch; // rotation around sideways axis
 //                double roll = detection.ftcPose.roll;
                     if (Math.abs(x) > 0.5) {
-                        X_MOVE = Range.clip(x * -0.05, -1, 1);
+                        X_MOVE = Range.clip(x * -0.05, -0.5, 0.5);
                         //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
                     }
-                    if (Math.abs(y - 120) > 1) {
-                        Y_MOVE = Range.clip((y - 120) * -0.05, -.5, .5);
-                    }
-                    if (Math.abs(yaw + 25) > 1) {
-                        YAW_MOVE = Range.clip((yaw + 25) * 0.05, -.5, .5);
-                    }
-                    Drive(Y_MOVE, YAW_MOVE, X_MOVE);
+                   //TODO: impliment pedro pathing for moving to position
+                    Drive(0, 0, X_MOVE);
                 }
                 if (gamepad1.b) {
 
@@ -685,5 +693,37 @@ public abstract class solo_op_MAIN extends OpMode {
     // Helper method to set light color
     private void setLightColor(Servo light, StatusLightColor color) {
         light.setPosition(color.getPosition());
+    }
+
+    public abstract Pose getStartPosition();
+    public abstract PathChain pathToTargetPoint(double x, double y, double heading);
+    public void moveToPoint(boolean aIsPressed){
+        if(aIsPressed){
+            switch(selectedPreset){
+                case BACK:
+                    if(color.equals("blue")){
+
+                    } else if(color.equals("red")) {
+
+                    }
+                case GOAL:
+                    if(color.equals("blue")){
+
+                    } else if(color.equals("red")) {
+
+                    }
+                case MIDDLE:
+                    if(color.equals("blue")){
+
+                    } else if(color.equals("red")) {
+
+                    }
+                default:
+                    break;
+
+            }
+        } else {
+            follower.pausePathFollowing();
+        }
     }
 }
