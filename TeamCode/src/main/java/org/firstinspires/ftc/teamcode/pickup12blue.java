@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "the 12 bluest of blue balls of the holiest holly pantheist pantheon", group = "Autonomous")
+@Autonomous(name = "the 12 bluest of blue balls of the holiest holly pantheon", group = "Autonomous")
 @Configurable // Panels
 public class pickup12blue extends OpMode {
 
