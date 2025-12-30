@@ -98,7 +98,7 @@ public abstract class solo_op_MAIN extends OpMode {
     //configurable vars
     public static int targetSpeed = 2480;//launch motor speed
     public static double targetAngle = 90 - 38;
-    public static int INTAKE_SPEED = 900;
+    public static int INTAKE_SPEED = 1200;
     // other vars and objects
     private final ElapsedTime feedTimer = new ElapsedTime();
     private final ElapsedTime Timer2 = new ElapsedTime();
@@ -472,6 +472,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     private void AddTelemetry() {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
