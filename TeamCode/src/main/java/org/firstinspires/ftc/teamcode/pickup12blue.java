@@ -174,29 +174,107 @@ public class pickup12blue extends OpMode {
                 }
                 if (!follower.isBusy()) {
                     pathState = 100;
+                    nextPathState = 2;
                 }
                 break;
             case 2:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.prePickup1);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 3:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 4:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 5:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 6:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 7:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 8:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 9:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 10:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 11:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 12:
+                if (!follower.isBusy()) {
+                    follower.followPath(paths.shootPreload);
+                }
+                if (!follower.isBusy()) {
+                    pathState = 100;
+                    nextPathState = 2;
+                }
                 break;
             case 13:
                 break;
@@ -212,8 +290,8 @@ public class pickup12blue extends OpMode {
                 // TODO use case 101 for launch
                 pathState = nextPathState;
                 break;
-            case 102:
-                // TODO use case 102 as a pause to start the intake
+            case 200:
+                // TODO use case 200 as a pause to start the intake
                 break;
         }
         return pathState;
