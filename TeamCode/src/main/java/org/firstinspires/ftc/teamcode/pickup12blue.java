@@ -22,6 +22,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @Configurable // Panels
 public class pickup12blue extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
+    private final double TPR_1620 = 103.8;
+    double IN_RPM = 0;
+    private final double LAUNCH_POS = 0.61;
     int timesToShoot = 3;
     int timesShot = 0;
     final ElapsedTime feedTimer = new ElapsedTime();
@@ -628,15 +631,22 @@ public class pickup12blue extends OpMode {
                 pathState = 101;
                 break;
             case 101:
+                intake_ramp.setPosition(LAUNCH_POS);
+                intake.setVelocity(0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 // TODO use case 101 for launch
                 doneLaunching = launch();
                 if (doneLaunching){
-                pathState = nextPathState;
-                timesShot = 0;
+                    pathState = nextPathState;
+                    timesShot = 0;
                 }
                 break;
             case 200:
                 // TODO use case 200 as a pause to start the intake
+                intake_ramp.setPosition(INTAKE_POS);
+                IN_TARGET_RPM = ((INTAKE_SPEED / 60) * TPR_1620);
+                intake.setVelocity(IN_TARGET_RPM);
+                LEFT_LAUNCH_SERVO.setPosition(0);
                 pathState = nextPathState;
                 break;
         }
