@@ -390,6 +390,11 @@ public class pickup12blue extends OpMode {
     public void autonomousPathUpdate() {
         double TPR_1620 = 103.8;
         double LAUNCH_POS = 0.61;
+        if(pathState == 3 || pathState == 6 || pathState == 9){
+            follower.setMaxPower(0.35);
+        } else {
+            follower.setMaxPower(1);
+        }
         switch (pathState) {
             case 1:
                 // start the path once and wait for it to complete

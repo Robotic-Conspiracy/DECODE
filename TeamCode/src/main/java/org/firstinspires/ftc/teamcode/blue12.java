@@ -7,6 +7,7 @@ import com.bylazar.field.FieldManager;
 import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
@@ -44,11 +45,13 @@ public class blue12 extends OpMode {
     private ElapsedTime feedTimer = new ElapsedTime();
 
 
+
     private path currentPath = path.MOVE_TO_SHOOT;
     private states currentState = states.NOT_READY;
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
+        follower.setConstants();
         PanelsConfigurables.INSTANCE.refreshClass(this);
         shootPath1 = follower.pathBuilder()
                 .addPath(new BezierLine(STARTING_POSE, new Pose(55, 12, Math.toRadians(111))))
