@@ -1,10 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.soloOP;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 @TeleOp(name = "Solo Op Blue")
-public class solo_op_BLUE extends solo_op_MAIN{
+public class solo_op_BLUE extends solo_op_MAIN {
     @Override
     public void set_color(){
         color = "blue";
