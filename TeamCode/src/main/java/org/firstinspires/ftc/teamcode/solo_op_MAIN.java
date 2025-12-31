@@ -70,6 +70,15 @@ public abstract class solo_op_MAIN extends OpMode {
     private double cachedIntakeVelocity = 0;
     private boolean aprilTagProcessorEnabled = true;  // Track processor state to avoid redundant calls
 
+    // Cached pinpoint values to avoid redundant I2C reads
+    private double cachedPosX = 0;
+    private double cachedPosY = 0;
+    private double cachedHeading = 0;
+
+    // Cached light colors to avoid redundant servo writes
+    private StatusLightColor cachedLight1Color = null;
+    private StatusLightColor cachedLight2Color = null;
+
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
     public final double INTAKE_POS = .84; // .87MAX
@@ -167,6 +176,11 @@ public abstract class solo_op_MAIN extends OpMode {
     @Override
     public void loop() {
         pinpoint.update();
+        // Cache pinpoint values immediately after update to avoid redundant I2C reads
+        cachedPosX = pinpoint.getPosX(DistanceUnit.MM);
+        cachedPosY = pinpoint.getPosY(DistanceUnit.MM);
+        cachedHeading = pinpoint.getHeading(AngleUnit.DEGREES);
+
         follower.updatePose();
         moveToPoint(gamepad1.a);
         if (portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
@@ -495,9 +509,9 @@ public abstract class solo_op_MAIN extends OpMode {
         IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60); // tps / tpr * 60(sec to min)
 
         telemetry.addData("Current (Amps)", "%.2f A", amps);
-        telemetry.addData("position x", pinpoint.getPosX(DistanceUnit.MM));
-        telemetry.addData("position y", pinpoint.getPosY(DistanceUnit.MM));
-        telemetry.addData("angle", pinpoint.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("position x", cachedPosX);
+        telemetry.addData("position y", cachedPosY);
+        telemetry.addData("angle", cachedHeading);
         telemetry.addData("Current Preset: ", selectedPreset);
         telemetry.addData("Servo Target Position: ", targetAngle);
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition() * 360);
@@ -598,15 +612,8 @@ public abstract class solo_op_MAIN extends OpMode {
             FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
         }
 
-        double TPS_FL = frontLeftMotor.getVelocity(); // default is ticks/sec
-        double TPS_BL = backLeftMotor.getVelocity(); // default is ticks/sec
-        double TPS_FR = frontRightMotor.getVelocity(); // default is ticks/sec
-        double TPS_BR = backRightMotor.getVelocity(); // default is ticks/sec
+        // Note: Removed unused velocity reads (getVelocity calls) that were wasting ~12ms per loop
         double TPR_435 = 384.5;
-        BR_RPM = (TPS_BR * 60) / TPR_435;
-        BL_RPM = (TPS_BL * 60) / TPR_435;
-        FR_RPM = (TPS_FR * 60) / TPR_435;
-        FL_RPM = (TPS_FL * 60) / TPR_435;
         double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate) / denominator), 1) * FL_MAX_RPM) * TPR_435) / 60.0;
         double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate) / denominator), 1) * BL_MAX_RPM) * TPR_435) / 60.0;
         double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate) / denominator), 1) * BR_MAX_RPM) * TPR_435) / 60.0;
@@ -685,9 +692,22 @@ public abstract class solo_op_MAIN extends OpMode {
         }
     }
 
-    // Helper method to set light color
+    // Helper method to set light color - only writes when color changes
     private void setLightColor(Servo light, StatusLightColor color) {
-        light.setPosition(color.getPosition());
+        if (light == light1) {
+            if (color != cachedLight1Color) {
+                light.setPosition(color.getPosition());
+                cachedLight1Color = color;
+            }
+        } else if (light == light2) {
+            if (color != cachedLight2Color) {
+                light.setPosition(color.getPosition());
+                cachedLight2Color = color;
+            }
+        } else {
+            // Fallback for any other servo
+            light.setPosition(color.getPosition());
+        }
     }
 
     public abstract Pose getStartPosition();
