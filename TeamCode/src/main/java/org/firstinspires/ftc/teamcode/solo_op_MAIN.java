@@ -68,6 +68,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private static final long FIRE_INTERVAL = 500;
     private double cachedLauncherVelocity = 0;
     private double cachedIntakeVelocity = 0;
+    private boolean aprilTagProcessorEnabled = true;  // Track processor state to avoid redundant calls
 
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
@@ -303,7 +304,14 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
         }
 
-        List<AprilTagDetection> detections = aprilTagProcessor.getDetections();
+        // Only enable AprilTag processing when alignment is requested (saves CPU/power)
+        boolean alignmentRequested = gamepad1.right_trigger >= 0.2 || gamepad1.b;
+        if (alignmentRequested != aprilTagProcessorEnabled) {
+            portal.setProcessorEnabled(aprilTagProcessor, alignmentRequested);
+            aprilTagProcessorEnabled = alignmentRequested;
+        }
+
+        List<AprilTagDetection> detections = alignmentRequested ? aprilTagProcessor.getDetections() : java.util.Collections.emptyList();
         currentDetections = detections;  // Store for telemetry
         AprilTagDetection detection = null;
         if (!detections.isEmpty()) {
