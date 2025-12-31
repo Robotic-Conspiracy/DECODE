@@ -281,6 +281,7 @@ public abstract class pickup12main extends OpMode {
         public int headpark;
 
 
+
         // No-arg constructor - fields will be populated by set_color() before buildPaths() is called
         public Paths() {
         }
