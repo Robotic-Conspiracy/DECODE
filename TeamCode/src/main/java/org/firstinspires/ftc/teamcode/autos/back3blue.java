@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.autos;
 
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+@Autonomous(name = "BLUE 3 BACK", group = "Autonomous")
 public class back3blue extends back3main{
     public void set_starting_pose(){
         starting_pose_x = 63;

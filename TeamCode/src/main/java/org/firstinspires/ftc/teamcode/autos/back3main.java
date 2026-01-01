@@ -204,6 +204,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             }
         }
 
+
         private void tryFollowWithPoseRetry(PathChain path, Pose startPose, String pathName) {
             if (path == null) {
                 panelsTelemetry.debug("tryFollow", pathName + " path is null");
@@ -283,9 +284,9 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     if (!waitingForPath && follower != null && !follower.isBusy()) {
                         panelsTelemetry.debug("Action", "Following prePickup1");
                         panelsTelemetry.debug("Path NonNull", paths != null && paths.prePickup1 != null);
-                        double dx = follower.getPose().getX() - paths.park.getX();
-                        double dy = follower.getPose().getY() - paths.park.getY();
-                        panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                        //double dx = follower.getPose().getX() - paths.park.getX();
+                        //double dy = follower.getPose().getY() - paths.park.getY();
+                        //panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                         panelsTelemetry.update(telemetry);
 
                         tryFollowWithPoseRetry(paths.prePickup1, paths.prePickup1Start, "prePickup1");
