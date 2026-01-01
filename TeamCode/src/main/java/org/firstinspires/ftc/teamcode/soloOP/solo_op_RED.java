@@ -20,16 +20,16 @@ public class solo_op_RED extends solo_op_MAIN {
         back_y = 0;
     }
 
-    @Override
-    public Pose getStartPosition() {
-        return new Pose(118.8, 70.941, 0);
-    }
-
-    @Override
-    public PathChain pathToTargetPoint(double x, double y, double heading) {
-        return this.follower.pathBuilder()
-                .addPath(new BezierLine(this.follower.getPose(), new Pose(x, y, heading)))
-                .setLinearHeadingInterpolation(this.follower.getHeading(), heading)
-                .build();
-    }
+//    @Override
+//    public Pose getStartPosition() {
+//        return new Pose(118.8, 70.941, 0);
+//    }
+//
+//    @Override
+//    public PathChain pathToTargetPoint(double x, double y, double heading) {
+//        return this.follower.pathBuilder()
+//                .addPath(new BezierLine(this.follower.getPose(), new Pose(x, y, heading)))
+//                .setLinearHeadingInterpolation(this.follower.getHeading(), heading)
+//                .build();
+//    }
 }

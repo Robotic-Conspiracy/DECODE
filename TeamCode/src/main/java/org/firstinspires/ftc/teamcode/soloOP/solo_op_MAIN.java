@@ -12,9 +12,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.PanelsConfigurables;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
+//import com.pedropathing.follower.Follower;
+//import com.pedropathing.geometry.Pose;
+//import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -35,7 +35,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
+//import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -103,7 +103,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
 
-    public Follower follower;
+    //public Follower follower;
 
     AnalogInput floodgate;
     private double X_MOVE = 0;
@@ -145,10 +145,10 @@ public abstract class solo_op_MAIN extends OpMode {
 
     @Override
     public void init() {
-        follower = Constants.createFollower(hardwareMap);
+        //follower = Constants.createFollower(hardwareMap);
         PanelsConfigurables.INSTANCE.refreshClass(this);
 
-        follower.setStartingPose(this.getStartPosition());
+        //follower.setStartingPose(this.getStartPosition());
         set_color();
         launchState = LaunchState.IDLE;
         intakeState = IntakeState.READY;
@@ -189,7 +189,7 @@ public abstract class solo_op_MAIN extends OpMode {
         cachedPosY = pinpoint.getPosY(DistanceUnit.MM);
         cachedHeading = pinpoint.getHeading(AngleUnit.DEGREES);
 
-        follower.updatePose();
+        //follower.updatePose();
         moveToPoint(gamepad1.a);
         if (portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
@@ -757,8 +757,8 @@ public abstract class solo_op_MAIN extends OpMode {
         return correction;
     }
 
-    public abstract Pose getStartPosition();
-    public abstract PathChain pathToTargetPoint(double x, double y, double heading);
+    //public abstract Pose getStartPosition();
+    //public abstract PathChain pathToTargetPoint(double x, double y, double heading);
     public void moveToPoint(boolean aIsPressed){
         if(aIsPressed){
             switch(selectedPreset){
@@ -785,7 +785,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
             }
         } else {
-            follower.pausePathFollowing();
+            //follower.pausePathFollowing();
         }
     }
 }
