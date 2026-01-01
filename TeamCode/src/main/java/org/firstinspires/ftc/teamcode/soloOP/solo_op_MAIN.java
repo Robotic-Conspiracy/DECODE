@@ -12,9 +12,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.PanelsConfigurables;
-//import com.pedropathing.follower.Follower;
-//import com.pedropathing.geometry.Pose;
-//import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -35,7 +32,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-//import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -51,13 +47,8 @@ import java.util.List;
 public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
 
-    // expose a pair of coordinates for subclasses to use; leave undefined (default 0.0) until set at runtime
-    protected double back_x;
-    protected double back_y;
-
     abstract void set_color();
     abstract int target_goal_tag();
-    abstract void back_line_pos();
     GoBildaPinpointDriver pinpoint;
 
 
@@ -106,8 +97,6 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx frontRightMotor = null;
     private DcMotorEx backRightMotor = null;
 
-    //public Follower follower;
-
     AnalogInput floodgate;
     private double X_MOVE = 0;
     private double Y_MOVE = 0;
@@ -148,10 +137,8 @@ public abstract class solo_op_MAIN extends OpMode {
 
     @Override
     public void init() {
-        //follower = Constants.createFollower(hardwareMap);
         PanelsConfigurables.INSTANCE.refreshClass(this);
 
-        //follower.setStartingPose(this.getStartPosition());
         set_color();
         launchState = LaunchState.IDLE;
         intakeState = IntakeState.READY;
@@ -192,8 +179,6 @@ public abstract class solo_op_MAIN extends OpMode {
         cachedPosY = pinpoint.getPosY(DistanceUnit.MM);
         cachedHeading = pinpoint.getHeading(AngleUnit.DEGREES);
 
-        //follower.updatePose();
-        moveToPoint(gamepad1.a);
         if (portal.getCameraState() == VisionPortal.CameraState.STREAMING && !exposure_set) {
             ExposureControl exposureControl = portal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
@@ -600,7 +585,6 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_pinpoint() {
-        back_line_pos();
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
@@ -770,37 +754,5 @@ public abstract class solo_op_MAIN extends OpMode {
         lastAlignmentTime = currentTime;
 
         return correction;
-    }
-
-    //public abstract Pose getStartPosition();
-    //public abstract PathChain pathToTargetPoint(double x, double y, double heading);
-    public void moveToPoint(boolean aIsPressed){
-        if(aIsPressed){
-            switch(selectedPreset){
-                case BACK:
-                    if(color.equals("blue")){
-
-                    } else if(color.equals("red")) {
-
-                    }
-                case GOAL:
-                    if(color.equals("blue")){
-
-                    } else if(color.equals("red")) {
-
-                    }
-                case MIDDLE:
-                    if(color.equals("blue")){
-
-                    } else if(color.equals("red")) {
-
-                    }
-                default:
-                    break;
-
-            }
-        } else {
-            //follower.pausePathFollowing();
-        }
     }
 }
