@@ -43,7 +43,7 @@ public class pickup12blue extends pickup12main {
         paths.shootPickup3End = new Pose(58, 84);
 
         paths.parkStart = new Pose(58, 84);
-        paths.parkEnd = new Pose(25, 68);
+        paths.parkEnd = new Pose(44, 68);
 
         paths.headShootPreload1 = 90;
         paths.headShootPreload2 = backlineAngle;

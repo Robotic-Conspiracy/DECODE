@@ -12,38 +12,39 @@ public class pickup12red extends pickup12main {
     public void set_color(){
         String color = "red";
         int tagToAim = 24;
-        paths.shootPreloadStart = new Pose(81.000, 8.000);
-        paths.shootPreloadEnd = new Pose(86.188, 15.882);
+        // Mirrored from blue across x = 72 -> x' = 144 - x
+        paths.shootPreloadStart = new Pose(81.000, 8.000); // from blue 63.000
+        paths.shootPreloadEnd = new Pose(86, 16); // from blue 58
 
-        paths.prePickup1Start = new Pose(86.188, 15.882);
-        paths.prePickup1End = new Pose(91.271, 35.576);
+        paths.prePickup1Start = new Pose(86, 16); // from blue 58
+        paths.prePickup1End = new Pose(86, 36); // from blue 58
 
-        paths.pickup1Start = new Pose(91.271, 35.576);
-        paths.pickup1End = new Pose(127.271, 35.365);
+        paths.pickup1Start = new Pose(86, 36); // from blue 58
+        paths.pickup1End = new Pose(136, 36); // from blue 8
 
-        paths.shootPickup1Start = new Pose(127.271, 35.365);
-        paths.shootPickup1End = new Pose(85.976, 15.882);
+        paths.shootPickup1Start = new Pose(136, 36); // from blue 8
+        paths.shootPickup1End = new Pose(86, 16); // from blue 58
 
-        paths.prePickup2Start = new Pose(86.000, 16.000);
-        paths.prePickup2End = new Pose(91.482, 59.929);
+        paths.prePickup2Start = new Pose(86, 16); // from blue 58
+        paths.prePickup2End = new Pose(92, 55); // from blue 52
 
-        paths.pickUp2Start = new Pose(91.482, 59.929);
-        paths.pickUp2End = new Pose(126.635, 59.718);
+        paths.pickUp2Start = new Pose(92, 55); // from blue 52
+        paths.pickUp2End = new Pose(136, 55); // from blue 8
 
-        paths.shootPickup2Start = new Pose(126.635, 59.718);
-        paths.shootPickup2End = new Pose(85.976, 15.882);
+        paths.shootPickup2Start = new Pose(136, 60); // from blue 8 (y was 60)
+        paths.shootPickup2End = new Pose(86, 16); // from blue 58
 
-        paths.prePickup3Start = new Pose(85.976, 15.882);
-        paths.prePickup3End = new Pose(93.176, 84.071);
+        paths.prePickup3Start = new Pose(86, 16); // from blue 58
+        paths.prePickup3End = new Pose(86, 84); // from blue 58
 
-        paths.pickup3Start = new Pose(93.176, 84.071);
-        paths.pickup3End = new Pose(126.635, 83.859);
+        paths.pickup3Start = new Pose(86, 84); // from blue 58
+        paths.pickup3End = new Pose(132, 84); // from blue 12
 
-        paths.shootPickup3Start = new Pose(126.635, 83.859);
-        paths.shootPickup3End = new Pose(84.706, 84.282);
+        paths.shootPickup3Start = new Pose(132, 84); // from blue 12
+        paths.shootPickup3End = new Pose(86, 84); // from blue 58
 
-        paths.parkStart = new Pose(84.494, 70.518);
-        paths.parkEnd = new Pose(118.800, 70.941);
+        paths.parkStart = new Pose(86, 84); // from blue 58
+        paths.parkEnd = new Pose(100, 68); // from blue 25
 
         paths.headShootPreload1 = 90;
         paths.headShootPreload2 = backlineAngle;

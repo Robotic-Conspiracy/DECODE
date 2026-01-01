@@ -429,6 +429,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 2;
+                    targetSpeed = 2440;
                 }
                 break;
             case 2:
@@ -487,6 +488,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 5;
+                    targetSpeed = 2440;
                 }
                 break;
             case 5:
@@ -545,6 +547,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 8;
+                    targetSpeed = 2440;
                 }
                 break;
             case 8:
@@ -662,7 +665,7 @@ public abstract class pickup12main extends OpMode {
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
-                LEFT_LAUNCH_SERVO.setPosition(0);
+                //LEFT_LAUNCH_SERVO.setPosition(0);
                 pathState = nextPathState;
                 break;
         }
