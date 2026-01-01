@@ -369,13 +369,13 @@ public abstract class solo_op_MAIN extends OpMode {
 
         launcher.setVelocity(targetSpeed);
 
-        // Always add telemetry data and update for consistent display
-        AddTelemetry();
-
         // Only use manual drive if alignment is not active
         if (!alignmentActive) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
+
+        // Always add telemetry data and update for consistent display
+        AddTelemetry();
 
         boolean rightBumper = gamepad1.right_bumper;
         long now = System.currentTimeMillis();
@@ -563,6 +563,11 @@ public abstract class solo_op_MAIN extends OpMode {
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        // IMPORTANT: explicitly stop motors so BRAKE is engaged and telemetry reports BRAKE (not FLOAT)
+        frontLeftMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backRightMotor.setPower(0);
     }
 
     private void initialize_launcher() {
