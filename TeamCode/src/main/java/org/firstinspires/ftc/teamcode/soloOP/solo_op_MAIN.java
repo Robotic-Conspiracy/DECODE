@@ -35,7 +35,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -79,6 +78,14 @@ public abstract class solo_op_MAIN extends OpMode {
     // Cached light colors to avoid redundant servo writes
     private StatusLightColor cachedLight1Color = null;
     private StatusLightColor cachedLight2Color = null;
+
+    // AprilTag alignment PD controller variables
+    private double lastAlignmentError = 0;
+    private long lastAlignmentTime = 0;
+    private static final double ALIGNMENT_DEADBAND = 1.5;  // Degrees - stop correcting when within this range
+    private static final double ALIGNMENT_P_GAIN = 0.03;   // Proportional gain (reduced from 0.05)
+    private static final double ALIGNMENT_D_GAIN = 0.015;  // Derivative gain to dampen oscillation
+    private static final double ALIGNMENT_MAX_POWER = 0.35; // Max rotation power (reduced from 0.5)
 
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
@@ -337,30 +344,24 @@ public abstract class solo_op_MAIN extends OpMode {
             }
         }
 
+        // Reset X_MOVE when no target detected to prevent stale values causing drift
+        if (detection == null) {
+            X_MOVE = 0;
+            lastAlignmentError = 0;  // Reset derivative term
+        }
 
         if (detection != null) {
+            // Use ftcPose.z for rotation since camera is mounted rotated 90 degrees
+            X_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
+
             if (gamepad1.right_trigger >= 0.2) {// MAPPING
-                    //double z = detection.ftcPose.x;   // left/right
-                    double y = detection.ftcPose.y;   // forward/back
-                    double x = detection.ftcPose.z;   // up/down
+                // TODO: Move to back line position automatically
+                Drive(0, 0, X_MOVE);
+            }
+            if (gamepad1.b) {
 
-
-//                double pitch = detection.ftcPose.yaw;   // rotation around vertical axis
-                    double yaw = detection.ftcPose.pitch; // rotation around sideways axis
-//                double roll = detection.ftcPose.roll;
-                    if (Math.abs(x) > 0.5) {
-                        X_MOVE = Range.clip(x * -0.05, -0.5, 0.5);
-                        //Drive(Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1), Range.clip(detection.ftcPose.z * -0.05, -1, 1));
-                    }
-                   //TODO: impliment pedro pathing for moving to position
-                    Drive(0, 0, X_MOVE);
-                }
-                if (gamepad1.b) {
-
-                    double x = detection.ftcPose.z;
-                    X_MOVE = Range.clip(x * -0.05, -1, 1);
-                    Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-                }
+                Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+            }
         }
 
         launcher.setVelocity(targetSpeed);
@@ -717,6 +718,38 @@ public abstract class solo_op_MAIN extends OpMode {
             // Fallback for any other servo
             light.setPosition(color.getPosition());
         }
+    }
+
+    /**
+     * Calculates the rotation correction needed to align with an AprilTag using PD control.
+     * @param error The bearing error to the target (degrees)
+     * @return The rotation power to apply (clipped to ALIGNMENT_MAX_POWER)
+     */
+    private double calculateAlignmentCorrection(double error) {
+        // Apply deadband - if error is small enough, stop correcting
+        if (Math.abs(error) < ALIGNMENT_DEADBAND) {
+            lastAlignmentError = 0;
+            return 0;
+        }
+
+        // Calculate derivative (rate of change of error)
+        long currentTime = System.currentTimeMillis();
+        double dt = (currentTime - lastAlignmentTime) / 1000.0;  // Convert to seconds
+        double derivative = 0;
+        if (dt > 0 && dt < 0.5) {  // Only use derivative if reasonable time delta
+            derivative = (error - lastAlignmentError) / dt;
+        }
+
+        // PD control: output = P * error + D * derivative
+        double pTerm = ALIGNMENT_P_GAIN * error;
+        double dTerm = ALIGNMENT_D_GAIN * derivative;
+        double correction = Range.clip(-(pTerm + dTerm), -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
+
+        // Store for next iteration
+        lastAlignmentError = error;
+        lastAlignmentTime = currentTime;
+
+        return correction;
     }
 
     public abstract Pose getStartPosition();
