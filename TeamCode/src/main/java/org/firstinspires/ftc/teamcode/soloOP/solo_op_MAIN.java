@@ -350,6 +350,9 @@ public abstract class solo_op_MAIN extends OpMode {
             lastAlignmentError = 0;  // Reset derivative term
         }
 
+        // Handle driving - only one Drive() call per loop
+        boolean alignmentActive = false;
+
         if (detection != null) {
             // Use ftcPose.z for rotation since camera is mounted rotated 90 degrees
             X_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
@@ -357,10 +360,10 @@ public abstract class solo_op_MAIN extends OpMode {
             if (gamepad1.right_trigger >= 0.2) {// MAPPING
                 // TODO: Move to back line position automatically
                 Drive(0, 0, X_MOVE);
-            }
-            if (gamepad1.b) {
-
+                alignmentActive = true;
+            } else if (gamepad1.b) {
                 Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+                alignmentActive = true;
             }
         }
 
@@ -369,7 +372,8 @@ public abstract class solo_op_MAIN extends OpMode {
         // Always add telemetry data and update for consistent display
         AddTelemetry();
 
-        if (!(gamepad1.right_trigger >= 0.2 && detection != null && gamepad1.b)) {
+        // Only use manual drive if alignment is not active
+        if (!alignmentActive) {
             Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
 
