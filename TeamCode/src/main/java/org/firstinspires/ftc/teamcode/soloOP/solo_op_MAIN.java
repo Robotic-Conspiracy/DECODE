@@ -82,10 +82,13 @@ public abstract class solo_op_MAIN extends OpMode {
     // AprilTag alignment PD controller variables
     private double lastAlignmentError = 0;
     private long lastAlignmentTime = 0;
-    private static final double ALIGNMENT_DEADBAND = 1.5;  // Degrees - stop correcting when within this range
-    private static final double ALIGNMENT_P_GAIN = 0.03;   // Proportional gain (reduced from 0.05)
-    private static final double ALIGNMENT_D_GAIN = 0.015;  // Derivative gain to dampen oscillation
-    private static final double ALIGNMENT_MAX_POWER = 0.35; // Max rotation power (reduced from 0.5)
+    private double filteredDerivative = 0;  // Low-pass filtered derivative to reduce noise
+    private static final double ALIGNMENT_DEADBAND = 2.0;  // Degrees - stop correcting when within this range (increased)
+    private static final double ALIGNMENT_P_GAIN = 0.015;  // Proportional gain (reduced further to prevent overshoot)
+    private static final double ALIGNMENT_D_GAIN = 0.04;   // Derivative gain (increased significantly to dampen oscillation)
+    private static final double ALIGNMENT_MAX_POWER = 0.25; // Max rotation power (reduced to slow down corrections)
+    private static final double ALIGNMENT_MIN_POWER = 0.05; // Minimum power to overcome static friction
+    private static final double DERIVATIVE_FILTER_ALPHA = 0.3; // Low-pass filter coefficient (0-1, lower = more smoothing)
 
     private final double STOP_SPEED = 0.0;
     private final double FULL_SPEED = 1.0;
@@ -526,15 +529,15 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
         telemetry.addData("gamepad1 right stick x and y", gamepad1.right_stick_x + " " + gamepad1.right_stick_y);
 
-        // Motor debug telemetry
-        telemetry.addLine("--- MOTOR DEBUG ---");
-        telemetry.addData("FL Power", "%.3f", frontLeftMotor.getPower());
-        telemetry.addData("FR Power", "%.3f", frontRightMotor.getPower());
-        telemetry.addData("BL Power", "%.3f", backLeftMotor.getPower());
-        telemetry.addData("BR Power", "%.3f", backRightMotor.getPower());
-        telemetry.addData("FL Mode", frontLeftMotor.getMode());
-        telemetry.addData("FL ZeroPower", frontLeftMotor.getZeroPowerBehavior());
-
+//        // Motor debug telemetry - verify BRAKE mode is working
+//        telemetry.addLine("--- MOTOR DEBUG ---");
+//        telemetry.addData("FL Power", "%.3f", frontLeftMotor.getPower());
+//        telemetry.addData("FR Power", "%.3f", frontRightMotor.getPower());
+//        telemetry.addData("BL Power", "%.3f", backLeftMotor.getPower());
+//        telemetry.addData("BR Power", "%.3f", backRightMotor.getPower());
+//        telemetry.addData("FL Mode", frontLeftMotor.getMode());
+//        telemetry.addData("FL ZeroPower", frontLeftMotor.getZeroPowerBehavior());
+//
         // AprilTag telemetry - show all detected tags for consistent display (prevents flickering)
 
         telemetry.update();
@@ -734,21 +737,33 @@ public abstract class solo_op_MAIN extends OpMode {
         // Apply deadband - if error is small enough, stop correcting
         if (Math.abs(error) < ALIGNMENT_DEADBAND) {
             lastAlignmentError = 0;
+            filteredDerivative = 0;  // Reset filtered derivative when in deadband
             return 0;
         }
 
         // Calculate derivative (rate of change of error)
         long currentTime = System.currentTimeMillis();
         double dt = (currentTime - lastAlignmentTime) / 1000.0;  // Convert to seconds
-        double derivative = 0;
+        double rawDerivative = 0;
         if (dt > 0 && dt < 0.5) {  // Only use derivative if reasonable time delta
-            derivative = (error - lastAlignmentError) / dt;
+            rawDerivative = (error - lastAlignmentError) / dt;
         }
+
+        // Apply low-pass filter to derivative to reduce noise-induced oscillation
+        filteredDerivative = DERIVATIVE_FILTER_ALPHA * rawDerivative + (1 - DERIVATIVE_FILTER_ALPHA) * filteredDerivative;
 
         // PD control: output = P * error + D * derivative
         double pTerm = ALIGNMENT_P_GAIN * error;
-        double dTerm = ALIGNMENT_D_GAIN * derivative;
-        double correction = Range.clip(-(pTerm + dTerm), -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
+        double dTerm = ALIGNMENT_D_GAIN * filteredDerivative;
+        double correction = -(pTerm + dTerm);
+
+        // Apply minimum power threshold to overcome static friction (prevents jerky start/stop)
+        if (Math.abs(correction) > 0 && Math.abs(correction) < ALIGNMENT_MIN_POWER) {
+            correction = Math.signum(correction) * ALIGNMENT_MIN_POWER;
+        }
+
+        // Clip to max power
+        correction = Range.clip(correction, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
 
         // Store for next iteration
         lastAlignmentError = error;
