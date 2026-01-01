@@ -526,6 +526,14 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
         telemetry.addData("gamepad1 right stick x and y", gamepad1.right_stick_x + " " + gamepad1.right_stick_y);
 
+        // Motor debug telemetry
+        telemetry.addLine("--- MOTOR DEBUG ---");
+        telemetry.addData("FL Power", "%.3f", frontLeftMotor.getPower());
+        telemetry.addData("FR Power", "%.3f", frontRightMotor.getPower());
+        telemetry.addData("BL Power", "%.3f", backLeftMotor.getPower());
+        telemetry.addData("BR Power", "%.3f", backRightMotor.getPower());
+        telemetry.addData("FL Mode", frontLeftMotor.getMode());
+        telemetry.addData("FL ZeroPower", frontLeftMotor.getZeroPowerBehavior());
 
         // AprilTag telemetry - show all detected tags for consistent display (prevents flickering)
 
