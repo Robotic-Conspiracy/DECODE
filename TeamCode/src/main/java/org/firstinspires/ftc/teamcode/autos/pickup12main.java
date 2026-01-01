@@ -412,7 +412,7 @@ public abstract class pickup12main extends OpMode {
         double LAUNCH_POS = 0.61;
 
         if(pathState == 3 || pathState == 6 || pathState == 9){
-            follower.setMaxPower(0.35);
+            follower.setMaxPower(0.5);
         } else {
             follower.setMaxPower(1);
         }
