@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous(name = "BLUE 12 BACK", group = "Autonomous")
 @Configurable // Panels
 public class pickup12blue extends pickup12main {
-    int backlineAngle = 115;
+    int backlineAngle = 110;
     public void set_color(){
         String color = "blue";
         int tagToAim = 20;
@@ -19,31 +19,31 @@ public class pickup12blue extends pickup12main {
         paths.prePickup1End = new Pose(58, 36);
 
         paths.pickup1Start = new Pose(58, 36);
-        paths.pickup1End = new Pose(15, 36);
+        paths.pickup1End = new Pose(8, 36);
 
-        paths.shootPickup1Start = new Pose(15, 36);
+        paths.shootPickup1Start = new Pose(8, 36);
         paths.shootPickup1End = new Pose(58, 16);
 
         paths.prePickup2Start = new Pose(58, 16);
         paths.prePickup2End = new Pose(52, 55);
 
         paths.pickUp2Start = new Pose(52, 55);
-        paths.pickUp2End = new Pose(18, 55);
+        paths.pickUp2End = new Pose(8, 55);
 
-        paths.shootPickup2Start = new Pose(20, 60);
+        paths.shootPickup2Start = new Pose(8, 60);
         paths.shootPickup2End = new Pose(58, 16);
 
         paths.prePickup3Start = new Pose(58, 16);
         paths.prePickup3End = new Pose(58, 84);
 
         paths.pickup3Start = new Pose(58, 84);
-        paths.pickup3End = new Pose(18, 84);
+        paths.pickup3End = new Pose(12, 84);
 
-        paths.shootPickup3Start = new Pose(18, 84);
+        paths.shootPickup3Start = new Pose(12, 84);
         paths.shootPickup3End = new Pose(58, 84);
 
         paths.parkStart = new Pose(58, 84);
-        paths.parkEnd = new Pose(25, 72);
+        paths.parkEnd = new Pose(25, 68);
 
         paths.headShootPreload1 = 90;
         paths.headShootPreload2 = backlineAngle;

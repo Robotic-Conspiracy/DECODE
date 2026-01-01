@@ -39,7 +39,7 @@ public abstract class pickup12main extends OpMode {
     public static int targetSpeed = 2440;//launch motor speed
     private Servo intake_ramp = null;
     public static double targetAngle = 0.1444;
-    public static int INTAKE_SPEED = 1200;
+    public static int INTAKE_SPEED = 1600; //RPM
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance

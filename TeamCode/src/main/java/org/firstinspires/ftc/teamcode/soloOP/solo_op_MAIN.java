@@ -605,6 +605,14 @@ public abstract class solo_op_MAIN extends OpMode {
         if (strafe > 1) {strafe = 1;}
         if (rotate > 1) {rotate = 1;}
         //rotate = Math.pow(rotate,3);
+        // If no motion requested, use power(0) so BRAKE engages and return
+        if (forward == 0 && strafe == 0 && rotate == 0) {
+            frontLeftMotor.setPower(0);
+            backLeftMotor.setPower(0);
+            frontRightMotor.setPower(0);
+            backRightMotor.setPower(0);
+            return;
+        }
         double FL_MAX_RPM = 435;
         double FR_MAX_RPM = 435;
         double BL_MAX_RPM = 435;
