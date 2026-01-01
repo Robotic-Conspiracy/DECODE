@@ -55,8 +55,8 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             public Pose parkStart, parkEnd;
             public  int headShootPreload1;
             public  int headShootPreload2;
-            public int headpark1;
-            public int headpark2;
+            public int headPark1;
+            public int headPark2;
 
             public Paths(Follower follower) {
                 shootPreload = follower
@@ -85,5 +85,4 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
             return pathState;
         }
-
-}
+    }
