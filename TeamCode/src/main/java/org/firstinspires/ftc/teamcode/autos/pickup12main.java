@@ -22,6 +22,8 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 public abstract class pickup12main extends OpMode {
     public final double INTAKE_POS = .84; // .87MAX
     int timesToShoot = 3;
+    public int starting_pose_x;
+    public int starting_pose_y;
     int timesShot = 0;
     abstract void set_color();
     public String color;
@@ -36,7 +38,7 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    public static int targetSpeed = 2440;//launch motor speed
+    public static int targetSpeed = 2380;//launch motor speed
     private Servo intake_ramp = null;
     public static double targetAngle = 0.1444;
     public static int INTAKE_SPEED = 1600; //RPM
@@ -83,13 +85,15 @@ public abstract class pickup12main extends OpMode {
 
     @Override
     public void init() {
+
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         initialize_launcher();
         initialize_intake();
         initialize_feeder();
         follower = Constants.createFollower(hardwareMap);
         // set starting pose to match the first path point (was 72,8) so the follower won't reject the path
-        follower.setStartingPose(new Pose(63, 8, Math.toRadians(90)));
+        set_starting_pose();
+        follower.setStartingPose(new Pose(starting_pose_x,starting_pose_y,Math.toRadians(90)));
 
         // Create Paths object first (without building paths yet)
         paths = new Paths();
@@ -111,6 +115,9 @@ public abstract class pickup12main extends OpMode {
         panelsTelemetry.debug("Starting Path State", pathState);
         panelsTelemetry.update(telemetry);
     }
+
+    abstract void set_starting_pose();
+
     private boolean launch() {
         double FEED_TIME_SECONDS = 0.15;
 
@@ -125,7 +132,7 @@ public abstract class pickup12main extends OpMode {
         double velocity = launcher.getVelocity();
 
         // Only start a feed cycle when launcher is up to speed and wait timer elapsed
-        if ((velocity >= targetSpeed - 200 && velocity <= targetSpeed + 200) && waitTimer.seconds() > 0.5) {
+        if ((velocity >= targetSpeed - 40 && velocity <= targetSpeed + 40) && waitTimer.seconds() > 0.5) {
             // Start feeding only if not already feeding
             double FULL_SPEED = 1.0;
             if (Current_speed != FULL_SPEED) {
@@ -429,7 +436,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 2;
-                    targetSpeed = 2440;
+                    targetSpeed = 2380;
                 }
                 break;
             case 2:
@@ -488,7 +495,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 5;
-                    targetSpeed = 2440;
+                    targetSpeed = 2380;
                 }
                 break;
             case 5:
@@ -547,7 +554,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 8;
-                    targetSpeed = 2440;
+                    targetSpeed = 2480;
                 }
                 break;
             case 8:
@@ -564,7 +571,7 @@ public abstract class pickup12main extends OpMode {
                 }
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
-                    targetSpeed = 2000;
+                    targetSpeed = 1900;
                     targetAngle = (double) 55 /360;
                     pathState = 200;
                     nextPathState = 9;
@@ -612,12 +619,14 @@ public abstract class pickup12main extends OpMode {
                 break;
             case 11:
                 if (!waitingForPath && follower != null && !follower.isBusy()) {
-                    panelsTelemetry.debug("Action", "Following Path15");
+                    panelsTelemetry.debug("Action", "Following park");
                     panelsTelemetry.debug("Path NonNull", paths != null && paths.park != null);
                     double dx = follower.getPose().getX() - paths.parkStart.getX();
                     double dy = follower.getPose().getY() - paths.parkStart.getY();
                     panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                     panelsTelemetry.update(telemetry);
+                    targetSpeed = -20;
+                    launcher.setVelocity(targetSpeed);
 
                     tryFollowWithPoseRetry(paths.park, paths.parkStart, "Path15");
                     waitingForPath = true;
@@ -628,24 +637,7 @@ public abstract class pickup12main extends OpMode {
                     nextPathState = 0;
                 }
                 break;
-            case 12:
-                if (!waitingForPath && follower != null && !follower.isBusy()) {
-                    panelsTelemetry.debug("Action", "Following shootPreload (12)");
-                    panelsTelemetry.debug("Path NonNull", paths != null && paths.shootPreload != null);
-                    double dx = follower.getPose().getX() - paths.shootPreloadStart.getX();
-                    double dy = follower.getPose().getY() - paths.shootPreloadStart.getY();
-                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
-                    panelsTelemetry.update(telemetry);
 
-                    tryFollowWithPoseRetry(paths.shootPreload, paths.shootPreloadStart, "shootPreload(12)");
-                    waitingForPath = true;
-                }
-                if (waitingForPath && !follower.isBusy()) {
-                    waitingForPath = false;
-                    pathState = 100;
-                    nextPathState = 2;
-                }
-                break;
             case 100:
                 // TODO use case 100 for aiming to launch
                 pathState = 101;

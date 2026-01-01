@@ -9,6 +9,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Configurable // Panels
 public class pickup12red extends pickup12main {
     int backlineAngle = 67;
+    @Override
+    public void set_starting_pose(){
+        starting_pose_x = 81;
+        starting_pose_y = 8;
+
+        //follower.setStartingPose(new Pose(81, 8, Math.toRadians(90)));
+    }
     public void set_color(){
         String color = "red";
         int tagToAim = 24;
