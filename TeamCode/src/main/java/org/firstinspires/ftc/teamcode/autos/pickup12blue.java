@@ -8,42 +8,42 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous(name = "BLUE 12 BACK", group = "Autonomous")
 @Configurable // Panels
 public class pickup12blue extends pickup12main {
-    int backlineAngle = 113;
+    int backlineAngle = 111;
     public void set_color(){
         String color = "blue";
         int tagToAim = 20;
         paths.shootPreloadStart = new Pose(63.000, 8.000);
-        paths.shootPreloadEnd = new Pose(57.812, 15.882);
+        paths.shootPreloadEnd = new Pose(58, 16);
 
-        paths.prePickup1Start = new Pose(57.812, 15.882);
-        paths.prePickup1End = new Pose(52.729, 35.576);
+        paths.prePickup1Start = new Pose(58, 16);
+        paths.prePickup1End = new Pose(58, 36);
 
-        paths.pickup1Start = new Pose(52.729, 35.576);
-        paths.pickup1End = new Pose(16.729, 35.365);
+        paths.pickup1Start = new Pose(58, 36);
+        paths.pickup1End = new Pose(15, 36);
 
-        paths.shootPickup1Start = new Pose(16.729, 35.365);
-        paths.shootPickup1End = new Pose(58.024, 15.882);
+        paths.shootPickup1Start = new Pose(15, 36);
+        paths.shootPickup1End = new Pose(58, 16);
 
         paths.prePickup2Start = new Pose(58, 16);
-        paths.prePickup2End = new Pose(52.518, 59.929);
+        paths.prePickup2End = new Pose(52, 55);
 
-        paths.pickUp2Start = new Pose(52.518, 59.929);
-        paths.pickUp2End = new Pose(17.365, 59.718);
+        paths.pickUp2Start = new Pose(52, 55);
+        paths.pickUp2End = new Pose(18, 55);
 
-        paths.shootPickup2Start = new Pose(17.365, 59.718);
-        paths.shootPickup2End = new Pose(58.024, 15.882);
+        paths.shootPickup2Start = new Pose(20, 60);
+        paths.shootPickup2End = new Pose(58, 16);
 
-        paths.prePickup3Start = new Pose(58.024, 15.882);
-        paths.prePickup3End = new Pose(50.824, 84.071);
+        paths.prePickup3Start = new Pose(58, 16);
+        paths.prePickup3End = new Pose(58, 84);
 
-        paths.pickup3Start = new Pose(50.824, 84.071);
-        paths.pickup3End = new Pose(17.365, 83.859);
+        paths.pickup3Start = new Pose(58, 84);
+        paths.pickup3End = new Pose(18, 84);
 
-        paths.shootPickup3Start = new Pose(17.365, 83.859);
-        paths.shootPickup3End = new Pose(59.294, 84.282);
+        paths.shootPickup3Start = new Pose(18, 84);
+        paths.shootPickup3End = new Pose(58, 84);
 
-        paths.parkStart = new Pose(59.506, 70.518);
-        paths.parkEnd = new Pose(25.200, 70.941);
+        paths.parkStart = new Pose(58, 84);
+        paths.parkEnd = new Pose(25, 72);
 
         paths.headShootPreload1 = 90;
         paths.headShootPreload2 = backlineAngle;
