@@ -654,7 +654,7 @@ public abstract class pickup12main extends OpMode {
                 intake.setVelocity(0);
                 doneLaunching = launch();
                 if (doneLaunching){
-                    pathState = nextPathState;
+                    pathState = 200;
                     timesShot = 0;
                 }
                 break;
