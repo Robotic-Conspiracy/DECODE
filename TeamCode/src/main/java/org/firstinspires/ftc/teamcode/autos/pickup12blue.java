@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous(name = "BLUE 12 BACK", group = "Autonomous")
 @Configurable // Panels
 public class pickup12blue extends pickup12main {
-    int backlineAngle = 111;
+    int backlineAngle = 115;
     public void set_color(){
         String color = "blue";
         int tagToAim = 20;
