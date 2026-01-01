@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.autos;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -85,5 +85,5 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
             return pathState;
         }
-    }
+
 }
