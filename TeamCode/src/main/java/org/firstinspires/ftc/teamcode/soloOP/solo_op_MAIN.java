@@ -599,7 +599,6 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void Drive(double forward, double strafe, double rotate) {
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
         if (Math.abs(forward) < 0.02) {forward = 0;}
         if (Math.abs(strafe) < 0.02) {strafe = 0;}
         if (Math.abs(rotate) < 0.02) {rotate = 0;}
@@ -609,34 +608,23 @@ public abstract class solo_op_MAIN extends OpMode {
         if (forward > 1) {forward = 1;}
         if (strafe > 1) {strafe = 1;}
         if (rotate > 1) {rotate = 1;}
-        //rotate = Math.pow(rotate,3);
-        // If no motion requested, use power(0) so BRAKE engages and return
-        if (forward == 0 && strafe == 0 && rotate == 0) {
-            frontLeftMotor.setPower(0);
-            backLeftMotor.setPower(0);
-            frontRightMotor.setPower(0);
-            backRightMotor.setPower(0);
-            return;
-        }
-        double FL_MAX_RPM = 435;
-        double FR_MAX_RPM = 435;
-        double BL_MAX_RPM = 435;
-        double BR_MAX_RPM = 435;
-        if (gamepad1.right_stick_button) {
-            FL_MAX_RPM = BL_MAX_RPM = FR_MAX_RPM = BR_MAX_RPM = 100;
-        }
 
-        // Note: Removed unused velocity reads (getVelocity calls) that were wasting ~12ms per loop
-        double TPR_435 = 384.5;
-        double FL_TARGET_RPM = ((Math.pow(((forward - strafe - rotate) / denominator), 1) * FL_MAX_RPM) * TPR_435) / 60.0;
-        double FR_TARGET_RPM = ((Math.pow(((forward + strafe + rotate) / denominator), 1) * BL_MAX_RPM) * TPR_435) / 60.0;
-        double BL_TARGET_RPM = ((Math.pow(((forward + strafe - rotate) / denominator), 1) * BR_MAX_RPM) * TPR_435) / 60.0;
-        double BR_TARGET_RPM = ((Math.pow(((forward - strafe + rotate) / denominator), 1) * FR_MAX_RPM) * TPR_435) / 60.0;
-        frontLeftMotor.setVelocity(FL_TARGET_RPM);
-        backLeftMotor.setVelocity(BL_TARGET_RPM);
-        frontRightMotor.setVelocity(FR_TARGET_RPM);
-        backRightMotor.setVelocity(BR_TARGET_RPM);
+        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
 
+        // Slow mode when right stick button is pressed
+        double speedMultiplier = gamepad1.right_stick_button ? 0.23 : 1.0;  // 100/435 ≈ 0.23
+
+        // Calculate power for each wheel (mecanum drive kinematics)
+        double flPower = ((forward - strafe - rotate) / denominator) * speedMultiplier;
+        double frPower = ((forward + strafe + rotate) / denominator) * speedMultiplier;
+        double blPower = ((forward + strafe - rotate) / denominator) * speedMultiplier;
+        double brPower = ((forward - strafe + rotate) / denominator) * speedMultiplier;
+
+        // Use setPower() consistently for reliable ZeroPowerBehavior.BRAKE support
+        frontLeftMotor.setPower(flPower);
+        frontRightMotor.setPower(frPower);
+        backLeftMotor.setPower(blPower);
+        backRightMotor.setPower(brPower);
     }
 
     public AprilTagDetection getTargetDetection() {
