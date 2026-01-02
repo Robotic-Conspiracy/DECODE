@@ -72,6 +72,8 @@ public abstract class The_Fourth_Auto extends OpMode {
         leftBackDrive.setZeroPowerBehavior(BRAKE);
         rightBackDrive.setZeroPowerBehavior(BRAKE);
 
+        launcher.setDirection(DcMotorSimple.Direction.REVERSE);
+
         pod.resetPosAndIMU();
         pod.setPosition(new Pose2D(DistanceUnit.MM,0,0,AngleUnit.RADIANS,0));
     }
