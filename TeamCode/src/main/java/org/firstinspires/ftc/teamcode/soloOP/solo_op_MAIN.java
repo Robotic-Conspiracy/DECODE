@@ -112,8 +112,9 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
+    private static int backlineSpeed = 2400;
     //configurable vars
-    public static int targetSpeed = 2480;//launch motor speed
+    public static int targetSpeed = backlineSpeed;//launch motor speed
     public static double targetAngle = 90 - 38;
     public static int INTAKE_SPEED = 1200;
     // other vars and objects
@@ -232,7 +233,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
-                    targetSpeed = 2440;
+                    targetSpeed = backlineSpeed;
                     targetAngle = 52;
                     break;
 

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous(name = "RED 12 BACK", group = "Autonomous")
 @Configurable // Panels
 public class pickup12red extends pickup12main {
-    int backlineAngle = 67;
+    int backlineAngle = 70;
     @Override
     public void set_starting_pose(){
         starting_pose_x = 81;
