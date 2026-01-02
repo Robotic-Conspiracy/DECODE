@@ -192,35 +192,20 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             public void buildPaths(Follower follower){
                 // Build shootPreload path using the Pose values provided by set_color()
                 // Fallback to safe defaults if the Poses are not set
-                Pose spStart = (shootPreloadStart != null) ? shootPreloadStart : new Pose(63.000, 8);
-                Pose spEnd = (shootPreloadEnd != null) ? shootPreloadEnd : new Pose(60, 11);
-
-                double h1 = (headShootPreload1 != 0) ? headShootPreload1 : 90;
-                double h2 = (headShootPreload2 != 0) ? headShootPreload2 : 113;
-
                 shootPreload = follower
                         .pathBuilder()
                         .addPath(
-                                new BezierLine(spStart, spEnd)
+                                new BezierLine(shootPreloadStart, shootPreloadEnd)
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(h1), Math.toRadians(h2))
+                        .setLinearHeadingInterpolation(Math.toRadians(headPark1), Math.toRadians(headPark2))
                         .build();
-
-                Wait2 = 1;
-
                 // Build park path
-                Pose pStart = (parkStart != null) ? parkStart : new Pose(59.718, 11.435);
-                Pose pEnd = (parkEnd != null) ? parkEnd : new Pose(36.000, 10.800);
-
-                double ph1 = (headPark1 != 0) ? headPark1 : 113;
-                double ph2 = (headPark2 != 0) ? headPark2 : 0;
-
                 park = follower
                         .pathBuilder()
                         .addPath(
-                                new BezierLine(pStart, pEnd)
+                                new BezierLine(parkStart, parkEnd)
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(ph1), Math.toRadians(ph2))
+                        .setLinearHeadingInterpolation(Math.toRadians(headPark1), Math.toRadians(headPark2))
                         .build();
             }
         }
@@ -273,11 +258,11 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             double TPR_1620 = 103.8;
             double LAUNCH_POS = 0.61;
 
-            if (pathState == 3 || pathState == 6 || pathState == 9) {
-                follower.setMaxPower(0.5);
-            } else {
-                follower.setMaxPower(1);
-            }
+            //if (pathState == 3 || pathState == 6 || pathState == 9) {
+                //follower.setMaxPower(0.5);
+            //} else {
+               // follower.setMaxPower(1);
+            //}
             switch (pathState) {
                 case 1:
                     // start the path once and wait for it to complete
@@ -329,7 +314,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     intake.setVelocity(0);
                     doneLaunching = launch();
                     if (doneLaunching){
-                        pathState = 200;
+                        pathState = nextPathState;
                         timesShot = 0;
                     }
                     break;
