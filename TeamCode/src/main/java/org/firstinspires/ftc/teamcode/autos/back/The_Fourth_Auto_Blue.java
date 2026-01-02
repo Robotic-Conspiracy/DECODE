@@ -17,5 +17,6 @@ public class The_Fourth_Auto_Blue extends The_Fourth_Auto{
         leftBackDrive.setPower((forward + strafe - rotate)/denominator);
         rightFrontDrive.setPower((forward + strafe + rotate)/denominator);
         rightBackDrive.setPower((forward - strafe + rotate)/denominator);
+
     }
 }

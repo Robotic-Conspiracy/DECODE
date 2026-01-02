@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         int timesToShoot = 3;
         public int starting_pose_x;
         public int starting_pose_y;
+        public int starting_pose_heading;
         int timesShot = 0;
 
         abstract void set_color();
@@ -101,7 +102,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             follower = Constants.createFollower(hardwareMap);
             // set starting pose to match the first path point (was 72,8) so the follower won't reject the path
             set_starting_pose();
-            follower.setStartingPose(new Pose(starting_pose_x, starting_pose_y, Math.toRadians(90)));
+            follower.setStartingPose(new Pose(starting_pose_x, starting_pose_y, Math.toRadians(starting_pose_heading)));
 
             // Create Paths object first (without building paths yet)
             paths = new Paths(follower);
@@ -185,6 +186,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             public int headPark1;
             public int headPark2;
 
+
             public Paths(Follower follower) {
                 // constructor intentionally left simple; set_color() will populate Pose/heading fields
             }
@@ -197,7 +199,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                         .addPath(
                                 new BezierLine(shootPreloadStart, shootPreloadEnd)
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(headPark1), Math.toRadians(headPark2))
+                        .setLinearHeadingInterpolation(Math.toRadians(headShootPreload1), Math.toRadians(headShootPreload2))
                         .build();
                 // Build park path
                 park = follower

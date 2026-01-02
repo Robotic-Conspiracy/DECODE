@@ -63,7 +63,9 @@ public abstract class The_Fourth_Auto extends OpMode {
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+
+
         leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -92,15 +94,24 @@ public abstract class The_Fourth_Auto extends OpMode {
                 //rightFrontDrive.setPower(1);
                 //leftBackDrive.setPower(1);
                 //rightBackDrive.setPower(-1);
+                double forward  = 0.5;
+                double strafe = 0;
+                double rotate = 0;
 
-//        pod.update();
-//        if (Math.abs(pod.getPosY()) >= 75 || Math.abs(pod.getPosX()) >= 75) {
-//          leftFrontDrive.setPower(0);
-//          rightFrontDrive.setPower(0);
-//          leftBackDrive.setPower(0);
-//          rightBackDrive.setPower(0);
-                state = states.SPIN_UP;
-                //}
+                double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
+
+                leftFrontDrive.setPower((forward - strafe - rotate)/denominator);
+                leftBackDrive.setPower((forward + strafe - rotate)/denominator);
+                rightFrontDrive.setPower((forward + strafe + rotate)/denominator);
+                rightBackDrive.setPower((forward - strafe + rotate)/denominator);
+                pod.update();
+                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 50 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 50) {
+                    leftFrontDrive.setPower(0);
+                    rightFrontDrive.setPower(0);
+                    leftBackDrive.setPower(0);
+                    rightBackDrive.setPower(0);
+                    state = states.SPIN_UP;
+                }
 
                 break;
             case SPIN_UP:
@@ -118,7 +129,7 @@ public abstract class The_Fourth_Auto extends OpMode {
             case LAUNCHING:
                 telemetry.addData("Feed time", feedTimer.seconds());
                 if(timesShot <= 4){
-                    if (feedTimer.seconds() > 0.2) {
+                    if (feedTimer.seconds() > 0.15) {
                         state = states.SPIN_UP;
                         leftFeeder.setPower(0);
                         rightFeeder.setPower(0);
@@ -135,7 +146,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
                 pod.update();
                 telemetry.addData("Position", pod.getPosition());
-                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 150 || Math.abs(pod.getPosX(DistanceUnit.MM)) >= 150) {
+                if (Math.abs(pod.getPosY(DistanceUnit.MM)) >= 300 && Math.abs(pod.getPosX(DistanceUnit.MM)) >= 300) {
                     leftFrontDrive.setPower(0);
                     rightFrontDrive.setPower(0);
                     leftBackDrive.setPower(0);
@@ -146,6 +157,7 @@ public abstract class The_Fourth_Auto extends OpMode {
 
                 break;
             case STOP_MOVE:
+                launcher.setPower(0);
                 break;
 
         }
