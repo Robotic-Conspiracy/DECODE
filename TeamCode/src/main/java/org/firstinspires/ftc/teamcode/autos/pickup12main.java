@@ -27,6 +27,7 @@ public abstract class pickup12main extends OpMode {
     int timesShot = 0;
     abstract void set_color();
     public String color;
+    private Servo stoppy_servo;
     final ElapsedTime feedTimer = new ElapsedTime();
     final ElapsedTime waitTimer = new ElapsedTime();
     boolean doneLaunching = false;
@@ -38,7 +39,7 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    public static int targetSpeed = 2380;//launch motor speed
+    public static int targetSpeed = 2340;//launch motor speed
     private Servo intake_ramp = null;
     public static double targetAngle = 0.1444;
     public static int INTAKE_SPEED = 1600; //RPM
@@ -85,7 +86,7 @@ public abstract class pickup12main extends OpMode {
 
     @Override
     public void init() {
-
+        stoppy_servo = hardwareMap.get(Servo.class, "intake stopper");
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         initialize_launcher();
         initialize_intake();
@@ -413,8 +414,10 @@ public abstract class pickup12main extends OpMode {
 
         if(pathState == 3 || pathState == 6 || pathState == 9){
             follower.setMaxPower(0.6);
+            stoppy_servo.setPosition(0.55);
         } else {
             follower.setMaxPower(1);
+            stoppy_servo.setPosition(0.3);
         }
         switch (pathState) {
             case 1:
@@ -436,7 +439,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 2;
-                    targetSpeed = 2380;
+                    targetSpeed = 2340;
                 }
                 break;
             case 2:
@@ -495,7 +498,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 5;
-                    targetSpeed = 2380;
+                    targetSpeed = 2340;
                 }
                 break;
             case 5:
@@ -554,7 +557,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 8;
-                    targetSpeed = 2380;// was 2480
+                    targetSpeed = 2340;// was 2480
                 }
                 break;
             case 8:
@@ -653,13 +656,17 @@ public abstract class pickup12main extends OpMode {
                     timesShot = 0;
                 }
                 break;
-            case 200:
+            case 200://intake
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 //LEFT_LAUNCH_SERVO.setPosition(0);
                 pathState = nextPathState;
+
                 break;
         }
+    }
+    private enum states{
+
     }
 }
