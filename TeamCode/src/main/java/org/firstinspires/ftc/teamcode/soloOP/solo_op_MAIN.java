@@ -474,7 +474,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 rightFeeder.setPower(Current_speed);
                 // keep launcher servo in safe position
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
-                stoppy_servo.setPosition(0.95);
+                stoppy_servo.setPosition(0.55);
                 break;
 
             case INTAKE:
@@ -486,7 +486,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 Current_speed = STOP_SPEED;
                 leftFeeder.setPower(Current_speed);
                 rightFeeder.setPower(Current_speed);
-                stoppy_servo.setPosition(0.95);
+                stoppy_servo.setPosition(0.55);
                 break;
 
             case SPIN:

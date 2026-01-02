@@ -412,7 +412,7 @@ public abstract class pickup12main extends OpMode {
         double LAUNCH_POS = 0.61;
 
         if(pathState == 3 || pathState == 6 || pathState == 9){
-            follower.setMaxPower(0.5);
+            follower.setMaxPower(0.6);
         } else {
             follower.setMaxPower(1);
         }
@@ -554,7 +554,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 8;
-                    targetSpeed = 2480;
+                    targetSpeed = 2380;// was 2480
                 }
                 break;
             case 8:
