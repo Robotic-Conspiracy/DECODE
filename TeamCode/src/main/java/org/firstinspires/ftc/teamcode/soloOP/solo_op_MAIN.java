@@ -77,7 +77,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private static final double ALIGNMENT_DEADBAND = 4.0;  // Degrees - balanced accuracy vs speed
     private static final double ALIGNMENT_P_GAIN = 0.025;  // Proportional gain - balanced for speed without oscillation
     private static final double ALIGNMENT_D_GAIN = 0.05;   // Derivative gain - higher to dampen oscillation and prevent overshoot
-    private static final double ALIGNMENT_MAX_POWER = 0.5;  // Max rotation power - fast but controllable
+    private static final double ALIGNMENT_MAX_POWER = 0.3;  // Max rotation power - fast but controllable
     private static final double ALIGNMENT_MIN_POWER = 0.06; // Minimum power to overcome static friction
     private static final double DERIVATIVE_FILTER_ALPHA = 0.4; // Moderate filtering for stability
 
