@@ -17,8 +17,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
-    @Autonomous(name = "Pedro Pathing Autonomous", group = "Autonomous")
+    @Autonomous(name = "donrt run ", group = "Autonomous")
     @Configurable // Panels
+    @SuppressWarnings("unused")
     public abstract class back3main extends OpMode {
 
         public final double INTAKE_POS = .84; // .87MAX
@@ -52,7 +53,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         public Follower follower; // Pedro Pathing follower instance
         private int pathState; // Current autonomous path state (state machine)
         private int nextPathState;
-        public pickup12main.Paths paths; // Paths defined in the Paths class
+        public Paths paths; // Paths defined in the Paths class
         // flag to indicate we've issued a followPath and are waiting for it to finish
         private boolean waitingForPath = false;
 
@@ -103,7 +104,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             follower.setStartingPose(new Pose(starting_pose_x, starting_pose_y, Math.toRadians(90)));
 
             // Create Paths object first (without building paths yet)
-            paths = new pickup12main.Paths();
+            paths = new Paths(follower);
 
             // set_color() populates the path coordinates on the paths object
             set_color();
@@ -160,6 +161,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
         @Override
         public void loop() {
+            autonomousPathUpdate();
             follower.update(); // Update Pedro Pathing
             // Update autonomous state machine
 
@@ -184,22 +186,41 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             public int headPark2;
 
             public Paths(Follower follower) {
+                // constructor intentionally left simple; set_color() will populate Pose/heading fields
+            }
+
+            public void buildPaths(Follower follower){
+                // Build shootPreload path using the Pose values provided by set_color()
+                // Fallback to safe defaults if the Poses are not set
+                Pose spStart = (shootPreloadStart != null) ? shootPreloadStart : new Pose(63.000, 8);
+                Pose spEnd = (shootPreloadEnd != null) ? shootPreloadEnd : new Pose(60, 11);
+
+                double h1 = (headShootPreload1 != 0) ? headShootPreload1 : 90;
+                double h2 = (headShootPreload2 != 0) ? headShootPreload2 : 113;
+
                 shootPreload = follower
                         .pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(63.000, 8), new Pose(60, 11))
+                                new BezierLine(spStart, spEnd)
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(113))
+                        .setLinearHeadingInterpolation(Math.toRadians(h1), Math.toRadians(h2))
                         .build();
 
                 Wait2 = 1;
 
+                // Build park path
+                Pose pStart = (parkStart != null) ? parkStart : new Pose(59.718, 11.435);
+                Pose pEnd = (parkEnd != null) ? parkEnd : new Pose(36.000, 10.800);
+
+                double ph1 = (headPark1 != 0) ? headPark1 : 113;
+                double ph2 = (headPark2 != 0) ? headPark2 : 0;
+
                 park = follower
                         .pathBuilder()
                         .addPath(
-                                new BezierLine(new Pose(59.718, 11.435), new Pose(36.000, 10.800))
+                                new BezierLine(pStart, pEnd)
                         )
-                        .setLinearHeadingInterpolation(Math.toRadians(113), Math.toRadians(0))
+                        .setLinearHeadingInterpolation(Math.toRadians(ph1), Math.toRadians(ph2))
                         .build();
             }
         }
@@ -283,39 +304,37 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                 case 2:
                     if (!waitingForPath && follower != null && !follower.isBusy()) {
                         panelsTelemetry.debug("Action", "Following prePickup1");
-                        panelsTelemetry.debug("Path NonNull", paths != null && paths.prePickup1 != null);
+                        panelsTelemetry.debug("Path NonNull", paths != null && paths.park != null);
                         //double dx = follower.getPose().getX() - paths.park.getX();
                         //double dy = follower.getPose().getY() - paths.park.getY();
                         //panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
                         panelsTelemetry.update(telemetry);
 
-                        tryFollowWithPoseRetry(paths.prePickup1, paths.prePickup1Start, "prePickup1");
+                        tryFollowWithPoseRetry(paths.park,paths.parkStart, "prePickup1");
                         waitingForPath = true;
                     }
                     if (waitingForPath && !follower.isBusy()) {
                         waitingForPath = false;
-                        pathState = 200;
+                        pathState = 0;
                         nextPathState = 3;
                     }
+                case 100:
+                    // TODO use case 100 for aiming to launch
+                    pathState = 101;
                     break;
-                case 3:
-                    if (!waitingForPath && follower != null && !follower.isBusy()) {
-                        panelsTelemetry.debug("Action", "Following pickup1");
-                        panelsTelemetry.debug("Path NonNull", paths != null && paths.pickup1 != null);
-                        double dx = follower.getPose().getX() - paths.pickup1Start.getX();
-                        double dy = follower.getPose().getY() - paths.pickup1Start.getY();
-                        panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
-                        panelsTelemetry.update(telemetry);
+                case 101:
+                    launcher.setVelocity(targetSpeed);
+                    LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                    intake_ramp.setPosition(LAUNCH_POS);
+                    intake.setVelocity(0);
+                    doneLaunching = launch();
+                    if (doneLaunching){
+                        pathState = 200;
+                        timesShot = 0;
+                    }
+                    break;
 
-                        tryFollowWithPoseRetry(paths.pickup1, paths.pickup1Start, "pickup1");
-                        waitingForPath = true;
-                    }
-                    if (waitingForPath && !follower.isBusy()) {
-                        waitingForPath = false;
-                        pathState = 4;
-                        nextPathState = 4;
-                    }
-                    break;
+
             }
         }
     }
