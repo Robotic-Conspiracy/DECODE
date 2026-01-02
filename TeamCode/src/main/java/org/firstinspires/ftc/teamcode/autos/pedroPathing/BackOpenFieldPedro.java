@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.pedropathing.util.Timer;
 
-@Autonomous
+//@Autonomous
 public class BackOpenFieldPedro extends OpMode {
     public static Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;

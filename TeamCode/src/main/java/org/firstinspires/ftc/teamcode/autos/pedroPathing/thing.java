@@ -12,7 +12,7 @@ import com.pedropathing.util.PoseHistory;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
+//@TeleOp
 public class thing extends OpMode {
     public static Follower follower;
     @IgnoreConfigurable
