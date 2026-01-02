@@ -134,6 +134,8 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo light2 = null;
     private boolean exposure_set = false;
 
+    private Servo stoppy_servo;
+
 
     @Override
     public void init() {
@@ -151,6 +153,7 @@ public abstract class solo_op_MAIN extends OpMode {
         initialize_pinpoint();
         light1 = hardwareMap.get(Servo.class, "preset light");
         light2 = hardwareMap.get(Servo.class, "launch light");
+        stoppy_servo = hardwareMap.get(Servo.class, "intake stopper");
         floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
@@ -461,6 +464,7 @@ public abstract class solo_op_MAIN extends OpMode {
                     leftFeeder.setPower(Current_speed);
                     rightFeeder.setPower(Current_speed);
                 }
+                stoppy_servo.setPosition(0.3);
                 break;
 
             case START_INTAKE:
@@ -470,6 +474,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 rightFeeder.setPower(Current_speed);
                 // keep launcher servo in safe position
                 LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                stoppy_servo.setPosition(0.95);
                 break;
 
             case INTAKE:
@@ -481,6 +486,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 Current_speed = STOP_SPEED;
                 leftFeeder.setPower(Current_speed);
                 rightFeeder.setPower(Current_speed);
+                stoppy_servo.setPosition(0.95);
                 break;
 
             case SPIN:
@@ -492,6 +498,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
 
             default:
+                stoppy_servo.setPosition(0.3);
                 break;
         }
     }
