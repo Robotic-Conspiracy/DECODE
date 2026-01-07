@@ -292,32 +292,6 @@ public abstract class solo_op_MAIN extends OpMode {
             canlaunch = CanLaunch.NOT_READY;
         }
 
-        switch (canlaunch) {
-            case OFF:
-                setLightColor(light2, StatusLightColor.OFF);
-                break;
-            case READY:
-                setLightColor(light2, StatusLightColor.GREEN);
-                break;
-            case NOT_READY:
-                setLightColor(light2, StatusLightColor.YELLOW);
-                break;
-            case INTAKE:
-                setLightColor(light2, StatusLightColor.RED);
-                break;
-            case ERROR:
-                // Blink: ON for ON_TIME seconds, OFF for (OFF_TIME - ON_TIME) seconds
-                double t = Timer3.seconds();
-                if (t < ON_TIME) {
-                    setLightColor(light2, StatusLightColor.RED); // ON
-                } else if (t < OFF_TIME) {
-                    setLightColor(light2, StatusLightColor.OFF); // OFF
-                } else {
-                    Timer3.reset(); // restart cycle
-                }
-                break;
-        }
-
         // Only enable AprilTag processing when alignment is requested (saves CPU/power)
         boolean alignmentRequested = gamepad1.right_trigger >= 0.2 || gamepad1.b;
         if (alignmentRequested != aprilTagProcessorEnabled) {
@@ -357,6 +331,23 @@ public abstract class solo_op_MAIN extends OpMode {
                 Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
                 alignmentActive = true;
             }
+        }
+
+        // Update light2 to show AprilTag alignment status (only when auto-aiming)
+        if (alignmentRequested) {
+            if (detection == null) {
+                // Red: AprilTag not visible
+                setLightColor(light2, StatusLightColor.RED);
+            } else if (Math.abs(detection.ftcPose.z) <= ALIGNMENT_DEADBAND) {
+                // Green: Aimed at goal within tolerance
+                setLightColor(light2, StatusLightColor.GREEN);
+            } else {
+                // Yellow: AprilTag visible but not aligned
+                setLightColor(light2, StatusLightColor.YELLOW);
+            }
+        } else {
+            // Turn off light2 when not auto-aiming
+            setLightColor(light2, StatusLightColor.OFF);
         }
 
         launcher.setVelocity(targetSpeed);
