@@ -53,7 +53,7 @@ public abstract class pickup12main extends OpMode {
     private boolean waitingForPath = false;
 
     // timeout to prevent getting stuck on a single path (ms)
-    private static final long PATH_TIMEOUT_MS = 8000;
+    private static final long PATH_TIMEOUT_MS = 5000;
     private long currentPathStartTime = 0;
 
     // If the robot is further than this from a path start, we will reseat pose and retry (inches)
