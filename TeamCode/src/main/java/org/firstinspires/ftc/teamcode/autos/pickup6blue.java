@@ -5,7 +5,7 @@ import com.pedropathing.geometry.Pose;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "BLUE 12 BACK", group = "Autonomous")
+@Autonomous(name = "BLUE 6 BACK", group = "Autonomous")
 @Configurable // Panels
 public class pickup6blue extends pickup6main {
     int backlineAngle = 110;
@@ -29,7 +29,7 @@ public class pickup6blue extends pickup6main {
 
         paths.shootPickup1Start = new Pose(12, 36);
         paths.shootPickup1End = new Pose(8, 5);
-
+//
         paths.prePickup2Start = new Pose(58, 16);
         paths.prePickup2End = new Pose(52, 55);
 
@@ -50,7 +50,7 @@ public class pickup6blue extends pickup6main {
 
         paths.parkStart = new Pose(58, 84);
         paths.parkEnd = new Pose(44, 68);
-
+//
         paths.headShootPreload1 = 90;
         paths.headShootPreload2 = backlineAngle;
 
@@ -61,7 +61,7 @@ public class pickup6blue extends pickup6main {
 
         paths.headshootPickup11 = 180;
         paths.headshootPickup12 = backlineAngle;
-
+//
         paths.headprePickup21 = backlineAngle;
         paths.headprePickup22 = 180;
 

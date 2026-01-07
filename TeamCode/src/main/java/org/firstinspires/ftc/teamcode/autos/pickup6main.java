@@ -668,8 +668,6 @@ public abstract class pickup6main extends OpMode {
                 break;
         }
     }
-    private enum states{
-
-    }
 }
+
 
