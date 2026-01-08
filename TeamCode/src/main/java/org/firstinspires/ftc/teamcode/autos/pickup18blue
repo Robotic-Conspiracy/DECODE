@@ -1,1 +1,172 @@
-//TODO add everything
+//JUST PATHS
+  public static class Paths {
+    public PathChain movetogoalposition;
+public PathChain lineupartifacts2;
+public PathChain intake2ndrow;
+public PathChain backup;
+public PathChain launch2;
+public PathChain opengate;
+public PathChain repeatlaunch;
+public PathChain opengate2;
+public PathChain repeatlaunch;
+public PathChain pickupfrontline;
+public PathChain frontrowlaunch;
+public PathChain headtobackrow;
+public PathChain intakebackrow;
+public PathChain movetobackline;
+public PathChain Path18;
+    
+    public Paths(Follower follower) {
+      movetogoalposition = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(21.752, 124.497),
+            
+            new Pose(24.671, 122.031)
+          )
+        ).setConstantHeadingInterpolation(Math.toRadians(144))
+        
+        .build();
+
+lineupartifacts2 = follower.pathBuilder().addPath(
+          new BezierCurve(
+            new Pose(24.671, 122.031),
+            new Pose(57.857, 91.186),
+new Pose(50.752, 60.571),
+            new Pose(50.776, 60.527)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+        
+        .build();
+
+intake2ndrow = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(50.776, 60.527),
+            
+            new Pose(7.857, 59.893)
+          )
+        ).setConstantHeadingInterpolation(Math.toRadians(180))
+        
+        .build();
+
+backup = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(7.857, 59.893),
+            
+            new Pose(20.040, 59.550)
+          )
+        ).setConstantHeadingInterpolation(Math.toRadians(180))
+        
+        .build();
+
+launch2 = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(20.040, 59.550),
+            
+            new Pose(61.410, 76.863)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(137))
+        
+        .build();
+
+opengate = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(61.410, 76.863),
+            
+            new Pose(10.870, 61.913)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(137), Math.toRadians(147))
+        
+        .build();
+
+repeatlaunch = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(10.870, 61.913),
+            
+            new Pose(61.559, 76.422)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(147), Math.toRadians(137))
+        
+        .build();
+
+opengate2 = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(61.559, 76.422),
+            
+            new Pose(10.870, 61.913)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(137), Math.toRadians(147))
+        
+        .build();
+
+repeatlaunch = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(10.870, 61.913),
+            
+            new Pose(61.559, 76.422)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(147), Math.toRadians(137))
+        
+        .build();
+
+pickupfrontline = follower.pathBuilder().addPath(
+          new BezierCurve(
+            new Pose(61.559, 76.422),
+            new Pose(54.242, 84.562),
+            new Pose(16.304, 84.180)
+          )
+        ).setTangentHeadingInterpolation()
+        
+        .build();
+
+frontrowlaunch = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(16.304, 84.180),
+            
+            new Pose(24.484, 121.416)
+          )
+        ).setConstantHeadingInterpolation(Math.toRadians(140))
+        
+        .build();
+
+headtobackrow = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(24.484, 121.416),
+            
+            new Pose(48.292, 35.099)
+          )
+        ).setConstantHeadingInterpolation(Math.toRadians(180))
+        
+        .build();
+
+intakebackrow = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(48.292, 35.099),
+            
+            new Pose(8.348, 35.255)
+          )
+        ).setTangentHeadingInterpolation()
+        
+        .build();
+
+movetobackline = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(8.348, 35.255),
+            
+            new Pose(65.820, 13.851)
+          )
+        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(110))
+        
+        .build();
+
+Path18 = follower.pathBuilder().addPath(
+          new BezierLine(
+            new Pose(65.820, 13.851),
+            
+            new Pose(56.374, 33.590)
+          )
+        ).setTangentHeadingInterpolation()
+        
+        .build();
+    }
+  }
+  
