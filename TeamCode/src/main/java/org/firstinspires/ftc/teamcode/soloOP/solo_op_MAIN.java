@@ -56,7 +56,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private boolean lastRightBumper = false;
     private boolean launchRequested = false;
     private long lastFireTime = 0;
-    private static final long FIRE_INTERVAL = 300;
+    private static final long FIRE_INTERVAL = 200;
     private double cachedLauncherVelocity = 0;
     private double cachedIntakeVelocity = 0;
     private boolean aprilTagProcessorEnabled = true;  // Track processor state to avoid redundant calls
@@ -112,7 +112,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
-    private static int backlineSpeed = 2500;
+    private static int backlineSpeed = 2360;
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed
     public static double targetAngle = 90 - 38;
@@ -396,7 +396,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
             case SPIN_UP:
                 // Use cached velocity - normal transition when launcher reaches target RPM
-                if (cachedLauncherVelocity >= targetSpeed - 60 && cachedLauncherVelocity <= targetSpeed + 60) {
+                if (cachedLauncherVelocity >= targetSpeed - 100 && cachedLauncherVelocity <= targetSpeed + 40) {
                     launchState = LaunchState.LAUNCH;
                 }
                 break;
