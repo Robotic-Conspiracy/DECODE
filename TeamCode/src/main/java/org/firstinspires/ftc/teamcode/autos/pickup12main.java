@@ -39,9 +39,9 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    public static int targetSpeed = 2340;//launch motor speed
+    public static int targetSpeed = 2240;//launch motor speed
     private Servo intake_ramp = null;
-    public static double targetAngle = (double) 50 /360;
+    public static double targetAngle = (double) 49/360;
     public static int INTAKE_SPEED = 1600; //RPM
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
@@ -133,7 +133,7 @@ public abstract class pickup12main extends OpMode {
         double velocity = launcher.getVelocity();
 
         // Only start a feed cycle when launcher is up to speed and wait timer elapsed
-        if ((velocity >= targetSpeed - 40 && velocity <= targetSpeed + 40) && waitTimer.seconds() > 0.5) {
+        if ((velocity >= targetSpeed - 40 && velocity <= targetSpeed + 40) && waitTimer.seconds() > 0.3) {
             // Start feeding only if not already feeding
             double FULL_SPEED = 1.0;
             if (Current_speed != FULL_SPEED) {
@@ -439,7 +439,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 2;
-                    targetSpeed = 2340;
+
                 }
                 break;
             case 2:
@@ -498,7 +498,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 5;
-                    targetSpeed = 2340;
+
                 }
                 break;
             case 5:
@@ -557,7 +557,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 8;
-                    targetSpeed = 2440;// was 2480
+
                 }
                 break;
             case 8:

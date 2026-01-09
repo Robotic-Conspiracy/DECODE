@@ -4,7 +4,10 @@
 //SCREAMING_SNAKE_CASE for FINALS
 //
 //
+//
+
 package org.firstinspires.ftc.teamcode.soloOP;
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
 
 import android.annotation.SuppressLint;
 
@@ -49,6 +52,8 @@ public abstract class solo_op_MAIN extends OpMode {
     public long now = System.currentTimeMillis();
     abstract void set_color();
     abstract int target_goal_tag();
+    abstract void setSpeedConstants();
+    abstract void setAngleConstants();
     GoBildaPinpointDriver pinpoint;
 
 
@@ -114,8 +119,8 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo intake_ramp = null;
     public static int backlineSpeed = 2240;
     public static int backlineAngle = 50;
-    public static int midSpeed = 2000;
-    public static int midAngle = 60;
+    public static int midSpeed = 1940;
+    public static int midAngle = 48;
     public static int goalSpeed = 1500;
     public static int goalAngle = 75;
 
@@ -149,6 +154,8 @@ public abstract class solo_op_MAIN extends OpMode {
         PanelsConfigurables.INSTANCE.refreshClass(this);
 
         set_color();
+        setAngleConstants();
+        setSpeedConstants();
         launchState = LaunchState.IDLE;
         intakeState = IntakeState.READY;
         selectedPreset = Preset.BACK;
