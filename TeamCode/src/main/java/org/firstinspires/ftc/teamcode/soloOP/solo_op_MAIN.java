@@ -1,11 +1,3 @@
-//READ ME
-// VARIABLE NAMING CONVENTIONS USED
-//PascalCase
-//SCREAMING_SNAKE_CASE for FINALS
-//
-//
-//
-
 package org.firstinspires.ftc.teamcode.soloOP;
 import org.firstinspires.ftc.teamcode.OpmodeConstants;
 
@@ -52,8 +44,6 @@ public abstract class solo_op_MAIN extends OpMode {
     public long now = System.currentTimeMillis();
     abstract void set_color();
     abstract int target_goal_tag();
-    abstract void setSpeedConstants();
-    abstract void setAngleConstants();
     GoBildaPinpointDriver pinpoint;
 
 
@@ -61,7 +51,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private boolean lastRightBumper = false;
     private boolean launchRequested = false;
     private long lastFireTime = 0;
-    private static final long FIRE_INTERVAL = 400;
+    private static final long FIRE_INTERVAL = 300; // milliseconds between launches
     private double cachedLauncherVelocity = 0;
     private double cachedIntakeVelocity = 0;
     private boolean aprilTagProcessorEnabled = true;  // Track processor state to avoid redundant calls
@@ -117,12 +107,12 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
-    public static int backlineSpeed = 2240;
-    public static int backlineAngle = 50;
-    public static int midSpeed = 1940;
-    public static int midAngle = 48;
-    public static int goalSpeed = 1500;
-    public static int goalAngle = 75;
+    public static int backlineSpeed = OpmodeConstants.backlineSpeed;
+    public static int backlineAngle = OpmodeConstants.backlineAngle;
+    public static int midSpeed = OpmodeConstants.midSpeed;
+    public static int midAngle = OpmodeConstants.midAngle;
+    public static int goalSpeed = OpmodeConstants.goalSpeed;
+    public static int goalAngle = OpmodeConstants.goalAngle;
 
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed
@@ -154,8 +144,7 @@ public abstract class solo_op_MAIN extends OpMode {
         PanelsConfigurables.INSTANCE.refreshClass(this);
 
         set_color();
-        setAngleConstants();
-        setSpeedConstants();
+
         launchState = LaunchState.IDLE;
         intakeState = IntakeState.READY;
         selectedPreset = Preset.BACK;

@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 
@@ -43,6 +44,12 @@ public abstract class pickup12main extends OpMode {
     private Servo intake_ramp = null;
     public static double targetAngle = (double) 49/360;
     public static int INTAKE_SPEED = 1600; //RPM
+    public static int backlineSpeed = OpmodeConstants.AutobacklineSpeed;
+    public static int backlineAngle = OpmodeConstants.AutobacklineAngle;
+    public static int midSpeed = OpmodeConstants.AutomidSpeed;
+    public static int midAngle = OpmodeConstants.AutomidAngle;
+    public static int goalSpeed = OpmodeConstants.AutogoalSpeed;
+    public static int goalAngle = OpmodeConstants.AutogoalAngle;
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -574,8 +581,8 @@ public abstract class pickup12main extends OpMode {
                 }
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
-                    targetSpeed = 2000;
-                    targetAngle = (double) 50 /360;
+                    targetSpeed = OpmodeConstants.AutomidSpeed;
+                    targetAngle = (double) OpmodeConstants.AutomidAngle / 360;
                     pathState = 200;
                     nextPathState = 9;
                 }
