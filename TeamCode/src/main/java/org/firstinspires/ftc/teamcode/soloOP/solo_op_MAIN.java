@@ -222,6 +222,8 @@ public abstract class solo_op_MAIN extends OpMode {
         if (gamepad1.yWasPressed()) {// MAPPING
             switch (selectedPreset) {
                 case CUSTOM:
+
+                case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = goalSpeed;
                     targetAngle = goalAngle;
@@ -243,12 +245,6 @@ public abstract class solo_op_MAIN extends OpMode {
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
                     targetAngle = 90;
-                    break;
-
-                case OFF:
-                    selectedPreset = Preset.GOAL;
-                    targetSpeed = goalSpeed;
-                    targetAngle = goalAngle;
                     break;
             }
         }
@@ -533,10 +529,10 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_drive() {
-        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left_drive");// DRIVE SETUP
-        backLeftMotor = hardwareMap.get(DcMotorEx.class, "back_left_drive");
-        frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
-        backRightMotor = hardwareMap.get(DcMotorEx.class, "back_right_drive");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.FrontLeftMotor);// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.BackLeftMotor);
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.FrontRightMotor);
+        backRightMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.BackRightMotor);
 
         // Set run mode to RUN_WITHOUT_ENCODER for power control with reliable braking
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -563,28 +559,28 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_launcher() {
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
         //launcher motor
-        double p = 203;
-        double f = 0.1;
-        double i = 1.001;
-        double d = 0.0015;
+        double p = OpmodeConstants.Launcher_P;
+        double i = OpmodeConstants.Launcher_I;
+        double d = OpmodeConstants.Launcher_D;
+        double f = OpmodeConstants.Launcher_F;
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
-        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
+        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
     }
 
     private void initialize_feeder() {
-        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
-        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        leftFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.LeftFeederName);
+        rightFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.RightFeederName);
 
         leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     private void initialize_intake() {
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
-        intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
+        intake = hardwareMap.get(DcMotorEx.class,  OpmodeConstants.IntakeName);
+        intake_ramp = hardwareMap.get(Servo.class, OpmodeConstants.IntakeRampName);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
     }
 
