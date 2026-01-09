@@ -10,9 +10,9 @@ public class OpmodeConstants {
     public static final int AutobacklineSpeed = 2240;
     public static final int AutomidSpeed = 1880;
     public static final int AutogoalSpeed = 1500;
-    public static final int AutomidAngle = 47;
-    public static final int AutogoalAngle = 75;
-    public static final int AutobacklineAngle = 49;
+    public static final int AutomidAngle = 47/360;
+    public static final int AutogoalAngle = 75/360;
+    public static final int AutobacklineAngle = 49/360;
     
     public static final int IntakeRampLaunchPos = 0.61;
     public static final int IntakeRampIntakePos = 0.84;
@@ -30,6 +30,7 @@ public class OpmodeConstants {
     public static final string LeftFeederName = "left_feeder";
     public static final string RightFeederName = "right_feeder";
     public static final string LauncherName = "launcher";
+    
     public static final string FrontLeftMotor = "";
     public static final string FrontRightMotor = "";
     public static final string BackLeftMotor = "";
