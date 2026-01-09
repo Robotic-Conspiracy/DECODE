@@ -30,10 +30,8 @@ public class OpmodeConstants {
     public static final string LeftFeederName = "left_feeder";
     public static final string RightFeederName = "right_feeder";
     public static final string LauncherName = "launcher";
-
-    
-
-
-
-
+    public static final string FrontLeftMotor = "";
+    public static final string FrontRightMotor = "";
+    public static final string BackLeftMotor = "";
+    public static final string BackRightMotor = "";
 }
