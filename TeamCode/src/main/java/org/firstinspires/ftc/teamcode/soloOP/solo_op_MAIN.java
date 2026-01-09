@@ -4,9 +4,9 @@ import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.PanelsConfigurables;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -36,8 +36,8 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import java.util.List;
 
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
-@Config
 
+@Configurable
 //@TeleOp(name = "Main Solo Op - run color")
 public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
