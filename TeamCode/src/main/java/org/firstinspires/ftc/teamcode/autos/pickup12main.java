@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 @Configurable // Panels
 public abstract class pickup12main extends OpMode {
-    public final double INTAKE_POS = .84; // .87MAX
+    public final double INTAKE_POS = OpmodeConstants.IntakeRampIntakePos; // .87MAX
     int timesToShoot = 3;
     public int starting_pose_x;
     public int starting_pose_y;
@@ -40,9 +40,9 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    public int targetSpeed = 2240;//launch motor speed
+    
     private Servo intake_ramp = null;
-    public static double targetAngle = (double) 49/360;
+    
     public static int INTAKE_SPEED = 1600; //RPM
     public static int backlineSpeed = OpmodeConstants.AutobacklineSpeed;
     public static int backlineAngle = OpmodeConstants.AutobacklineAngle;
@@ -50,6 +50,9 @@ public abstract class pickup12main extends OpMode {
     public static int midAngle = OpmodeConstants.AutomidAngle;
     public static int goalSpeed = OpmodeConstants.AutogoalSpeed;
     public static int goalAngle = OpmodeConstants.AutogoalAngle;
+    
+    public int targetSpeed = backlineSpeed;//launch motor speed
+    public static double targetAngle = backlineAngle;
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -67,33 +70,33 @@ public abstract class pickup12main extends OpMode {
     private static final double START_TOLERANCE_INCHES = 6.0;
 
     private void initialize_launcher() {
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        double p = 203;
-        double i = 1.001;
-        double d = 0.0015;
-        double f = 0.1;
+        launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
+        double p = OpmodeConstants.Launcher_P;
+        double i = OpmodeConstants.Launcher_I;
+        double d = OpmodeConstants.Launcher_D;
+        double f = OpmodeConstants.Launcher_F;
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
-        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
+        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
     }
     private void initialize_feeder(){
-        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
-        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        leftFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.LeftFeederName);
+        rightFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.RightFeederName);
 
         leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
     private void initialize_intake(){
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
-        intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
+        intake = hardwareMap.get(DcMotorEx.class, OpmodeConstants.IntakeName);
+        intake_ramp = hardwareMap.get(Servo.class, OpmodeConstants.IntakeRampName);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
     }
 
     @Override
     public void init() {
-        stoppy_servo = hardwareMap.get(Servo.class, "intake stopper");
+        stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         initialize_launcher();
         initialize_intake();
@@ -128,7 +131,7 @@ public abstract class pickup12main extends OpMode {
     abstract void set_starting_pose();
 
     private boolean launch() {
-        double FEED_TIME_SECONDS = 0.15;
+        double FEED_TIME_SECONDS = OpmodeConstants.FeedTimeSeconds;
 
 
 
@@ -583,7 +586,7 @@ public abstract class pickup12main extends OpMode {
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
                     targetSpeed = OpmodeConstants.AutomidSpeed;
-                    targetAngle = (double) OpmodeConstants.AutomidAngle / 360;
+                    targetAngle = (double) OpmodeConstants.AutomidAngle;
                     pathState = 200;
                     nextPathState = 9;
                 }
