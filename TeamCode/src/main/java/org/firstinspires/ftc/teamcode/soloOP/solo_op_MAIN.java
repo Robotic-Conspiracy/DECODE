@@ -56,7 +56,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private boolean lastRightBumper = false;
     private boolean launchRequested = false;
     private long lastFireTime = 0;
-    private static final long FIRE_INTERVAL = 200;
+    private static final long FIRE_INTERVAL = 400;
     private double cachedLauncherVelocity = 0;
     private double cachedIntakeVelocity = 0;
     private boolean aprilTagProcessorEnabled = true;  // Track processor state to avoid redundant calls
@@ -112,10 +112,16 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
-    private static int backlineSpeed = 2360;
+    public static int backlineSpeed = 2240;
+    public static int backlineAngle = 50;
+    public static int midSpeed = 2000;
+    public static int midAngle = 60;
+    public static int goalSpeed = 1500;
+    public static int goalAngle = 75;
+
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed
-    public static double targetAngle = 90 - 38;
+    public static double targetAngle = backlineAngle;
     public static int INTAKE_SPEED = 1200;
     // other vars and objects
     private final ElapsedTime feedTimer = new ElapsedTime();
@@ -221,20 +227,20 @@ public abstract class solo_op_MAIN extends OpMode {
             switch (selectedPreset) {
                 case CUSTOM:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1480;
-                    targetAngle = 73;
+                    targetSpeed = goalSpeed;
+                    targetAngle = goalAngle;
                     break;
 
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
-                    targetSpeed = 2000;
-                    targetAngle = 52;
+                    targetSpeed = midSpeed;
+                    targetAngle = midAngle;
                     break;
 
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
                     targetSpeed = backlineSpeed;
-                    targetAngle = 52;
+                    targetAngle = backlineAngle;
                     break;
 
                 case BACK:
@@ -245,8 +251,8 @@ public abstract class solo_op_MAIN extends OpMode {
 
                 case OFF:
                     selectedPreset = Preset.GOAL;
-                    targetSpeed = 1500;
-                    targetAngle = 73;
+                    targetSpeed = goalSpeed;
+                    targetAngle = goalAngle;
                     break;
             }
         }
@@ -397,7 +403,7 @@ public abstract class solo_op_MAIN extends OpMode {
             case SPIN_UP:
                 // Use cached velocity - normal transition when launcher reaches target RPM
                 cachedLauncherVelocity = launcher.getVelocity();
-                if (cachedLauncherVelocity >= targetSpeed - 100 && cachedLauncherVelocity <= targetSpeed + 40) {
+                if (cachedLauncherVelocity >= targetSpeed - 40 && cachedLauncherVelocity <= targetSpeed + 40) {
                     launchState = LaunchState.LAUNCH;
                     now = System.currentTimeMillis();
                     lastFireTime = now;

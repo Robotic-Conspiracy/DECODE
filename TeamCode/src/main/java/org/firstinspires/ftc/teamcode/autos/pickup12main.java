@@ -41,7 +41,7 @@ public abstract class pickup12main extends OpMode {
     private DcMotorEx intake = null;
     public static int targetSpeed = 2340;//launch motor speed
     private Servo intake_ramp = null;
-    public static double targetAngle = 0.1444;
+    public static double targetAngle = (double) 50 /360;
     public static int INTAKE_SPEED = 1600; //RPM
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
@@ -557,7 +557,7 @@ public abstract class pickup12main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 8;
-                    targetSpeed = 2340;// was 2480
+                    targetSpeed = 2440;// was 2480
                 }
                 break;
             case 8:
@@ -574,8 +574,8 @@ public abstract class pickup12main extends OpMode {
                 }
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
-                    targetSpeed = 1900;
-                    targetAngle = (double) 55 /360;
+                    targetSpeed = 2000;
+                    targetAngle = (double) 50 /360;
                     pathState = 200;
                     nextPathState = 9;
                 }
