@@ -46,7 +46,7 @@ import java.util.List;
 //@TeleOp(name = "Main Solo Op - run color")
 public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
-
+    public long now = System.currentTimeMillis();
     abstract void set_color();
     abstract int target_goal_tag();
     GoBildaPinpointDriver pinpoint;
@@ -228,7 +228,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
                     targetSpeed = 2000;
-                    targetAngle = 55;
+                    targetAngle = 52;
                     break;
 
                 case MIDDLE:
@@ -361,7 +361,7 @@ public abstract class solo_op_MAIN extends OpMode {
         AddTelemetry();
 
         boolean rightBumper = gamepad1.right_bumper;
-        long now = System.currentTimeMillis();
+        now = System.currentTimeMillis();
 
         // Fire on initial press
         if (rightBumper && !lastRightBumper) {
@@ -372,7 +372,7 @@ public abstract class solo_op_MAIN extends OpMode {
         // Continuous fire when held (after interval)
         if (rightBumper && (now - lastFireTime > FIRE_INTERVAL) && launchState == LaunchState.IDLE) {
             launchRequested = true;
-            lastFireTime = now;
+
         }
 
         lastRightBumper = rightBumper;
@@ -396,8 +396,11 @@ public abstract class solo_op_MAIN extends OpMode {
 
             case SPIN_UP:
                 // Use cached velocity - normal transition when launcher reaches target RPM
+                cachedLauncherVelocity = launcher.getVelocity();
                 if (cachedLauncherVelocity >= targetSpeed - 100 && cachedLauncherVelocity <= targetSpeed + 40) {
                     launchState = LaunchState.LAUNCH;
+                    now = System.currentTimeMillis();
+                    lastFireTime = now;
                 }
                 break;
 
