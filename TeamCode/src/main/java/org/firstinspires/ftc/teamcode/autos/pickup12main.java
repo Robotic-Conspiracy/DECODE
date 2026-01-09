@@ -40,7 +40,7 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    public static int targetSpeed = 2240;//launch motor speed
+    public int targetSpeed = 2240;//launch motor speed
     private Servo intake_ramp = null;
     public static double targetAngle = (double) 49/360;
     public static int INTAKE_SPEED = 1600; //RPM
@@ -60,7 +60,7 @@ public abstract class pickup12main extends OpMode {
     private boolean waitingForPath = false;
 
     // timeout to prevent getting stuck on a single path (ms)
-    private static final long PATH_TIMEOUT_MS = 5000;
+    private static final long PATH_TIMEOUT_MS = 4000;
     private long currentPathStartTime = 0;
 
     // If the robot is further than this from a path start, we will reseat pose and retry (inches)
