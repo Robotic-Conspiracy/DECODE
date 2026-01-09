@@ -52,7 +52,7 @@ public abstract class pickup12main extends OpMode {
     public static int goalAngle = OpmodeConstants.AutogoalAngle;
     
     public int targetSpeed = backlineSpeed;//launch motor speed
-    public static double targetAngle = backlineAngle;
+    public double targetAngle = backlineAngle;
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -63,11 +63,11 @@ public abstract class pickup12main extends OpMode {
     private boolean waitingForPath = false;
 
     // timeout to prevent getting stuck on a single path (ms)
-    private static final long PATH_TIMEOUT_MS = 4000;
+    private final long PATH_TIMEOUT_MS = 4000;
     private long currentPathStartTime = 0;
 
     // If the robot is further than this from a path start, we will reseat pose and retry (inches)
-    private static final double START_TOLERANCE_INCHES = 6.0;
+    private final double START_TOLERANCE_INCHES = 6.0;
 
     private void initialize_launcher() {
         launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
@@ -129,20 +129,13 @@ public abstract class pickup12main extends OpMode {
     }
 
     abstract void set_starting_pose();
-
     private boolean launch() {
         double FEED_TIME_SECONDS = OpmodeConstants.FeedTimeSeconds;
-
-
-
-
         // If we've already shot enough for this launch call, do nothing
         if (timesShot >= timesToShoot) {
             return true;
         }
-
         double velocity = launcher.getVelocity();
-
         // Only start a feed cycle when launcher is up to speed and wait timer elapsed
         if ((velocity >= targetSpeed - 40 && velocity <= targetSpeed + 40) && waitTimer.seconds() > 0.3) {
             // Start feeding only if not already feeding
@@ -298,13 +291,9 @@ public abstract class pickup12main extends OpMode {
         public int headshootPickup31;
         public int headshootPickup32;
         public int headpark;
-
-
-
         // No-arg constructor - fields will be populated by set_color() before buildPaths() is called
         public Paths() {
         }
-
         // Build all paths using the populated pose/heading fields
         public void buildPaths(Follower follower) {
             // shootPreload
