@@ -122,6 +122,7 @@ public abstract class pickup12main extends OpMode {
         panelsTelemetry.debug("Paths Null?", paths == null);
         panelsTelemetry.debug("Starting Path State", pathState);
         panelsTelemetry.update(telemetry);
+        targetSpeed = backlineSpeed;
     }
 
     abstract void set_starting_pose();
