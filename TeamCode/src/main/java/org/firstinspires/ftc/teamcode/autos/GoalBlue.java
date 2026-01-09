@@ -1,22 +1,27 @@
 package org.firstinspires.ftc.teamcode.autos;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "BLUE GOAL")
-
+@Autonomous(name = "Blue Goal", group = "Autonomous")
 public class GoalBlue extends GoalMain {
-    @Override
-    void move() {
-        double forward  = 1;
-        double strafe = 1;
-        double rotate = 0;
-
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-
-        leftFrontDrive.setPower((forward - strafe - rotate)/denominator);
-        leftBackDrive.setPower((forward + strafe - rotate)/denominator);
-        rightFrontDrive.setPower((forward + strafe + rotate)/denominator);
-        rightBackDrive.setPower((forward - strafe + rotate)/denominator);
-
+    int backlineAngle = 110;
+    public void set_starting_pose(){
+        starting_pose_x = 63;
+        starting_pose_y = 8;
+        starting_pose_heading = 90;
+        //follower.setStartingPose(new Pose(63, 8, Math.toRadians(90)));
+    }
+    public void set_color(){
+        String color = "blue";
+        int tagToAim = 20;
+        paths.shootPreloadStart = new Pose(63.000, 8.000);
+        paths.shootPreloadEnd = new Pose(58, 16);
+        paths.parkStart = new Pose(58, 16);
+        paths.parkEnd = new Pose(36, 10);
+        paths.headShootPreload1 = 90;
+        paths.headShootPreload2 = backlineAngle;
+        paths.headPark1 = backlineAngle;
+        paths.headPark2 = 0;
     }
 }

@@ -15,12 +15,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
     @Autonomous(name = "donrt run ", group = "Autonomous")
     @Configurable // Panels
     @SuppressWarnings("unused")
-    public abstract class Back3Main extends OpMode {
+    public abstract class GoalMain extends OpMode {
 
         public final double INTAKE_POS = .84; // .87MAX
         int timesToShoot = 3;
