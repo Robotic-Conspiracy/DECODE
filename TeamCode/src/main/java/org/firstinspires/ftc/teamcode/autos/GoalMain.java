@@ -1,5 +1,5 @@
 
-package org.firstinspires.ftc.teamcode.autos.back;
+package org.firstinspires.ftc.teamcode.autos;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 @Config
-public abstract class AutoMain extends OpMode {
+public abstract class GoalMain extends OpMode {
     protected DcMotor leftFrontDrive;
     protected DcMotor rightFrontDrive;
     protected DcMotor leftBackDrive;

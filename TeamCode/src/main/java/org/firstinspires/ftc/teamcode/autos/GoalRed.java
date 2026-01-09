@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.autos.back;
+package org.firstinspires.ftc.teamcode.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Red goal")
+@Autonomous(name = "RED GOAL")
 
-public class AutoRedGoal extends AutoMain {
+public class GoalRed extends GoalMain {
     @Override
     void move() {
         double forward  = 1;
