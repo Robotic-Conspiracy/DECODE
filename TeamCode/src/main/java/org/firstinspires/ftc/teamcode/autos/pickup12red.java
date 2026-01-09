@@ -1,3 +1,4 @@
+// Java
 package org.firstinspires.ftc.teamcode.autos;
 
 import com.bylazar.configurables.annotations.Configurable;
@@ -20,38 +21,38 @@ public class pickup12red extends pickup12main {
         String color = "red";
         int tagToAim = 24;
         // Mirrored from blue across x = 72 -> x' = 144 - x
-        paths.shootPreloadStart = new Pose(81.000, 8.000); // from blue 63.000
-        paths.shootPreloadEnd = new Pose(86, 16); // from blue 58
+        paths.shootPreloadStart = new Pose(81.000, 8.000);
+        paths.shootPreloadEnd = new Pose(86, 16);
 
-        paths.prePickup1Start = new Pose(86, 16); // from blue 58
-        paths.prePickup1End = new Pose(86, 36); // from blue 58
+        paths.prePickup1Start = new Pose(86, 16);
+        paths.prePickup1End = new Pose(86, 36);
 
-        paths.pickup1Start = new Pose(86, 36); // from blue 58
-        paths.pickup1End = new Pose(136, 36); // from blue 8
+        paths.pickup1Start = new Pose(86, 36);
+        paths.pickup1End = new Pose(132, 36);
 
-        paths.shootPickup1Start = new Pose(136, 36); // from blue 8
-        paths.shootPickup1End = new Pose(86, 16); // from blue 58
+        paths.shootPickup1Start = new Pose(132, 36);
+        paths.shootPickup1End = new Pose(86, 16);
 
-        paths.prePickup2Start = new Pose(86, 16); // from blue 58
-        paths.prePickup2End = new Pose(92, 55); // from blue 52
+        paths.prePickup2Start = new Pose(86, 16);
+        paths.prePickup2End = new Pose(92, 55);
 
-        paths.pickUp2Start = new Pose(92, 55); // from blue 52
-        paths.pickUp2End = new Pose(136, 55); // from blue 8
+        paths.pickUp2Start = new Pose(92, 55);
+        paths.pickUp2End = new Pose(132, 55);
 
-        paths.shootPickup2Start = new Pose(136, 60); // from blue 8 (y was 60)
-        paths.shootPickup2End = new Pose(86, 16); // from blue 58
+        paths.shootPickup2Start = new Pose(132, 60);
+        paths.shootPickup2End = new Pose(86, 16);
 
-        paths.prePickup3Start = new Pose(86, 16); // from blue 58
-        paths.prePickup3End = new Pose(86, 84); // from blue 58
+        paths.prePickup3Start = new Pose(86, 16);
+        paths.prePickup3End = new Pose(86, 84);
 
-        paths.pickup3Start = new Pose(86, 84); // from blue 58
-        paths.pickup3End = new Pose(132, 84); // from blue 12
+        paths.pickup3Start = new Pose(86, 84);
+        paths.pickup3End = new Pose(128, 84);
 
-        paths.shootPickup3Start = new Pose(132, 84); // from blue 12
-        paths.shootPickup3End = new Pose(86, 84); // from blue 58
+        paths.shootPickup3Start = new Pose(128, 84);
+        paths.shootPickup3End = new Pose(86, 84);
 
-        paths.parkStart = new Pose(86, 84); // from blue 58
-        paths.parkEnd = new Pose(100, 68); // from blue 25
+        paths.parkStart = new Pose(86, 84);
+        paths.parkEnd = new Pose(100, 68);
 
         paths.headShootPreload1 = 90;
         paths.headShootPreload2 = backlineAngle;
