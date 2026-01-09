@@ -4,7 +4,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "BLUE 3 BACK", group = "Autonomous")
-public class back3blue extends back3main {
+public class Back3Blue extends Back3Main {
     int backlineAngle = 110;
     public void set_starting_pose(){
         starting_pose_x = 63;

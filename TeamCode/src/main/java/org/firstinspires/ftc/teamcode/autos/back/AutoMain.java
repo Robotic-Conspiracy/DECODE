@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 @Config
-public abstract class The_Fourth_Auto extends OpMode {
+public abstract class AutoMain extends OpMode {
     protected DcMotor leftFrontDrive;
     protected DcMotor rightFrontDrive;
     protected DcMotor leftBackDrive;

@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
     @Autonomous(name = "donrt run ", group = "Autonomous")
     @Configurable // Panels
     @SuppressWarnings("unused")
-    public abstract class back3main extends OpMode {
+    public abstract class Back3Main extends OpMode {
 
         public final double INTAKE_POS = .84; // .87MAX
         int timesToShoot = 3;
