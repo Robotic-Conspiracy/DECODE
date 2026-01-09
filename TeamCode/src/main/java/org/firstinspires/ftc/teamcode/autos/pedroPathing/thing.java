@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.autos.pedroPathing;
 
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
@@ -9,11 +9,11 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.PoseHistory;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Autonomous
-public class BackOpenFieldPedro extends OpMode {
+//@TeleOp
+public class thing extends OpMode {
     public static Follower follower;
     @IgnoreConfigurable
     static PoseHistory poseHistory;
@@ -63,7 +63,7 @@ public class BackOpenFieldPedro extends OpMode {
         path = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, endPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), endPose.getHeading())
-            .build();
+                .build();
         follower.followPath(path);
     }
 
