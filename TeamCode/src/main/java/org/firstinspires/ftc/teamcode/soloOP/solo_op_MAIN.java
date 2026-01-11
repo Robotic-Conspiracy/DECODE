@@ -171,14 +171,14 @@ public abstract class solo_op_MAIN extends OpMode {
         initialize_launcher();
         initialize_intake();
         initialize_pinpoint();
-        light1 = hardwareMap.get(Servo.class, "preset light");
-        light2 = hardwareMap.get(Servo.class, "launch light");
-        stoppy_servo = hardwareMap.get(Servo.class, "intake stopper");
-        floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
+        light1 = hardwareMap.get(Servo.class, OpmodeConstants.PresetLightName);
+        light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
+        stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
+        floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
-        aprilTagProcessor.setDecimation(3);
+        aprilTagProcessor.setDecimation(2);
 //        portal = new VisionPortal.Builder()
 //                .setCamera(BuiltinCameraDirection.BACK)
 //                .addProcessor(aprilTagProcessor)
