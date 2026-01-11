@@ -8,10 +8,10 @@ public class OpmodeConstants {
     public static final int TeleopBacklineAngle = 50/360;
 
     public static final int AutoBacklineSpeed = 2240;
-    public static final int AutoMidSpeed = 1880;
+    public static final int AutoMidSpeed = 1820;
     public static final int AutoGoalSpeed = 1500;
-    public static final int AutoMidAngle = 47/360;
-    public static final int AutoGoalAngle = 75/360;
+    public static final int AutoMidAngle = 48/360;
+    public static final int AutoGoalAngle = 73/360;
     public static final int AutoBacklineAngle = 49/360;
 
     public static final double IntakeRampLaunchPos = 0.61;

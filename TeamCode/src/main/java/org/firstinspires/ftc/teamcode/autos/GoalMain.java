@@ -22,6 +22,13 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
     @Configurable // Panels
     @SuppressWarnings("unused")
     public abstract class GoalMain extends OpMode {
+        public static int backlineSpeed = OpmodeConstants.AutoBacklineSpeed;
+        public static int backlineAngle = OpmodeConstants.AutoBacklineAngle;
+        public static int midSpeed = OpmodeConstants.AutoMidSpeed;
+        public static int midAngle = OpmodeConstants.AutoMidAngle;
+        public static int AutoGoalSpeed = OpmodeConstants.AutoGoalSpeed;
+        public static int AutoGoalAngle = OpmodeConstants.AutoGoalAngle;
+
 
         public final double INTAKE_POS = .84; // .87MAX
         int timesToShoot = 3;
@@ -46,9 +53,9 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         private CRServo rightFeeder = null;
         private DcMotorEx launcher = null;
         private DcMotorEx intake = null;
-        public static int targetSpeed = 2380;//launch motor speed
+        public static int targetSpeed = AutoGoalSpeed;//launch motor speed
         private Servo intake_ramp = null;
-        public static double targetAngle = 0.1444;
+        public static double targetAngle = AutoGoalAngle;
         public static int INTAKE_SPEED = 1600; //RPM
 
         private TelemetryManager panelsTelemetry; // Panels Telemetry instance
