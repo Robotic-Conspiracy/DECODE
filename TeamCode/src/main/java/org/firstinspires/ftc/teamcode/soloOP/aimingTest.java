@@ -99,6 +99,7 @@ public abstract class aimingTest extends OpMode {
             double heading = follower.getHeading();
             double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
 
+            angle += Math.PI / 2;
             // Calculate the shortest angular distance (flipped)
             double angle_to_target = heading - angle;
 
