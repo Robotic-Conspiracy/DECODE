@@ -15,12 +15,16 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.ConceptBlackboard;
 import org.firstinspires.ftc.teamcode.OpmodeConstants;
+import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 
 @Configurable // Panels
 public abstract class pickup12main extends OpMode {
+
+    private ConceptBlackboard blackboard;
     public final double INTAKE_POS = OpmodeConstants.IntakeRampIntakePos; // .87MAX
     int timesToShoot = 3;
     public int starting_pose_x;
@@ -637,6 +641,7 @@ public abstract class pickup12main extends OpMode {
                     pathState = 0;
                     nextPathState = 0;
                 }
+                StaticCommunism.pose = follower.getPose();
                 break;
 
             case 100:

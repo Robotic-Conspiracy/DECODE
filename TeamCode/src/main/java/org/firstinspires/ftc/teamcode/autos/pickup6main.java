@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 
@@ -501,6 +502,7 @@ public abstract class pickup6main extends OpMode {
                     nextPathState = 0;
                     targetSpeed = 2340;
                 }
+                StaticCommunism.pose = follower.getPose();
                 break;
 
             case 100:

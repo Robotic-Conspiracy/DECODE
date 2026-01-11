@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
     @Autonomous(name = "donrt run ", group = "Autonomous")
@@ -305,6 +306,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                         pathState = 0;
                         nextPathState = 3;
                     }
+                    StaticCommunism.pose = follower.getPose();
                 case 100:
                     // TODO use case 100 for aiming to launch
                     pathState = 101;
