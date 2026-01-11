@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
@@ -46,9 +47,9 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         private CRServo rightFeeder = null;
         private DcMotorEx launcher = null;
         private DcMotorEx intake = null;
-        public static int targetSpeed = 2380;//launch motor speed
+        public static int targetSpeed = OpmodeConstants.AutoBacklineSpeed;//launch motor speed
         private Servo intake_ramp = null;
-        public static double targetAngle = 0.1444;
+        public static double targetAngle = OpmodeConstants.AutoBacklineAngle;
         public static int INTAKE_SPEED = 1600; //RPM
 
         private TelemetryManager panelsTelemetry; // Panels Telemetry instance
@@ -286,7 +287,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                         waitingForPath = false;
                         pathState = 100;
                         nextPathState = 2;
-                        targetSpeed = 2380;
+                        targetSpeed = OpmodeConstants.AutoBacklineSpeed;
                     }
                     break;
                 case 2:
