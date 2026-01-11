@@ -349,35 +349,37 @@ public abstract class solo_op_MAIN extends OpMode {
                 follower.setTeleOpDrive(0,0, -X_MOVE, true);
                 //Drive(0, 0, X_MOVE);
                 alignmentActive = true;
-            } else if (gamepad1.b) {
-                if(breakModeActive){
-                    breakModeActive = false;
-                    follower.startTeleopDrive(false);
-                }
-
-                double heading = follower.getHeading();
-                // Use atan2 for correct quadrant handling
-                double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
-
-                // Calculate the shortest angular distance - FLIP the sign here
-                double angle_to_target = angle - heading;  // Changed from heading - angle
-
-                // Normalize to [-π, π] to ensure shortest rotation path
-                while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
-                while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
-
-                double kP = 3;//1.5
-                double exponentialFactor = 0.8;//0.8
-                double normalizedError = Math.abs(angle_to_target) / Math.PI;
-                double exponentialGain = Math.pow(normalizedError, exponentialFactor);
-
-                double rotationPower = kP * angle_to_target * exponentialGain;
-                rotationPower = Range.clip(rotationPower, -0.7, 0.7);
-                follower.setTeleOpDrive(0, 0, rotationPower, true);
-                //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-                //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-                alignmentActive = true;
             }
+        }
+
+        if (gamepad1.b) {
+            if(breakModeActive){
+                breakModeActive = false;
+                follower.startTeleopDrive(false);
+            }
+
+            double heading = follower.getHeading();
+            // Use atan2 for correct quadrant handling
+            double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
+
+            // Calculate the shortest angular distance - FLIP the sign here
+            double angle_to_target = angle - heading;  // Changed from heading - angle
+
+            // Normalize to [-π, π] to ensure shortest rotation path
+            while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
+            while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
+
+            double kP = 3;//1.5
+            double exponentialFactor = 0.8;//0.8
+            double normalizedError = Math.abs(angle_to_target) / Math.PI;
+            double exponentialGain = Math.pow(normalizedError, exponentialFactor);
+
+            double rotationPower = kP * angle_to_target * exponentialGain;
+            rotationPower = Range.clip(rotationPower, -0.7, 0.7);
+            follower.setTeleOpDrive(0, 0, rotationPower, true);
+            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
