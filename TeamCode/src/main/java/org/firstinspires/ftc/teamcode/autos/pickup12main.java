@@ -657,6 +657,7 @@ public abstract class pickup12main extends OpMode {
               if (doneLaunching) {
                 pathState = 200;
                 timesShot = 0;
+                waitTimer.reset();
               }
               break;
             case 200://intake
@@ -664,7 +665,10 @@ public abstract class pickup12main extends OpMode {
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 //LEFT_LAUNCH_SERVO.setPosition(0);
-                pathState = nextPathState;
+                if (waitTimer.seconds() >= 0.3) {
+                    pathState = nextPathState;
+                }
+
 
 
                 break;
