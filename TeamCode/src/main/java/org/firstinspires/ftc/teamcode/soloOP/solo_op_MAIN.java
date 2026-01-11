@@ -314,7 +314,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         // Only enable AprilTag processing when alignment is requested (saves CPU/power)
-        boolean alignmentRequested = gamepad1.right_trigger >= 0.2 || gamepad1.b;
+        boolean alignmentRequested = gamepad1.right_trigger >= 0.2;
         if (alignmentRequested != aprilTagProcessorEnabled) {
             portal.setProcessorEnabled(aprilTagProcessor, alignmentRequested);
             aprilTagProcessorEnabled = alignmentRequested;
@@ -380,6 +380,12 @@ public abstract class solo_op_MAIN extends OpMode {
             //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
             //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
 
+        } else {
+            if(!breakModeActive){
+                breakModeActive = true;
+                follower.startTeleopDrive(true);
+            }
+            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
@@ -402,14 +408,7 @@ public abstract class solo_op_MAIN extends OpMode {
         launcher.setVelocity(targetSpeed);
 
         // Only use manual drive if alignment is not active
-        if (!alignmentActive) {
-            if(!breakModeActive){
-                breakModeActive = true;
-                follower.startTeleopDrive(true);
-            }
-            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
-            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
-        }
+
 
         // Always add telemetry data and update for consistent display
         AddTelemetry();
@@ -623,6 +622,7 @@ public abstract class solo_op_MAIN extends OpMode {
         double f = OpmodeConstants.Launcher_F;
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
     }
 
