@@ -92,38 +92,33 @@ public abstract class aimingTest extends OpMode {
                 breakModeActive = false;
                 follower.startTeleopDrive(false);
             }
-//            double heading = follower.getHeading();
-//            double angle = Math.atan((goalPosition.getY() - follower.getPose().getY()) / (goalPosition.getX()-follower.getPose().getX()));
-//            double angle_to_target = heading-angle;
-//            drive(0, 0, Range.clip(0.5*(angle_to_target/angle), -0.5, 0.5));
+
             double heading = follower.getHeading();
+            // Use atan2 for correct quadrant handling
             double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
 
-            angle += Math.PI;
-            // Calculate the shortest angular distance (flipped)
-            double angle_to_target = heading - angle;
-
+            // Calculate the shortest angular distance - FLIP the sign here
+            double angle_to_target = angle - heading;  // Changed from heading - angle
 
             // Normalize to [-π, π] to ensure shortest rotation path
             while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
             while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
 
-            // Exponential control: speed decreases exponentially as angle approaches zero
-            double kP = 3; // Base proportional gain
-            double exponentialFactor = 1; // Controls steepness of exponential curve
-            double normalizedError = Math.abs(angle_to_target) / Math.PI; // Normalize to [0, 1]
+            double kP = 1.5;
+            double exponentialFactor = 0.8;
+            double normalizedError = Math.abs(angle_to_target) / Math.PI;
             double exponentialGain = Math.pow(normalizedError, exponentialFactor);
 
-
             double rotationPower = kP * angle_to_target * exponentialGain;
-            rotationPower = Range.clip(rotationPower, -1.0, 1.0);
+            rotationPower = Range.clip(rotationPower, -0.7, 0.7);
 
             panelsTelemetry.addData("heading", Math.toDegrees(follower.getHeading()));
             panelsTelemetry.addData("rotation power", rotationPower);
             panelsTelemetry.addData("target heading", Math.toDegrees(angle));
+            panelsTelemetry.addData("angle error", Math.toDegrees(angle_to_target));
             panelsTelemetry.update();
-            //drive(0, 0, rotationPower);
-            follower.setTeleOpDrive(0,0, rotationPower, true);
+
+            follower.setTeleOpDrive(0, 0, rotationPower, true);
         } else {
             if(!breakModeActive){
                 breakModeActive = true;
