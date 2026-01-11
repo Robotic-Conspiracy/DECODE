@@ -204,12 +204,12 @@ public abstract class solo_op_MAIN extends OpMode {
 
         //changing servo rotation
         if (gamepad1.dpadRightWasPressed()) {// MAPPING
-            targetAngle += (gamepad1.x ? 5 : 1);// MAPPING
+            targetAngle += (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
         }
         if (gamepad1.dpadLeftWasPressed()) {// MAPPING
-            targetAngle -= (gamepad1.x ? 5 : 1);// MAPPING
+            targetAngle -= (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
         }
-        double SERVO_MAXIMUM_POSITION = 90/360.0;
+        double SERVO_MAXIMUM_POSITION = 0.25;
         double SERVO_MINIMUM_POSITION = 0;
         if (targetAngle > SERVO_MAXIMUM_POSITION) {
             targetAngle = SERVO_MAXIMUM_POSITION;
@@ -244,7 +244,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 case BACK:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 0.3;
+                    targetAngle = 0.25;
                     break;
             }
         }

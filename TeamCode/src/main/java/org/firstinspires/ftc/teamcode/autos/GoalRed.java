@@ -5,33 +5,35 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Red Goal", group = "Autonomous")
 public class GoalRed extends GoalMain {
-    int backlineAngle = 70; // Mirrored from blue 110 (180 - 110 = 70, adjusted to 67 to match other red autos)
+    // Mirrored from blue GoalAimAngle = 135 -> 180 - 135 = 45
+    int GoalAimAngle = 45; // mirrored aim angle
 
     public void set_starting_pose(){
-        // Mirrored from blue: x' = 144 - 63 = 81
-        starting_pose_x = 81;
-        starting_pose_y = 8;
-        starting_pose_heading = 90;
+        // Mirrored from blue starting_pose_x = 17 -> 144 - 17 = 127
+        starting_pose_x = 127;
+        starting_pose_y = 119;
+        // Mirror heading: 180 - 142 = 38
+        starting_pose_heading = 38;
     }
 
     public void set_color(){
         String color = "red";
-        int tagToAim = 24; // Red side AprilTag
+        int tagToAim = 24; // keep red AprilTag id
 
         // Mirrored from blue across x = 72 -> x' = 144 - x
-        // Blue shootPreloadStart was (63, 8) -> Red is (81, 8)
-        paths.shootPreloadStart = new Pose(81.000, 8.000);
-        // Blue shootPreloadEnd was (58, 16) -> Red is (86, 16)
-        paths.shootPreloadEnd = new Pose(86, 16);
+        // Blue shootPreloadStart was (17.5, 119) -> Red is (126.5, 119)
+        paths.shootPreloadStart = new Pose(126.5, 119);
+        // Blue shootPreloadEnd was (23, 119) -> Red is (121, 119)
+        paths.shootPreloadEnd = new Pose(121, 119);
 
-        // Blue parkStart was (58, 16) -> Red is (86, 16)
-        paths.parkStart = new Pose(86, 16);
-        // Blue parkEnd was (36, 10) -> Red is (108, 10)
-        paths.parkEnd = new Pose(108, 10);
+        // Blue parkStart was (23, 119) -> Red is (121, 119)
+        paths.parkStart = new Pose(121, 119);
+        // Blue parkEnd was (36, 132) -> Red is (108, 132)
+        paths.parkEnd = new Pose(108, 132);
 
         paths.headShootPreload1 = 90;
-        paths.headShootPreload2 = backlineAngle;
-        paths.headPark1 = backlineAngle;
-        paths.headPark2 = 180; // Mirrored from blue 0 -> 180
+        paths.headShootPreload2 = GoalAimAngle;
+        paths.headPark1 = GoalAimAngle;
+        paths.headPark2 = 180; // mirrored from blue 0 -> 180
     }
 }
