@@ -286,7 +286,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                         waitingForPath = false;
                         pathState = 100;
                         nextPathState = 2;
-                        targetSpeed = OpmodeConstants.AutogoalSpeed;
+                        targetSpeed = OpmodeConstants.AutoGoalSpeed;
                     }
                     break;
                 case 2:

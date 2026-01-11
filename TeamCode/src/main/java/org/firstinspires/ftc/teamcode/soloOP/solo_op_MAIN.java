@@ -107,12 +107,12 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
-    public static int backlineSpeed = OpmodeConstants.backlineSpeed;
-    public static int backlineAngle = OpmodeConstants.backlineAngle;
-    public static int midSpeed = OpmodeConstants.midSpeed;
-    public static int midAngle = OpmodeConstants.midAngle;
-    public static int goalSpeed = OpmodeConstants.goalSpeed;
-    public static int goalAngle = OpmodeConstants.goalAngle;
+    public static int backlineSpeed = OpmodeConstants.TeleopBacklineSpeed;
+    public static int backlineAngle = OpmodeConstants.TeleopBacklineAngle;
+    public static int midSpeed = OpmodeConstants.TeleopMidlineSpeed;
+    public static int midAngle = OpmodeConstants.TeleopMidAngle;
+    public static int goalSpeed = OpmodeConstants.TeleopGoalSpeed;
+    public static int goalAngle = OpmodeConstants.TeleopGoalAngle;
 
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed

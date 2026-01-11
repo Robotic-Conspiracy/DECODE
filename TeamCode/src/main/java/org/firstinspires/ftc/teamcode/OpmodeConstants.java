@@ -1,19 +1,19 @@
 package org.firstinspires.ftc.teamcode;
 public class OpmodeConstants {
-    public static final int backlineSpeed = 2240;
-    public static final int midSpeed = 1940;
-    public static final int goalSpeed = 1500;
-    public static final int midAngle = 48/360;
-    public static final int goalAngle = 75/360;
-    public static final int backlineAngle = 50/360;
+    public static final int TeleopBacklineSpeed = 2240;
+    public static final int TeleopMidlineSpeed = 1940;
+    public static final int TeleopGoalSpeed = 1500;
+    public static final int TeleopMidAngle = 48/360;
+    public static final int TeleopGoalAngle = 75/360;
+    public static final int TeleopBacklineAngle = 50/360;
 
-    public static final int AutobacklineSpeed = 2240;
-    public static final int AutomidSpeed = 1880;
-    public static final int AutogoalSpeed = 1500;
-    public static final int AutomidAngle = 47/360;
-    public static final int AutogoalAngle = 75/360;
-    public static final int AutobacklineAngle = 49/360;
-    
+    public static final int AutoBacklineSpeed = 2240;
+    public static final int AutoMidSpeed = 1880;
+    public static final int AutoGoalSpeed = 1500;
+    public static final int AutoMidAngle = 47/360;
+    public static final int AutoGoalAngle = 75/360;
+    public static final int AutoBacklineAngle = 49/360;
+
     public static final double IntakeRampLaunchPos = 0.61;
     public static final double IntakeRampIntakePos = 0.84;
     public static final double FeedTimeSeconds = 0.15;
@@ -30,7 +30,7 @@ public class OpmodeConstants {
     public static final String LeftFeederName = "left_feeder";
     public static final String RightFeederName = "right_feeder";
     public static final String LauncherName = "launcher";
-    
+
     public static final String FrontLeftMotor = "front_left_drive";
     public static final String FrontRightMotor = "front_right_drive";
     public static final String BackLeftMotor = "back_left_drive";

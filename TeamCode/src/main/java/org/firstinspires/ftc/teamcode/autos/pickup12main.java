@@ -40,17 +40,15 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    
+
     private Servo intake_ramp = null;
-    
+
     public static int INTAKE_SPEED = 1600; //RPM
-    public static int backlineSpeed = OpmodeConstants.AutobacklineSpeed;
-    public static int backlineAngle = OpmodeConstants.AutobacklineAngle;
-    public static int midSpeed = OpmodeConstants.AutomidSpeed;
-    public static int midAngle = OpmodeConstants.AutomidAngle;
-    public static int goalSpeed = OpmodeConstants.AutogoalSpeed;
-    public static int goalAngle = OpmodeConstants.AutogoalAngle;
-    
+    public static int backlineSpeed = OpmodeConstants.AutoBacklineSpeed;
+    public static int backlineAngle = OpmodeConstants.AutoBacklineAngle;
+    public static int midSpeed = OpmodeConstants.AutoMidSpeed;
+    public static int midAngle = OpmodeConstants.AutoMidAngle;
+
     public int targetSpeed = backlineSpeed;//launch motor speed
     public double targetAngle = backlineAngle;
 
@@ -574,8 +572,8 @@ public abstract class pickup12main extends OpMode {
                 }
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
-                    targetSpeed = OpmodeConstants.AutomidSpeed;
-                    targetAngle = (double) OpmodeConstants.AutomidAngle;
+                    targetSpeed = midSpeed;
+                    targetAngle = midAngle;
                     pathState = 200;
                     nextPathState = 9;
                 }
@@ -646,22 +644,23 @@ public abstract class pickup12main extends OpMode {
                 pathState = 101;
                 break;
             case 101:
-                launcher.setVelocity(targetSpeed);
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
-                intake_ramp.setPosition(LAUNCH_POS);
-                intake.setVelocity(0);
-                doneLaunching = launch();
-                if (doneLaunching){
-                    pathState = 200;
-                    timesShot = 0;
-                }
-                break;
+              launcher.setVelocity(targetSpeed);
+              LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+              intake_ramp.setPosition(LAUNCH_POS);
+              intake.setVelocity(0);
+              doneLaunching = launch();
+              if (doneLaunching) {
+                pathState = 200;
+                timesShot = 0;
+              }
+              break;
             case 200://intake
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 //LEFT_LAUNCH_SERVO.setPosition(0);
                 pathState = nextPathState;
+
 
                 break;
         }
