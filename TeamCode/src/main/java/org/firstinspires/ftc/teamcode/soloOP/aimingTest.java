@@ -158,10 +158,10 @@ public abstract class aimingTest extends OpMode {
     }
 
     public void init_wheels(){
-        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left_drive");// DRIVE SETUP
-        backLeftMotor = hardwareMap.get(DcMotorEx.class, "back_left_drive");
-        frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
-        backRightMotor = hardwareMap.get(DcMotorEx.class, "back_right_drive");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.FrontLeftMotor);// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.BackLeftMotor);
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.FrontRightMotor);
+        backRightMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.BackRightMotor);
 
         // Set run mode to RUN_WITHOUT_ENCODER for power control with reliable braking
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -188,7 +188,7 @@ public abstract class aimingTest extends OpMode {
     }
 
     public void init_shooter(){
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
         launchAngleServo = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
 
         launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

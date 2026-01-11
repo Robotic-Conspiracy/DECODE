@@ -29,7 +29,7 @@ public class PIDF_Tuning  extends OpMode {
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
         time.reset();
     }
 
