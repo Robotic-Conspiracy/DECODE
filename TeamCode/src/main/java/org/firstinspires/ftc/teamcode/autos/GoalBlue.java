@@ -5,11 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Blue Goal", group = "Autonomous")
 public class GoalBlue extends GoalMain {
-    int GoalAimAngle = 110;
+    int GoalAimAngle = 135;
     public void set_starting_pose(){
         starting_pose_x = 17;
         starting_pose_y = 119;
-        starting_pose_heading = 135;
+        starting_pose_heading = 142;
         //follower.setStartingPose(new Pose(63, 8, Math.toRadians(90)));
     }
     public void set_color(){

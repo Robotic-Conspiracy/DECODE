@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
-    @Autonomous(name = "donrt run ", group = "Autonomous")
+
     @Configurable // Panels
     @SuppressWarnings("unused")
     public abstract class GoalMain extends OpMode {
