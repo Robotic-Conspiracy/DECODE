@@ -35,4 +35,11 @@ public class OpmodeConstants {
     public static final String FrontRightMotor = "front_right_drive";
     public static final String BackLeftMotor = "back_left_drive";
     public static final String BackRightMotor = "back_right_drive";
+
+    public static final String IMUName = "imu";
+    public static final String odometryName = "odometry";
+    public static final String PresetLightName = "preset light";
+    public static final String AimLightName = "aim light";
+    public static final String FloodgateName = "floodgate";
+
 }

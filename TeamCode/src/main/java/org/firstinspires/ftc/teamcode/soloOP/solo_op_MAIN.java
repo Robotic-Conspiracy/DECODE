@@ -171,14 +171,14 @@ public abstract class solo_op_MAIN extends OpMode {
         initialize_launcher();
         initialize_intake();
         initialize_pinpoint();
-        light1 = hardwareMap.get(Servo.class, "preset light");
-        light2 = hardwareMap.get(Servo.class, "launch light");
-        stoppy_servo = hardwareMap.get(Servo.class, "intake stopper");
-        floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
+        light1 = hardwareMap.get(Servo.class, OpmodeConstants.PresetLightName);
+        light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
+        stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
+        floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
-        aprilTagProcessor.setDecimation(3);
+        aprilTagProcessor.setDecimation(2);
 //        portal = new VisionPortal.Builder()
 //                .setCamera(BuiltinCameraDirection.BACK)
 //                .addProcessor(aprilTagProcessor)
@@ -381,7 +381,7 @@ public abstract class solo_op_MAIN extends OpMode {
             //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
             //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
 
-        } else {
+        } else if (!alignmentActive) {
             if(!breakModeActive){
                 breakModeActive = true;
                 follower.startTeleopDrive(true);
@@ -642,7 +642,7 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_pinpoint() {
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, OpmodeConstants.odometryName);
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
 

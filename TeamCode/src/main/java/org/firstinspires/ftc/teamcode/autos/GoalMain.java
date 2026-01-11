@@ -76,10 +76,10 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
         private void initialize_launcher() {
             launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-            double p = 203;
-            double i = 1.001;
-            double d = 0.0015;
-            double f = 0.1;
+            double p = OpmodeConstants.Launcher_P;
+            double i = OpmodeConstants.Launcher_I;
+            double d = OpmodeConstants.Launcher_D;
+            double f = OpmodeConstants.Launcher_F;
             launcher.setVelocityPIDFCoefficients(p, i, d, f);
             launcher.setDirection(DcMotorSimple.Direction.REVERSE);
             LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
