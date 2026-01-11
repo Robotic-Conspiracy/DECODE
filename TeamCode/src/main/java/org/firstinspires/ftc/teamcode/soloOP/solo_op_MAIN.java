@@ -7,6 +7,11 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -27,6 +32,8 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.StaticCommunism;
+import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -138,11 +145,21 @@ public abstract class solo_op_MAIN extends OpMode {
 
     private Servo stoppy_servo;
 
+    private Follower follower;
+    public Pose goalPosition;
+    public PathChain path;
+    private boolean breakModeActive;
+    private TelemetryManager panelsTelemetry;
+
 
     @Override
     public void init() {
         PanelsConfigurables.INSTANCE.refreshClass(this);
-
+        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(StaticCommunism.pose);
+        goalPosition = set_goal_position();
+        Drawing.drawDebug(follower);
         set_color();
 
         launchState = LaunchState.IDLE;
@@ -175,11 +192,17 @@ public abstract class solo_op_MAIN extends OpMode {
 
         canlaunch = CanLaunch.ERROR;
     }
+    @Override
+    public void start(){
+        follower.startTeleopDrive(true  );
+        breakModeActive = true;
+    }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
         pinpoint.update();
+        follower.update();
         // Cache pinpoint values immediately after update to avoid redundant I2C reads
         cachedPosX = pinpoint.getPosX(DistanceUnit.MM);
         cachedPosY = pinpoint.getPosY(DistanceUnit.MM);
@@ -323,10 +346,36 @@ public abstract class solo_op_MAIN extends OpMode {
 
             if (gamepad1.right_trigger >= 0.2) {// MAPPING
                 // TODO: Move to back line position automatically
-                Drive(0, 0, X_MOVE);
+                follower.setTeleOpDrive(0,0, -X_MOVE, true);
+                //Drive(0, 0, X_MOVE);
                 alignmentActive = true;
             } else if (gamepad1.b) {
-                Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+                if(breakModeActive){
+                    breakModeActive = false;
+                    follower.startTeleopDrive(false);
+                }
+
+                double heading = follower.getHeading();
+                // Use atan2 for correct quadrant handling
+                double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
+
+                // Calculate the shortest angular distance - FLIP the sign here
+                double angle_to_target = angle - heading;  // Changed from heading - angle
+
+                // Normalize to [-π, π] to ensure shortest rotation path
+                while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
+                while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
+
+                double kP = 3;//1.5
+                double exponentialFactor = 0.8;//0.8
+                double normalizedError = Math.abs(angle_to_target) / Math.PI;
+                double exponentialGain = Math.pow(normalizedError, exponentialFactor);
+
+                double rotationPower = kP * angle_to_target * exponentialGain;
+                rotationPower = Range.clip(rotationPower, -0.7, 0.7);
+                follower.setTeleOpDrive(0, 0, rotationPower, true);
+                //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+                //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
                 alignmentActive = true;
             }
         }
@@ -352,7 +401,12 @@ public abstract class solo_op_MAIN extends OpMode {
 
         // Only use manual drive if alignment is not active
         if (!alignmentActive) {
-            Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
+            if(!breakModeActive){
+                breakModeActive = true;
+                follower.startTeleopDrive(true);
+            }
+            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
         }
 
         // Always add telemetry data and update for consistent display
@@ -634,6 +688,8 @@ public abstract class solo_op_MAIN extends OpMode {
     public void setTargetDetection(AprilTagDetection targetDetection) {
         this.targetDetection = targetDetection;
     }
+
+    public abstract Pose set_goal_position();
 
     enum IntakeState {
         SPIN,
