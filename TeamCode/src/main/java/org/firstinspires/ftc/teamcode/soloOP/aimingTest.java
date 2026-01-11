@@ -89,8 +89,8 @@ public abstract class aimingTest extends OpMode {
 
         if(gamepad1.b){
             if(breakModeActive){
-                breakModeActive = true;
-                follower.startTeleopDrive(true);
+                breakModeActive = false;
+                follower.startTeleopDrive(false);
             }
 //            double heading = follower.getHeading();
 //            double angle = Math.atan((goalPosition.getY() - follower.getPose().getY()) / (goalPosition.getX()-follower.getPose().getX()));
@@ -109,13 +109,13 @@ public abstract class aimingTest extends OpMode {
             while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
 
             // Exponential control: speed decreases exponentially as angle approaches zero
-            double kP = 2; // Base proportional gain
+            double kP = 3; // Base proportional gain
             double exponentialFactor = 1; // Controls steepness of exponential curve
             double normalizedError = Math.abs(angle_to_target) / Math.PI; // Normalize to [0, 1]
             double exponentialGain = Math.pow(normalizedError, exponentialFactor);
 
 
-            double rotationPower = kP * angle_to_target;
+            double rotationPower = kP * angle_to_target * exponentialGain;
             rotationPower = Range.clip(rotationPower, -1.0, 1.0);
 
             panelsTelemetry.addData("heading", Math.toDegrees(follower.getHeading()));
