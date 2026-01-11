@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Tuning.*;
@@ -60,10 +61,33 @@ public abstract class aimingTest extends OpMode {
 
     private boolean breakModeActive = false;
 
+    // --- Auto-aiming configuration ---
+    // Configurable via FTC Dashboard
+    public static double goalHeightInches = 36.0;           // Height of the goal basket (inches)
+    public static double launcherHeightInches = 12.0;       // Height of launcher above ground (inches)
+    public static double gravity = 386.0;                    // Gravity in inches/sec^2 (32.2 ft/s^2)
+
+    // Velocity control parameters (for encoder-based velocity control)
+    public static double launcherTicksPerRev = 537.7;       // Encoder ticks per revolution (adjust for your motor)
+    public static double launcherWheelDiameterInches = 4.0; // Diameter of launcher wheel (inches)
+    public static double launchVelocityFactor = 0.8;        // Efficiency factor (0-1) for actual vs theoretical velocity
+
+    // Servo angle mapping (tune these to your servo/mechanism)
+    public static double servoAngleMin = 0.0;               // Servo position for minimum angle
+    public static double servoAngleMax = 1.0;               // Servo position for maximum angle
+    public static double launchAngleMinDegrees = 30.0;      // Minimum launch angle (degrees)
+    public static double launchAngleMaxDegrees = 60.0;      // Maximum launch angle (degrees)
+
+    // Velocity limits (ticks per second)
+    public static double minLauncherVelocity = 500.0;       // Minimum velocity in ticks/sec
+    public static double maxLauncherVelocity = 2800.0;      // Maximum velocity in ticks/sec (adjust for your motor)
+    // ---------------------------------------
+
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         init_wheels();
+        init_shooter();
         init_pedro();
         goalPosition = set_goal_position();
         Drawing.init();
@@ -111,6 +135,9 @@ public abstract class aimingTest extends OpMode {
 
             double rotationPower = kP * angle_to_target * exponentialGain;
             rotationPower = Range.clip(rotationPower, -0.7, 0.7);
+
+            // Automatically adjust launcher angle and velocity for current distance
+            aim();
 
             panelsTelemetry.addData("heading", Math.toDegrees(follower.getHeading()));
             panelsTelemetry.addData("rotation power", rotationPower);
@@ -161,7 +188,13 @@ public abstract class aimingTest extends OpMode {
     }
 
     public void init_shooter(){
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launchAngleServo = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
 
+        launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcher.setVelocity(0);
     }
 
     public void init_camera(){
@@ -211,7 +244,97 @@ public abstract class aimingTest extends OpMode {
     }
 
     public void aim(){
+        // Calculate horizontal distance to goal
+        double dx = goalPosition.getX() - follower.getPose().getX();
+        double dy = goalPosition.getY() - follower.getPose().getY();
+        double horizontalDistance = Math.sqrt(dx * dx + dy * dy);
 
+        // Calculate vertical distance (height difference)
+        double verticalDistance = goalHeightInches - launcherHeightInches;
+
+        // Calculate optimal launch angle and velocity using projectile motion physics
+        // For a given distance and height, we solve: range = v^2 * sin(2θ) / g, height = v^2 * sin^2(θ) / (2g)
+        // We use an iterative approach to find the best angle and velocity
+
+        double optimalAngleDegrees = calculateOptimalAngle(horizontalDistance, verticalDistance);
+        double optimalVelocity = calculateRequiredVelocity(horizontalDistance, verticalDistance, optimalAngleDegrees);
+
+        // Convert velocity (inches/sec) to motor velocity (ticks/sec)
+        // Linear velocity = (RPM × wheel_diameter × π) / 60
+        // Angular velocity (RPM) = (linear_velocity × 60) / (wheel_diameter × π)
+        // Ticks/sec = (RPM × ticks_per_rev) / 60
+        // Therefore: ticks/sec = (linear_velocity × ticks_per_rev) / (wheel_diameter × π)
+
+        double wheelCircumference = launcherWheelDiameterInches * Math.PI;
+        double requiredVelocityTicksPerSec = (optimalVelocity / launchVelocityFactor) * launcherTicksPerRev / wheelCircumference;
+        requiredVelocityTicksPerSec = Range.clip(requiredVelocityTicksPerSec, minLauncherVelocity, maxLauncherVelocity);
+
+        // Convert angle (degrees) to servo position
+        double angleRange = launchAngleMaxDegrees - launchAngleMinDegrees;
+        double normalizedAngle = (optimalAngleDegrees - launchAngleMinDegrees) / angleRange;
+        double servoPosition = servoAngleMin + normalizedAngle * (servoAngleMax - servoAngleMin);
+        servoPosition = Range.clip(servoPosition, servoAngleMin, servoAngleMax);
+
+        // Apply calculated values
+        launcher.setVelocity(requiredVelocityTicksPerSec);
+        launchAngleServo.setPosition(servoPosition/360);
+
+        // Telemetry for debugging
+        panelsTelemetry.addData("Distance to goal", String.format("%.1f in", horizontalDistance));
+        panelsTelemetry.addData("Height difference", String.format("%.1f in", verticalDistance));
+        panelsTelemetry.addData("Optimal angle", String.format("%.1f deg", optimalAngleDegrees));
+        panelsTelemetry.addData("Required velocity", String.format("%.1f in/s", optimalVelocity));
+        panelsTelemetry.addData("Launcher velocity", String.format("%.0f ticks/s", requiredVelocityTicksPerSec));
+        panelsTelemetry.addData("Servo position", String.format("%.3f", servoPosition));
+        panelsTelemetry.addData("Current velocity", String.format("%.0f ticks/s", launcher.getVelocity()));
+
+    }
+
+    /**
+     * Calculate optimal launch angle for given distance and height
+     * Uses a simplified approach: for maximum range with height constraint
+     */
+    private double calculateOptimalAngle(double horizontalDistance, double verticalDistance) {
+        // For flat trajectory (verticalDistance ≈ 0), optimal angle is 45°
+        // For upward trajectory, we need a higher angle
+        // Simple heuristic: angle = 45° + adjustment based on height/distance ratio
+
+        double baseAngle = 45.0;
+        double heightRatio = verticalDistance / Math.max(horizontalDistance, 1.0);
+        double angleAdjustment = Math.toDegrees(Math.atan(heightRatio)) * 0.5;
+
+        double optimalAngle = baseAngle + angleAdjustment;
+
+        // Clamp to servo range
+        optimalAngle = Range.clip(optimalAngle, launchAngleMinDegrees, launchAngleMaxDegrees);
+
+        return optimalAngle;
+    }
+
+    /**
+     * Calculate required launch velocity for given distance, height, and angle
+     * Uses projectile motion equation: v = sqrt(g * d^2 / (2 * cos^2(θ) * (d*tan(θ) - h)))
+     */
+    private double calculateRequiredVelocity(double horizontalDistance, double verticalDistance, double angleDegrees) {
+        double angleRad = Math.toRadians(angleDegrees);
+        double cosTheta = Math.cos(angleRad);
+        double tanTheta = Math.tan(angleRad);
+
+        // v^2 = g * d^2 / (2 * cos^2(θ) * (d*tan(θ) - h))
+        double denominator = 2.0 * cosTheta * cosTheta * (horizontalDistance * tanTheta - verticalDistance);
+
+        if (denominator <= 0) {
+            // Invalid trajectory - return a default high velocity
+            return 200.0; // inches per second
+        }
+
+        double velocitySquared = (gravity * horizontalDistance * horizontalDistance) / denominator;
+
+        if (velocitySquared < 0) {
+            return 200.0; // fallback
+        }
+
+        return Math.sqrt(velocitySquared);
     }
 
     public void handle_servo(){
