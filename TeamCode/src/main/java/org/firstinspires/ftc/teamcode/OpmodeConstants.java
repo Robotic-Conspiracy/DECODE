@@ -3,16 +3,16 @@ public class OpmodeConstants {
     public static final int TeleopBacklineSpeed = 2240;
     public static final int TeleopMidlineSpeed = 1940;
     public static final int TeleopGoalSpeed = 1500;
-    public static final double TeleopMidAngle = 48/360.0;
-    public static final double TeleopGoalAngle = 75/360.0;
-    public static final double TeleopBacklineAngle = 50/360.0;
+    public static final double TeleopMidAngle = 0.133333; //48/360.0;
+    public static final double TeleopGoalAngle = 0.208333; //75/360.0;
+    public static final double TeleopBacklineAngle = 0.138888; //50/360.0;
 
     public static final int AutoBacklineSpeed = 2240;
     public static final int AutoMidSpeed = 1820;
     public static final int AutoGoalSpeed = 1500;
-    public static final double AutoMidAngle = 48/360.0;
-    public static final double AutoGoalAngle = 73/360.0;
-    public static final double AutoBacklineAngle = 49/360.0;
+    public static final double AutoMidAngle = 0.133333; //48/360.0;
+    public static final double AutoGoalAngle = 0.202777; //73/360.0;
+    public static final double AutoBacklineAngle = 0.136111; // 49/360.0;
 
     public static final double IntakeRampLaunchPos = 0.61;
     public static final double IntakeRampIntakePos = 0.84;
