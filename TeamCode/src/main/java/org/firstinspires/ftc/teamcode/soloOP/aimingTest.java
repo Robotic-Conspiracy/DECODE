@@ -89,8 +89,8 @@ public abstract class aimingTest extends OpMode {
 
         if(gamepad1.b){
             if(breakModeActive){
-                breakModeActive = false;
-                follower.startTeleopDrive(false);
+                breakModeActive = true;
+                follower.startTeleopDrive(true);
             }
 //            double heading = follower.getHeading();
 //            double angle = Math.atan((goalPosition.getY() - follower.getPose().getY()) / (goalPosition.getX()-follower.getPose().getX()));
