@@ -49,9 +49,9 @@ public abstract class pickup12main extends OpMode {
 
     public static int INTAKE_SPEED = 1600; //RPM
     public static int backlineSpeed = OpmodeConstants.AutoBacklineSpeed;
-    public static int backlineAngle = OpmodeConstants.AutoBacklineAngle;
+    public static double backlineAngle = OpmodeConstants.AutoBacklineAngle;
     public static int midSpeed = OpmodeConstants.AutoMidSpeed;
-    public static int midAngle = OpmodeConstants.AutoMidAngle;
+    public static double midAngle = OpmodeConstants.AutoMidAngle;
 
     public int targetSpeed = backlineSpeed;//launch motor speed
     public double targetAngle = backlineAngle;

@@ -108,11 +108,11 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
     public static int backlineSpeed = OpmodeConstants.TeleopBacklineSpeed;
-    public static int backlineAngle = OpmodeConstants.TeleopBacklineAngle;
+    public static double backlineAngle = OpmodeConstants.TeleopBacklineAngle;
     public static int midSpeed = OpmodeConstants.TeleopMidlineSpeed;
-    public static int midAngle = OpmodeConstants.TeleopMidAngle;
+    public static double midAngle = OpmodeConstants.TeleopMidAngle;
     public static int goalSpeed = OpmodeConstants.TeleopGoalSpeed;
-    public static int goalAngle = OpmodeConstants.TeleopGoalAngle;
+    public static double goalAngle = OpmodeConstants.TeleopGoalAngle;
 
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed
@@ -209,7 +209,7 @@ public abstract class solo_op_MAIN extends OpMode {
         if (gamepad1.dpadLeftWasPressed()) {// MAPPING
             targetAngle -= (gamepad1.x ? 5 : 1);// MAPPING
         }
-        double SERVO_MAXIMUM_POSITION = 90;
+        double SERVO_MAXIMUM_POSITION = 90/360.0;
         double SERVO_MINIMUM_POSITION = 0;
         if (targetAngle > SERVO_MAXIMUM_POSITION) {
             targetAngle = SERVO_MAXIMUM_POSITION;
@@ -244,7 +244,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 case BACK:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 90;
+                    targetAngle = 0.3;
                     break;
             }
         }
@@ -449,7 +449,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
         switch (intakeState) {
             case READY:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
                 if (Current_speed == REV_SPEED) {
@@ -466,7 +466,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 leftFeeder.setPower(Current_speed);
                 rightFeeder.setPower(Current_speed);
                 // keep launcher servo in safe position
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 stoppy_servo.setPosition(0.55);
                 break;
 
@@ -483,7 +483,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
 
             case SPIN:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60);
                 IN_TARGET_RPM = ((SPIN_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);

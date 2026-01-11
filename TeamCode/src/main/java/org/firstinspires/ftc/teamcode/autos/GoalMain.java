@@ -24,11 +24,11 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
     @SuppressWarnings("unused")
     public abstract class GoalMain extends OpMode {
         public static int backlineSpeed = OpmodeConstants.AutoBacklineSpeed;
-        public static int backlineAngle = OpmodeConstants.AutoBacklineAngle;
+        public static double backlineAngle = OpmodeConstants.AutoBacklineAngle;
         public static int midSpeed = OpmodeConstants.AutoMidSpeed;
-        public static int midAngle = OpmodeConstants.AutoMidAngle;
+        public static double midAngle = OpmodeConstants.AutoMidAngle;
         public static int AutoGoalSpeed = OpmodeConstants.AutoGoalSpeed;
-        public static int AutoGoalAngle = OpmodeConstants.AutoGoalAngle;
+        public static double AutoGoalAngle = OpmodeConstants.AutoGoalAngle;
 
 
         public final double INTAKE_POS = .84; // .87MAX
