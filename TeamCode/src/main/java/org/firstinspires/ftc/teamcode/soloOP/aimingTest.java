@@ -58,6 +58,8 @@ public abstract class aimingTest extends OpMode {
 
     private TelemetryManager panelsTelemetry;
 
+    private boolean breakModeActive = false;
+
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -71,6 +73,7 @@ public abstract class aimingTest extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive(true);
+        breakModeActive = true;
     }
 
     @Override
@@ -85,6 +88,10 @@ public abstract class aimingTest extends OpMode {
 
 
         if(gamepad1.b){
+            if(breakModeActive){
+                breakModeActive = false;
+                follower.startTeleopDrive(false);
+            }
 //            double heading = follower.getHeading();
 //            double angle = Math.atan((goalPosition.getY() - follower.getPose().getY()) / (goalPosition.getX()-follower.getPose().getX()));
 //            double angle_to_target = heading-angle;
@@ -117,7 +124,11 @@ public abstract class aimingTest extends OpMode {
             //drive(0, 0, rotationPower);
             follower.setTeleOpDrive(0,0, rotationPower, true);
         } else {
-            follower.setTeleOpDrive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, true);
+            if(!breakModeActive){
+                breakModeActive = true;
+                follower.startTeleopDrive(true);
+            }
+            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
 
