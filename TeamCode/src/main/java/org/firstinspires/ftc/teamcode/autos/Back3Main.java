@@ -319,10 +319,16 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     intake.setVelocity(0);
                     doneLaunching = launch();
                     if (doneLaunching){
-                        pathState = nextPathState;
-                        timesShot = 0;
+                            timesShot = 0;
+                            pathState = 200;
+                            waitTimer.reset();
                     }
                     break;
+                case 200:
+                    if (waitTimer.seconds() >= 0.3) {
+                        pathState = nextPathState;
+                    }
+
 
 
             }
