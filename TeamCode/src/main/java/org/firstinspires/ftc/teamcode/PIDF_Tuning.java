@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous
 @Configurable
+@Config
 public class PIDF_Tuning  extends OpMode {
     public static double P = 0;
     public static double I = 0;
