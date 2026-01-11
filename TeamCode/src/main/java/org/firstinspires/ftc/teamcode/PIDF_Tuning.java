@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous
-@Configurable
 @Config
 public class PIDF_Tuning  extends OpMode {
     public static double P = 0;
@@ -35,6 +34,7 @@ public class PIDF_Tuning  extends OpMode {
     public void loop() {
         launcher.setVelocityPIDFCoefficients(P,I,D,F);
         telemetry.addData("Velocity", launcher.getVelocity());
+        telemetry.addData("target speed", targetSpeed);
         telemetry.addData("Time passed", time.seconds());
         telemetry.addData("P", P);
         telemetry.addData("I", I);
