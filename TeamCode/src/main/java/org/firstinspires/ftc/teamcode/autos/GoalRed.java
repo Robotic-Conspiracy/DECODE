@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous(name = "Red Goal", group = "Autonomous")
 public class GoalRed extends GoalMain {
     // Mirrored from blue GoalAimAngle = 135 -> 180 - 135 = 45
-    int GoalAimAngle = 45; // mirrored aim angle
+    int GoalAimAngle = 38; // mirrored aim angle
 
     public void set_starting_pose(){
         // Mirrored from blue starting_pose_x = 17 -> 144 - 17 = 127
@@ -22,7 +22,7 @@ public class GoalRed extends GoalMain {
 
         // Mirrored from blue across x = 72 -> x' = 144 - x
         // Blue shootPreloadStart was (17.5, 119) -> Red is (126.5, 119)
-        paths.shootPreloadStart = new Pose(126.5, 119);
+        paths.shootPreloadStart = new Pose(127, 119);
         // Blue shootPreloadEnd was (23, 119) -> Red is (121, 119)
         paths.shootPreloadEnd = new Pose(121, 119);
 

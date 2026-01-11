@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "Blue Goal", group = "Autonomous")
 public class GoalBlue extends GoalMain {
-    int GoalAimAngle = 135;
+    int GoalAimAngle = 142;
     public void set_starting_pose(){
         starting_pose_x = 17;
         starting_pose_y = 119;
@@ -15,7 +15,7 @@ public class GoalBlue extends GoalMain {
     public void set_color(){
         String color = "blue";
         int tagToAim = 20;
-        paths.shootPreloadStart = new Pose(17.5, 119);
+        paths.shootPreloadStart = new Pose(17, 119);
         paths.shootPreloadEnd = new Pose(23, 119);
         paths.parkStart = new Pose(23, 119);
         paths.parkEnd = new Pose(36, 132);
