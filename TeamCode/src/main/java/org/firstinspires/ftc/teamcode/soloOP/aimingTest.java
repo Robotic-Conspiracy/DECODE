@@ -104,8 +104,8 @@ public abstract class aimingTest extends OpMode {
             while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
             while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
 
-            double kP = 1.5;
-            double exponentialFactor = 0.8;
+            double kP = 3;//1.5
+            double exponentialFactor = 1;//0.8
             double normalizedError = Math.abs(angle_to_target) / Math.PI;
             double exponentialGain = Math.pow(normalizedError, exponentialFactor);
 
