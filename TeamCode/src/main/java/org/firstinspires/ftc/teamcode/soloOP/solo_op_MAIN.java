@@ -376,8 +376,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 follower.setTeleOpDrive(0, 0, rotationPower, true);
                 //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
                 //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-                alignmentActive = true;
-            }
+                }
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
