@@ -159,7 +159,7 @@ public abstract class solo_op_MAIN extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(StaticCommunism.pose);
         goalPosition = set_goal_position();
-        Drawing.drawDebug(follower);
+        Drawing.init();
         set_color();
 
         launchState = LaunchState.IDLE;
@@ -203,6 +203,7 @@ public abstract class solo_op_MAIN extends OpMode {
     public void loop() {
         pinpoint.update();
         follower.update();
+        Drawing.drawDebug(follower);
         // Cache pinpoint values immediately after update to avoid redundant I2C reads
         cachedPosX = pinpoint.getPosX(DistanceUnit.MM);
         cachedPosY = pinpoint.getPosY(DistanceUnit.MM);
