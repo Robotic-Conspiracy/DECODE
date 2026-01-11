@@ -99,7 +99,7 @@ public abstract class aimingTest extends OpMode {
             double heading = follower.getHeading();
             double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
 
-            angle += Math.PI / 2;
+            angle += Math.PI;
             // Calculate the shortest angular distance (flipped)
             double angle_to_target = heading - angle;
 
@@ -109,7 +109,7 @@ public abstract class aimingTest extends OpMode {
             while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
 
             // Exponential control: speed decreases exponentially as angle approaches zero
-            double kP = 3; // Base proportional gain
+            double kP = 2; // Base proportional gain
             double exponentialFactor = 1; // Controls steepness of exponential curve
             double normalizedError = Math.abs(angle_to_target) / Math.PI; // Normalize to [0, 1]
             double exponentialGain = Math.pow(normalizedError, exponentialFactor);
