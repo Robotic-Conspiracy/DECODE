@@ -75,19 +75,19 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         private static final double START_TOLERANCE_INCHES = 6.0;
 
         private void initialize_launcher() {
-            launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+            launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
             double p = OpmodeConstants.Launcher_P;
             double i = OpmodeConstants.Launcher_I;
             double d = OpmodeConstants.Launcher_D;
             double f = OpmodeConstants.Launcher_F;
             launcher.setVelocityPIDFCoefficients(p, i, d, f);
             launcher.setDirection(DcMotorSimple.Direction.REVERSE);
-            LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
+            LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
         }
 
         private void initialize_feeder() {
-            leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
-            rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+            leftFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.LeftFeederName);
+            rightFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.RightFeederName);
 
             leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
             rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -95,8 +95,8 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         }
 
         private void initialize_intake() {
-            intake = hardwareMap.get(DcMotorEx.class, "intake");
-            intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
+            intake = hardwareMap.get(DcMotorEx.class, OpmodeConstants.IntakeName);
+            intake_ramp = hardwareMap.get(Servo.class, OpmodeConstants.IntakeRampName);
             intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
         }

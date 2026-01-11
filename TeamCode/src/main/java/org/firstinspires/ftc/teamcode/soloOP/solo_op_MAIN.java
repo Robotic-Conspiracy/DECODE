@@ -184,7 +184,7 @@ public abstract class solo_op_MAIN extends OpMode {
 //                .addProcessor(aprilTagProcessor)
 //                .build();
         portal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCamera(hardwareMap.get(WebcamName.class, OpmodeConstants.WebcamName))
                 .addProcessor(aprilTagProcessor)
                 .build();
         portal.setProcessorEnabled(aprilTagProcessor, true);
