@@ -381,7 +381,7 @@ public abstract class solo_op_MAIN extends OpMode {
             //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
             //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
 
-        } else {
+        } else if (!alignmentActive) {
             if(!breakModeActive){
                 breakModeActive = true;
                 follower.startTeleopDrive(true);
@@ -642,7 +642,7 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_pinpoint() {
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, OpmodeConstants.odometryName);
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
 
