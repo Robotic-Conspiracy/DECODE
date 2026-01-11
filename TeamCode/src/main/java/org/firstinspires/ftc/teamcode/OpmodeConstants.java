@@ -18,10 +18,10 @@ public class OpmodeConstants {
     public static final double IntakeRampIntakePos = 0.84;
     public static final double FeedTimeSeconds = 0.15;
 
-    public static final double Launcher_P = 203;
-    public static final double Launcher_I = 1.001;
-    public static final double Launcher_D = 0.0015;
-    public static final double Launcher_F = 0.1;
+    public static final double Launcher_P = 80;
+    public static final double Launcher_I = 0.002;
+    public static final double Launcher_D = 0.1;
+    public static final double Launcher_F = 11;
 //hardware map names
     public static final String IntakeName = "intake";
     public static final String IntakeRampName = "intake ramp";

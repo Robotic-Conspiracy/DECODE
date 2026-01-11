@@ -44,7 +44,6 @@ public class PIDF_Tuning  extends OpMode {
         telemetry.addData("D", D);
         telemetry.addData("F", F);
         if(time.seconds() >= switch_time){
-            targetSpeed = random.nextInt(2300);
             launcher.setVelocity(targetSpeed);
 //            if (Switch == 0) {
 //                launcher.setVelocity(-targetSpeed);
