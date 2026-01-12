@@ -10,8 +10,12 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -41,6 +45,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
 
@@ -52,6 +57,7 @@ public abstract class solo_op_MAIN extends OpMode {
     abstract void set_color();
     abstract int target_goal_tag();
     GoBildaPinpointDriver pinpoint;
+    private Supplier<PathChain> pathChain;
 
 
     // Performance optimization flags
@@ -175,8 +181,8 @@ public abstract class solo_op_MAIN extends OpMode {
         light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
         stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
         floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
-         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(58,16))))
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(16,58))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(108), 0.8))
                 .build();
 
@@ -323,7 +329,7 @@ public abstract class solo_op_MAIN extends OpMode {
             }
 
             // Update the shared pose so other systems see the new pose
-            StaticCommunism.pose = new Pose(x, y, math.toRadians(z));
+            StaticCommunism.pose = new Pose(x, y, Math.toRadians(z));
 
             // Tell the follower about the new starting pose
             try {
@@ -445,8 +451,10 @@ public abstract class solo_op_MAIN extends OpMode {
             }
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
-        if (gamepad1.aWasPressed()) {
+        if (gamepad1.xWasPressed()) {
+            follower.startTeleopDrive(true);
             follower.followPath(pathChain.get());
+
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
