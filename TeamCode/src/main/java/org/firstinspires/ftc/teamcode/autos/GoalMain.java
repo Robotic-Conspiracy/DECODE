@@ -312,7 +312,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     if (waitingForPath && !follower.isBusy()) {
                         waitingForPath = false;
                         pathState = 0;
-                        nextPathState = 3;
+                        nextPathState = 0;
                     }
                     StaticCommunism.pose = follower.getPose();
                 case 100:
@@ -326,11 +326,15 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     intake.setVelocity(0);
                     doneLaunching = launch();
                     if (doneLaunching){
-                        pathState = nextPathState;
+                        pathState = 200;
                         timesShot = 0;
+                        waitTimer.reset();
                     }
                     break;
-
+                case 200:
+                    if (waitTimer.seconds() >= 0.5) {
+                        pathState = nextPathState;
+                    }
 
             }
         }

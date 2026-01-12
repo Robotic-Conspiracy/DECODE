@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 public class OpmodeConstants {
-    public static final int TeleopBacklineSpeed = 2240;
+    public static final int TeleopBacklineSpeed = 2300;
     public static final int TeleopMidlineSpeed = 1940;
     public static final int TeleopGoalSpeed = 1500;
     public static final double TeleopMidAngle = 0.133333; //48/360.0;
     public static final double TeleopGoalAngle = 0.208333; //75/360.0;
-    public static final double TeleopBacklineAngle = 0.138888; //50/360.0;
+    public static final double TeleopBacklineAngle = 0.14165; //50/360.0;
 
     public static final int AutoBacklineSpeed = 2240;
     public static final int AutoMidSpeed = 1820;

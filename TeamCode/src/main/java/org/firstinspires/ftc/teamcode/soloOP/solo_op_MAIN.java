@@ -178,7 +178,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
-        aprilTagProcessor.setDecimation(2);
+        aprilTagProcessor.setDecimation(3);
 //        portal = new VisionPortal.Builder()
 //                .setCamera(BuiltinCameraDirection.BACK)
 //                .addProcessor(aprilTagProcessor)
@@ -812,6 +812,6 @@ public abstract class solo_op_MAIN extends OpMode {
         lastAlignmentError = error;
         lastAlignmentTime = currentTime;
 
-        return correction;
+        return Range.clip(-0.01*error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
     }
 }

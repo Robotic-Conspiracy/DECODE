@@ -305,7 +305,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     if (waitingForPath && !follower.isBusy()) {
                         waitingForPath = false;
                         pathState = 0;
-                        nextPathState = 3;
+                        nextPathState = 0;
                     }
                     StaticCommunism.pose = follower.getPose();
                 case 100:
