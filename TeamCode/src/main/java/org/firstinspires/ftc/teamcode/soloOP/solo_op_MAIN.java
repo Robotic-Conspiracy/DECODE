@@ -175,6 +175,10 @@ public abstract class solo_op_MAIN extends OpMode {
         light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
         stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
         floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
+         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(58,16))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(108), 0.8))
+                .build();
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
@@ -440,6 +444,9 @@ public abstract class solo_op_MAIN extends OpMode {
                 follower.startTeleopDrive(true);
             }
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+        }
+        if (gamepad1.aWasPressed()) {
+            follower.followPath(pathChain.get());
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
