@@ -153,6 +153,17 @@ public abstract class aimingTest extends OpMode {
             }
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
+        boolean xPressed = gamepad1.x;
+        if (xPressed && !prevX) { // rising edge only
+            PathChain toTarget = follower.pathBuilder()
+                    .addPath(new BezierLine(follower.getPose(), new Pose(58.0, 16.0, Math.toRadians(108.0))))
+                    .setLinearHeadingInterpolation(follower.getPose().getHeading(), Math.toRadians(108.0))
+                    .build();
+
+            follower.resumePathFollowing();
+            follower.followPath(toTarget);
+        }
+        prevX = xPressed;
 
 
     }
