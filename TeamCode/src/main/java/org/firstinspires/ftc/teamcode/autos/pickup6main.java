@@ -5,6 +5,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 
 import com.pedropathing.paths.PathChain;
@@ -15,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.ConceptBlackboard;
 import org.firstinspires.ftc.teamcode.OpmodeConstants;
 import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
@@ -22,11 +24,12 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 @Configurable // Panels
 public abstract class pickup6main extends OpMode {
-    public final double INTAKE_POS = .84; // .87MAX
+
+    private ConceptBlackboard blackboard;
+    public final double INTAKE_POS = OpmodeConstants.IntakeRampIntakePos; // .87MAX
     int timesToShoot = 3;
     public int starting_pose_x;
     public int starting_pose_y;
-    public int starting_pose_heading;
     int timesShot = 0;
     abstract void set_color();
     public String color;
@@ -42,10 +45,17 @@ public abstract class pickup6main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    public static int targetSpeed = 2340;//launch motor speed
+
     private Servo intake_ramp = null;
-    public static double targetAngle = 0.1444;
+
     public static int INTAKE_SPEED = 1600; //RPM
+    public static int backlineSpeed = OpmodeConstants.AutoBacklineSpeed;
+    public static double backlineAngle = OpmodeConstants.AutoBacklineAngle;
+    public static int midSpeed = OpmodeConstants.AutoMidSpeed;
+    public static double midAngle = OpmodeConstants.AutoMidAngle;
+
+    public int targetSpeed = backlineSpeed;//launch motor speed
+    public double targetAngle = backlineAngle;
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -56,11 +66,11 @@ public abstract class pickup6main extends OpMode {
     private boolean waitingForPath = false;
 
     // timeout to prevent getting stuck on a single path (ms)
-    private static final long PATH_TIMEOUT_MS = 8000;
+    private final long PATH_TIMEOUT_MS = 4000;
     private long currentPathStartTime = 0;
 
     // If the robot is further than this from a path start, we will reseat pose and retry (inches)
-    private static final double START_TOLERANCE_INCHES = 6.0;
+    private final double START_TOLERANCE_INCHES = 6.0;
 
     private void initialize_launcher() {
         launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
@@ -97,7 +107,7 @@ public abstract class pickup6main extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         // set starting pose to match the first path point (was 72,8) so the follower won't reject the path
         set_starting_pose();
-        follower.setStartingPose(new Pose(starting_pose_x,starting_pose_y,Math.toRadians(starting_pose_heading)));
+        follower.setStartingPose(new Pose(starting_pose_x,starting_pose_y,Math.toRadians(90)));
 
         // Create Paths object first (without building paths yet)
         paths = new Paths();
@@ -118,24 +128,19 @@ public abstract class pickup6main extends OpMode {
         panelsTelemetry.debug("Paths Null?", paths == null);
         panelsTelemetry.debug("Starting Path State", pathState);
         panelsTelemetry.update(telemetry);
+        targetSpeed = backlineSpeed;
     }
 
     abstract void set_starting_pose();
-
     private boolean launch() {
-        double FEED_TIME_SECONDS = 0.15;
-
-
-
+        double FEED_TIME_SECONDS = OpmodeConstants.FeedTimeSeconds;
         // If we've already shot enough for this launch call, do nothing
         if (timesShot >= timesToShoot) {
             return true;
         }
-
         double velocity = launcher.getVelocity();
-
         // Only start a feed cycle when launcher is up to speed and wait timer elapsed
-        if ((velocity >= targetSpeed - 40 && velocity <= targetSpeed + 40) && waitTimer.seconds() > 0.5) {
+        if ((velocity >= targetSpeed - 40 && velocity <= targetSpeed + 40) && waitTimer.seconds() > 0.3) {
             // Start feeding only if not already feeding
             double FULL_SPEED = 1.0;
             if (Current_speed != FULL_SPEED) {
@@ -263,39 +268,21 @@ public abstract class pickup6main extends OpMode {
         public Pose shootPreloadStart, shootPreloadEnd;
         public Pose prePickup1Start, prePickup1End;
         public Pose pickup1Start, pickup1End;
+        public Pose preShootPickup1Start, preShootPickup1End;
         public Pose shootPickup1Start, shootPickup1End;
-        public Pose prePickup2Start, prePickup2End;
-        public Pose pickUp2Start, pickUp2End;
-        public Pose shootPickup2Start, shootPickup2End;
-        public Pose prePickup3Start, prePickup3End;
-        public Pose pickup3Start, pickup3End;
-        public Pose shootPickup3Start, shootPickup3End;
         public Pose parkStart, parkEnd;
         public  int headShootPreload1;
         public  int headShootPreload2;
         public int headprePickup11;
         public int headprePickup12;
-        public int headpickup1;
-        public int headshootPickup11;
-        public int headshootPickup12;
-        public int headprePickup21;
-        public int headprePickup22;
-        public int headpickUp2;
-        public int headshootPickup21;
-        public int headshootPickup22;
-        public int headprePickup31;
-        public int headprePickup32;
-        public int headpickup3;
-        public int headshootPickup31;
-        public int headshootPickup32;
+        public int preShootPickup1Start;
+        public int preShootPickup1End;
+        public int shootPickup1Start;
+        public int shootPickup1End;
         public int headpark;
-
-
-
         // No-arg constructor - fields will be populated by set_color() before buildPaths() is called
         public Paths() {
         }
-
         // Build all paths using the populated pose/heading fields
         public void buildPaths(Follower follower) {
             // shootPreload
@@ -441,7 +428,7 @@ public abstract class pickup6main extends OpMode {
                     waitingForPath = false;
                     pathState = 100;
                     nextPathState = 2;
-                    targetSpeed = 2340;
+
                 }
                 break;
             case 2:
@@ -499,8 +486,147 @@ public abstract class pickup6main extends OpMode {
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
                     pathState = 100;
+                    nextPathState = 5;
+
+                }
+                break;
+            case 5:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following prePickup2");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.prePickup2 != null);
+                    double dx = follower.getPose().getX() - paths.prePickup2Start.getX();
+                    double dy = follower.getPose().getY() - paths.prePickup2Start.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+
+                    tryFollowWithPoseRetry(paths.prePickup2, paths.prePickup2Start, "prePickup2");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    pathState = 200;
+                    nextPathState = 6;
+                }
+                break;
+            case 6:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following pickUp2");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.pickUp2 != null);
+                    double dx = follower.getPose().getX() - paths.pickUp2Start.getX();
+                    double dy = follower.getPose().getY() - paths.pickUp2Start.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+
+                    tryFollowWithPoseRetry(paths.pickUp2, paths.pickUp2Start, "pickUp2");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    pathState = 7;
+                    nextPathState = 7;
+                }
+                break;
+            case 7:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following shootPickup2");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.shootPickup2 != null);
+                    double dx = follower.getPose().getX() - paths.shootPickup2Start.getX();
+                    double dy = follower.getPose().getY() - paths.shootPickup2Start.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+                    launcher.setVelocity(targetSpeed);
+                    LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                    intake_ramp.setPosition(LAUNCH_POS);
+                    intake.setVelocity(0);
+
+                    tryFollowWithPoseRetry(paths.shootPickup2, paths.shootPickup2Start, "shootPickup2");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    pathState = 100;
+                    nextPathState = 8;
+
+                }
+                break;
+            case 8:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following prePickup3");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.prePickup3 != null);
+                    double dx = follower.getPose().getX() - paths.prePickup3Start.getX();
+                    double dy = follower.getPose().getY() - paths.prePickup3Start.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+
+                    tryFollowWithPoseRetry(paths.prePickup3, paths.prePickup3Start, "prePickup3");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    targetSpeed = midSpeed;
+                    targetAngle = midAngle;
+                    pathState = 200;
+                    nextPathState = 9;
+                }
+                break;
+            case 9:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following pickup3");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.pickup3 != null);
+                    double dx = follower.getPose().getX() - paths.pickup3Start.getX();
+                    double dy = follower.getPose().getY() - paths.pickup3Start.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+
+                    tryFollowWithPoseRetry(paths.pickup3, paths.pickup3Start, "pickup3");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    pathState = 10;
+                    nextPathState = 10;
+                }
+                break;
+            case 10:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following shootPickup3");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.shootPickup3 != null);
+                    double dx = follower.getPose().getX() - paths.shootPickup3Start.getX();
+                    double dy = follower.getPose().getY() - paths.shootPickup3Start.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+                    launcher.setVelocity(targetSpeed);
+                    LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                    intake_ramp.setPosition(LAUNCH_POS);
+                    intake.setVelocity(0);
+
+                    tryFollowWithPoseRetry(paths.shootPickup3, paths.shootPickup3Start, "shootPickup3");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    pathState = 100;
+                    nextPathState = 11;
+                }
+                break;
+            case 11:
+                if (!waitingForPath && follower != null && !follower.isBusy()) {
+                    panelsTelemetry.debug("Action", "Following park");
+                    panelsTelemetry.debug("Path NonNull", paths != null && paths.park != null);
+                    double dx = follower.getPose().getX() - paths.parkStart.getX();
+                    double dy = follower.getPose().getY() - paths.parkStart.getY();
+                    panelsTelemetry.debug("Dist to start", Math.hypot(dx, dy));
+                    panelsTelemetry.update(telemetry);
+                    targetSpeed = -20;
+                    launcher.setVelocity(targetSpeed);
+
+                    tryFollowWithPoseRetry(paths.park, paths.parkStart, "Path15");
+                    waitingForPath = true;
+                }
+                if (waitingForPath && !follower.isBusy()) {
+                    waitingForPath = false;
+                    pathState = 0;
                     nextPathState = 0;
-                    targetSpeed = 2340;
                 }
                 StaticCommunism.pose = follower.getPose();
                 break;
@@ -510,25 +636,32 @@ public abstract class pickup6main extends OpMode {
                 pathState = 101;
                 break;
             case 101:
-                launcher.setVelocity(targetSpeed);
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
-                intake_ramp.setPosition(LAUNCH_POS);
-                intake.setVelocity(0);
-                doneLaunching = launch();
-                if (doneLaunching){
-                    pathState = 200;
-                    timesShot = 0;
-                }
-                break;
+              launcher.setVelocity(targetSpeed);
+              LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+              intake_ramp.setPosition(LAUNCH_POS);
+              intake.setVelocity(0);
+              doneLaunching = launch();
+              if (doneLaunching) {
+                pathState = 200;
+                timesShot = 0;
+                waitTimer.reset();
+              }
+              break;
             case 200://intake
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 //LEFT_LAUNCH_SERVO.setPosition(0);
-                pathState = nextPathState;
+                if (waitTimer.seconds() >= 0.3) {
+                    pathState = nextPathState;
+                }
+
+
 
                 break;
         }
     }
-}
+    private enum states{
 
+    }
+}
