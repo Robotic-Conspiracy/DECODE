@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
 
 // Constants for 28139-A-RC (aka "Bot 2")
 public class Constants {
@@ -23,10 +24,10 @@ public class Constants {
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
-            .rightFrontMotorName("front_right_drive")
-            .rightRearMotorName("back_right_drive")
-            .leftRearMotorName("back_left_drive")
-            .leftFrontMotorName("front_left_drive")
+            .rightFrontMotorName(OpmodeConstants.FrontRightMotor)
+            .rightRearMotorName(OpmodeConstants.BackRightMotor)
+            .leftRearMotorName(OpmodeConstants.BackLeftMotor)
+            .leftFrontMotorName(OpmodeConstants.FrontLeftMotor)
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
@@ -39,7 +40,7 @@ public class Constants {
             .forwardPodY(1.375)
             .strafePodX(-4.25)
             .distanceUnit(DistanceUnit.INCH)
-            .hardwareMapName("odometry")
+            .hardwareMapName(OpmodeConstants.odometryName)
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
             //.strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);

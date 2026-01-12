@@ -15,12 +15,16 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.ConceptBlackboard;
 import org.firstinspires.ftc.teamcode.OpmodeConstants;
+import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
 
 @Configurable // Panels
 public abstract class pickup12main extends OpMode {
+
+    private ConceptBlackboard blackboard;
     public final double INTAKE_POS = OpmodeConstants.IntakeRampIntakePos; // .87MAX
     int timesToShoot = 3;
     public int starting_pose_x;
@@ -40,17 +44,15 @@ public abstract class pickup12main extends OpMode {
     private CRServo rightFeeder = null;
     private DcMotorEx launcher = null;
     private DcMotorEx intake = null;
-    
+
     private Servo intake_ramp = null;
-    
+
     public static int INTAKE_SPEED = 1600; //RPM
-    public static int backlineSpeed = OpmodeConstants.AutobacklineSpeed;
-    public static int backlineAngle = OpmodeConstants.AutobacklineAngle;
-    public static int midSpeed = OpmodeConstants.AutomidSpeed;
-    public static int midAngle = OpmodeConstants.AutomidAngle;
-    public static int goalSpeed = OpmodeConstants.AutogoalSpeed;
-    public static int goalAngle = OpmodeConstants.AutogoalAngle;
-    
+    public static int backlineSpeed = OpmodeConstants.AutoBacklineSpeed;
+    public static double backlineAngle = OpmodeConstants.AutoBacklineAngle;
+    public static int midSpeed = OpmodeConstants.AutoMidSpeed;
+    public static double midAngle = OpmodeConstants.AutoMidAngle;
+
     public int targetSpeed = backlineSpeed;//launch motor speed
     public double targetAngle = backlineAngle;
 
@@ -574,8 +576,8 @@ public abstract class pickup12main extends OpMode {
                 }
                 if (waitingForPath && !follower.isBusy()) {
                     waitingForPath = false;
-                    targetSpeed = OpmodeConstants.AutomidSpeed;
-                    targetAngle = (double) OpmodeConstants.AutomidAngle;
+                    targetSpeed = midSpeed;
+                    targetAngle = midAngle;
                     pathState = 200;
                     nextPathState = 9;
                 }
@@ -639,6 +641,7 @@ public abstract class pickup12main extends OpMode {
                     pathState = 0;
                     nextPathState = 0;
                 }
+                StaticCommunism.pose = follower.getPose();
                 break;
 
             case 100:
@@ -646,22 +649,27 @@ public abstract class pickup12main extends OpMode {
                 pathState = 101;
                 break;
             case 101:
-                launcher.setVelocity(targetSpeed);
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
-                intake_ramp.setPosition(LAUNCH_POS);
-                intake.setVelocity(0);
-                doneLaunching = launch();
-                if (doneLaunching){
-                    pathState = 200;
-                    timesShot = 0;
-                }
-                break;
+              launcher.setVelocity(targetSpeed);
+              LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+              intake_ramp.setPosition(LAUNCH_POS);
+              intake.setVelocity(0);
+              doneLaunching = launch();
+              if (doneLaunching) {
+                pathState = 200;
+                timesShot = 0;
+                waitTimer.reset();
+              }
+              break;
             case 200://intake
                 intake_ramp.setPosition(INTAKE_POS);
                 double IN_TARGET_RPM = (((double) INTAKE_SPEED / 60) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
                 //LEFT_LAUNCH_SERVO.setPosition(0);
-                pathState = nextPathState;
+                if (waitTimer.seconds() >= 0.3) {
+                    pathState = nextPathState;
+                }
+
+
 
                 break;
         }

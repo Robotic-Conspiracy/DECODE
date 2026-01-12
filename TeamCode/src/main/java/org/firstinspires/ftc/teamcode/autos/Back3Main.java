@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.OpmodeConstants;
+import org.firstinspires.ftc.teamcode.StaticCommunism;
 import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 
     @Autonomous(name = "donrt run ", group = "Autonomous")
@@ -45,9 +47,9 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         private CRServo rightFeeder = null;
         private DcMotorEx launcher = null;
         private DcMotorEx intake = null;
-        public static int targetSpeed = 2380;//launch motor speed
+        public static int targetSpeed = OpmodeConstants.AutoBacklineSpeed;//launch motor speed
         private Servo intake_ramp = null;
-        public static double targetAngle = 0.1444;
+        public static double targetAngle = OpmodeConstants.AutoBacklineAngle;
         public static int INTAKE_SPEED = 1600; //RPM
 
         private TelemetryManager panelsTelemetry; // Panels Telemetry instance
@@ -66,19 +68,19 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         private static final double START_TOLERANCE_INCHES = 6.0;
 
         private void initialize_launcher() {
-            launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-            double p = 203;
-            double i = 1.001;
-            double d = 0.0015;
-            double f = 0.1;
+            launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
+            double p = OpmodeConstants.Launcher_P;
+            double i = OpmodeConstants.Launcher_I;
+            double d = OpmodeConstants.Launcher_D;
+            double f = OpmodeConstants.Launcher_F;
             launcher.setVelocityPIDFCoefficients(p, i, d, f);
             launcher.setDirection(DcMotorSimple.Direction.REVERSE);
-            LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
+            LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
         }
 
         private void initialize_feeder() {
-            leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
-            rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+            leftFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.LeftFeederName);
+            rightFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.RightFeederName);
 
             leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
             rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -86,8 +88,8 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
         }
 
         private void initialize_intake() {
-            intake = hardwareMap.get(DcMotorEx.class, "intake");
-            intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
+            intake = hardwareMap.get(DcMotorEx.class, OpmodeConstants.IntakeName);
+            intake_ramp = hardwareMap.get(Servo.class, OpmodeConstants.IntakeRampName);
             intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
 
         }
@@ -285,7 +287,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                         waitingForPath = false;
                         pathState = 100;
                         nextPathState = 2;
-                        targetSpeed = 2380;
+                        targetSpeed = OpmodeConstants.AutoBacklineSpeed;
                     }
                     break;
                 case 2:
@@ -303,8 +305,9 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     if (waitingForPath && !follower.isBusy()) {
                         waitingForPath = false;
                         pathState = 0;
-                        nextPathState = 3;
+                        nextPathState = 0;
                     }
+                    StaticCommunism.pose = follower.getPose();
                 case 100:
                     // TODO use case 100 for aiming to launch
                     pathState = 101;
@@ -316,10 +319,16 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
                     intake.setVelocity(0);
                     doneLaunching = launch();
                     if (doneLaunching){
-                        pathState = nextPathState;
-                        timesShot = 0;
+                            timesShot = 0;
+                            pathState = 200;
+                            waitTimer.reset();
                     }
                     break;
+                case 200:
+                    if (waitTimer.seconds() >= 0.3) {
+                        pathState = nextPathState;
+                    }
+
 
 
             }

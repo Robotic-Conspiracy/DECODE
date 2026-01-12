@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "RED 3 BACK", group = "Autonomous")
 public class Back3Red extends Back3Main {
-    int backlineAngle = 70; // Mirrored from blue 110 (180 - 110 = 70, adjusted to 67 to match other red autos)
+    int backlineAngle = 73; // Mirrored from blue 110 (180 - 110 = 70, adjusted to 67 to match other red autos)
 
     public void set_starting_pose(){
         // Mirrored from blue: x' = 144 - 63 = 81

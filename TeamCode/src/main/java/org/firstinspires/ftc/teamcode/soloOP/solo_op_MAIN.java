@@ -7,6 +7,11 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -27,6 +32,8 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.StaticCommunism;
+import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -107,12 +114,12 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx intake = null;
     private Servo LEFT_LAUNCH_SERVO = null;
     private Servo intake_ramp = null;
-    public static int backlineSpeed = OpmodeConstants.backlineSpeed;
-    public static int backlineAngle = OpmodeConstants.backlineAngle;
-    public static int midSpeed = OpmodeConstants.midSpeed;
-    public static int midAngle = OpmodeConstants.midAngle;
-    public static int goalSpeed = OpmodeConstants.goalSpeed;
-    public static int goalAngle = OpmodeConstants.goalAngle;
+    public static int backlineSpeed = OpmodeConstants.TeleopBacklineSpeed;
+    public static double backlineAngle = OpmodeConstants.TeleopBacklineAngle;
+    public static int midSpeed = OpmodeConstants.TeleopMidlineSpeed;
+    public static double midAngle = OpmodeConstants.TeleopMidAngle;
+    public static int goalSpeed = OpmodeConstants.TeleopGoalSpeed;
+    public static double goalAngle = OpmodeConstants.TeleopGoalAngle;
 
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed
@@ -138,11 +145,21 @@ public abstract class solo_op_MAIN extends OpMode {
 
     private Servo stoppy_servo;
 
+    private Follower follower;
+    public Pose goalPosition;
+    public PathChain path;
+    private boolean breakModeActive;
+    private TelemetryManager panelsTelemetry;
+
 
     @Override
     public void init() {
         PanelsConfigurables.INSTANCE.refreshClass(this);
-
+        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(StaticCommunism.pose);
+        goalPosition = set_goal_position();
+        Drawing.init();
         set_color();
 
         launchState = LaunchState.IDLE;
@@ -154,10 +171,10 @@ public abstract class solo_op_MAIN extends OpMode {
         initialize_launcher();
         initialize_intake();
         initialize_pinpoint();
-        light1 = hardwareMap.get(Servo.class, "preset light");
-        light2 = hardwareMap.get(Servo.class, "launch light");
-        stoppy_servo = hardwareMap.get(Servo.class, "intake stopper");
-        floodgate = hardwareMap.get(AnalogInput.class, "floodgate");
+        light1 = hardwareMap.get(Servo.class, OpmodeConstants.PresetLightName);
+        light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
+        stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
+        floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
@@ -167,7 +184,7 @@ public abstract class solo_op_MAIN extends OpMode {
 //                .addProcessor(aprilTagProcessor)
 //                .build();
         portal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCamera(hardwareMap.get(WebcamName.class, OpmodeConstants.WebcamName))
                 .addProcessor(aprilTagProcessor)
                 .build();
         portal.setProcessorEnabled(aprilTagProcessor, true);
@@ -175,11 +192,18 @@ public abstract class solo_op_MAIN extends OpMode {
 
         canlaunch = CanLaunch.ERROR;
     }
+    @Override
+    public void start(){
+        follower.startTeleopDrive(true  );
+        breakModeActive = true;
+    }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
         pinpoint.update();
+        follower.update();
+        Drawing.drawDebug(follower);
         // Cache pinpoint values immediately after update to avoid redundant I2C reads
         cachedPosX = pinpoint.getPosX(DistanceUnit.MM);
         cachedPosY = pinpoint.getPosY(DistanceUnit.MM);
@@ -204,12 +228,12 @@ public abstract class solo_op_MAIN extends OpMode {
 
         //changing servo rotation
         if (gamepad1.dpadRightWasPressed()) {// MAPPING
-            targetAngle += (gamepad1.x ? 5 : 1);// MAPPING
+            targetAngle += (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
         }
         if (gamepad1.dpadLeftWasPressed()) {// MAPPING
-            targetAngle -= (gamepad1.x ? 5 : 1);// MAPPING
+            targetAngle -= (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
         }
-        double SERVO_MAXIMUM_POSITION = 90;
+        double SERVO_MAXIMUM_POSITION = 0.25;
         double SERVO_MINIMUM_POSITION = 0;
         if (targetAngle > SERVO_MAXIMUM_POSITION) {
             targetAngle = SERVO_MAXIMUM_POSITION;
@@ -222,6 +246,8 @@ public abstract class solo_op_MAIN extends OpMode {
         if (gamepad1.yWasPressed()) {// MAPPING
             switch (selectedPreset) {
                 case CUSTOM:
+
+                case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = goalSpeed;
                     targetAngle = goalAngle;
@@ -242,13 +268,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 case BACK:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 90;
-                    break;
-
-                case OFF:
-                    selectedPreset = Preset.GOAL;
-                    targetSpeed = goalSpeed;
-                    targetAngle = goalAngle;
+                    targetAngle = 0.25;
                     break;
             }
         }
@@ -295,7 +315,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         // Only enable AprilTag processing when alignment is requested (saves CPU/power)
-        boolean alignmentRequested = gamepad1.right_trigger >= 0.2 || gamepad1.b;
+        boolean alignmentRequested = gamepad1.right_trigger >= 0.2;
         if (alignmentRequested != aprilTagProcessorEnabled) {
             portal.setProcessorEnabled(aprilTagProcessor, alignmentRequested);
             aprilTagProcessorEnabled = alignmentRequested;
@@ -327,12 +347,46 @@ public abstract class solo_op_MAIN extends OpMode {
 
             if (gamepad1.right_trigger >= 0.2) {// MAPPING
                 // TODO: Move to back line position automatically
-                Drive(0, 0, X_MOVE);
-                alignmentActive = true;
-            } else if (gamepad1.b) {
-                Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+                follower.setTeleOpDrive(0,0, -X_MOVE, true);
+                //Drive(0, 0, X_MOVE);
                 alignmentActive = true;
             }
+        }
+
+        if (gamepad1.b) {
+            if(breakModeActive){
+                breakModeActive = false;
+                follower.startTeleopDrive(false);
+            }
+
+            double heading = follower.getHeading();
+            // Use atan2 for correct quadrant handling
+            double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
+
+            // Calculate the shortest angular distance - FLIP the sign here
+            double angle_to_target = angle - heading;  // Changed from heading - angle
+
+            // Normalize to [-π, π] to ensure shortest rotation path
+            while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
+            while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
+
+            double kP = 3;//1.5
+            double exponentialFactor = 0.8;//0.8
+            double normalizedError = Math.abs(angle_to_target) / Math.PI;
+            double exponentialGain = Math.pow(normalizedError, exponentialFactor);
+
+            double rotationPower = kP * angle_to_target * exponentialGain;
+            rotationPower = Range.clip(rotationPower, -0.7, 0.7);
+            follower.setTeleOpDrive(0, 0, rotationPower, true);
+            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+
+        } else if (!alignmentActive) {
+            if(!breakModeActive){
+                breakModeActive = true;
+                follower.startTeleopDrive(true);
+            }
+            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
@@ -355,9 +409,7 @@ public abstract class solo_op_MAIN extends OpMode {
         launcher.setVelocity(targetSpeed);
 
         // Only use manual drive if alignment is not active
-        if (!alignmentActive) {
-            Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);// MAPPING
-        }
+
 
         // Always add telemetry data and update for consistent display
         AddTelemetry();
@@ -453,7 +505,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
         switch (intakeState) {
             case READY:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
                 if (Current_speed == REV_SPEED) {
@@ -470,7 +522,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 leftFeeder.setPower(Current_speed);
                 rightFeeder.setPower(Current_speed);
                 // keep launcher servo in safe position
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 stoppy_servo.setPosition(0.55);
                 break;
 
@@ -487,7 +539,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
 
             case SPIN:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle / 360.0);
+                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
                 IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60);
                 IN_TARGET_RPM = ((SPIN_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
@@ -533,10 +585,10 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_drive() {
-        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "front_left_drive");// DRIVE SETUP
-        backLeftMotor = hardwareMap.get(DcMotorEx.class, "back_left_drive");
-        frontRightMotor = hardwareMap.get(DcMotorEx.class, "front_right_drive");
-        backRightMotor = hardwareMap.get(DcMotorEx.class, "back_right_drive");
+        frontLeftMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.FrontLeftMotor);// DRIVE SETUP
+        backLeftMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.BackLeftMotor);
+        frontRightMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.FrontRightMotor);
+        backRightMotor = hardwareMap.get(DcMotorEx.class, OpmodeConstants.BackRightMotor);
 
         // Set run mode to RUN_WITHOUT_ENCODER for power control with reliable braking
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -563,33 +615,34 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     private void initialize_launcher() {
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher = hardwareMap.get(DcMotorEx.class, OpmodeConstants.LauncherName);
         //launcher motor
-        double p = 203;
-        double f = 0.1;
-        double i = 1.001;
-        double d = 0.0015;
+        double p = OpmodeConstants.Launcher_P;
+        double i = OpmodeConstants.Launcher_I;
+        double d = OpmodeConstants.Launcher_D;
+        double f = OpmodeConstants.Launcher_F;
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
-        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, "left twideler");
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LEFT_LAUNCH_SERVO = hardwareMap.get(Servo.class, OpmodeConstants.AimServoName);
     }
 
     private void initialize_feeder() {
-        leftFeeder = hardwareMap.get(CRServo.class, "left_feeder");
-        rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
+        leftFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.LeftFeederName);
+        rightFeeder = hardwareMap.get(CRServo.class, OpmodeConstants.RightFeederName);
 
         leftFeeder.setDirection(DcMotorSimple.Direction.FORWARD);//  DIRECTION SETUP
         rightFeeder.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     private void initialize_intake() {
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
-        intake_ramp = hardwareMap.get(Servo.class, "intake ramp");
+        intake = hardwareMap.get(DcMotorEx.class,  OpmodeConstants.IntakeName);
+        intake_ramp = hardwareMap.get(Servo.class, OpmodeConstants.IntakeRampName);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);// DIRECTION SETUP
     }
 
     private void initialize_pinpoint() {
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, OpmodeConstants.odometryName);
         double FORWARD_OFFSET = 1.375;
         double LATERAL_OFFSET = -4.25;
 
@@ -638,6 +691,8 @@ public abstract class solo_op_MAIN extends OpMode {
     public void setTargetDetection(AprilTagDetection targetDetection) {
         this.targetDetection = targetDetection;
     }
+
+    public abstract Pose set_goal_position();
 
     enum IntakeState {
         SPIN,
@@ -757,6 +812,6 @@ public abstract class solo_op_MAIN extends OpMode {
         lastAlignmentError = error;
         lastAlignmentTime = currentTime;
 
-        return correction;
+        return Range.clip(-0.01*error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
     }
 }
