@@ -66,6 +66,7 @@ public abstract class solo_op_MAIN extends OpMode {
     private Supplier<PathChain> pathToBack;
     private Supplier<PathChain> pathToGate;
     private Supplier<PathChain> pathToHuman;
+    public boolean AutoMove;
 
 
     // Performance optimization flags
@@ -114,9 +115,6 @@ public abstract class solo_op_MAIN extends OpMode {
     private DcMotorEx backRightMotor = null;
 
     AnalogInput floodgate;
-    private double X_MOVE = 0;
-    private double Y_MOVE = 0;
-    private double YAW_MOVE = 0;
     private final double TPR_6k = 28;
     private final double TPR_1620 = 103.8;
     double FL_RPM = 0;
@@ -374,8 +372,9 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         // Reset X_MOVE when no target detected to prevent stale values causing drift
+        double x_MOVE = 0;
         if (detection == null) {
-            X_MOVE = 0;
+            x_MOVE = 0;
             lastAlignmentError = 0;  // Reset derivative term
         }
 
@@ -389,14 +388,16 @@ public abstract class solo_op_MAIN extends OpMode {
                     breakModeActive = false;
                     follower.startTeleopDrive(false);
                 }
-                X_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
-                follower.setTeleOpDrive(0, 0, -X_MOVE, true);
+                x_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
+                follower.setTeleOpDrive(0, 0, -x_MOVE, true);
                 alignmentActive = true;
+                AutoMove = true;
             } else {
                 // No tag: rotate toward the predefined aim heading using Pedro follower
                 if (breakModeActive) {
                     breakModeActive = false;
                     follower.startTeleopDrive(false);
+                    AutoMove = true;
                 }
 
                 double targetHeading = Math.toRadians(gateAimAngle);
@@ -423,22 +424,27 @@ public abstract class solo_op_MAIN extends OpMode {
                 breakModeActive = true;
                 follower.startTeleopDrive(true);
             }
+            AutoMove = false;
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
         if (gamepad1.bWasPressed()) {
             follower.startTeleopDrive(true);
             follower.followPath(pathToBack.get());
+            AutoMove = true;
         }
         else if (gamepad1.aWasPressed()) {
             follower.startTeleopDrive(true);
             follower.followPath(pathToHuman.get());
+            AutoMove = true;
         }
         else if (gamepad1.xWasPressed()) {
             follower.startTeleopDrive(true);
             follower.followPath(pathToGate.get());
+            AutoMove = true;
         }
-        if (!alignmentActive && (Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
+        if ((Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            AutoMove = false;
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
