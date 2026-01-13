@@ -40,7 +40,7 @@ public class Constants {
             .forwardPodY(1.375)
             .strafePodX(-4.25)
             .distanceUnit(DistanceUnit.INCH)
-            .hardwareMapName(OpmodeConstants.odometryName)
+            .hardwareMapName(OpmodeConstants.PinpointName)
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
             //.strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);

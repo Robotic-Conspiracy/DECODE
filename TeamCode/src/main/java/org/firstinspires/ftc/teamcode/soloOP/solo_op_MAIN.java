@@ -40,6 +40,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3a;
+
 import java.util.List;
 
 // to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
@@ -49,9 +52,12 @@ import java.util.List;
 public abstract class solo_op_MAIN extends OpMode {
     protected String color = "None";
     public long now = System.currentTimeMillis();
-    abstract void set_color();
-    abstract int target_goal_tag();
-    GoBildaPinpointDriver pinpoint;
+    public abstract void set_color();
+    public abstract int target_goal_tag();
+    protected GoBildaPinpointDriver pinpoint;
+    protected Limelight3a limelight;
+    private boolean limelightCalibrated = false;
+    protected LLResult latestLimelightResult = null;
 
 
     // Performance optimization flags
@@ -145,7 +151,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     private Servo stoppy_servo;
 
-    private Follower follower;
+    protected Follower follower;
     public Pose goalPosition;
     public PathChain path;
     private boolean breakModeActive;
@@ -171,6 +177,18 @@ public abstract class solo_op_MAIN extends OpMode {
         initialize_launcher();
         initialize_intake();
         initialize_pinpoint();
+
+        if (OpmodeConstants.LIMELIGHT_PRESENT) {
+            try {
+                limelight = hardwareMap.get(Limelight3a.class, OpmodeConstants.LimelightName);
+                limelight.setPollRate(100);
+                limelight.start();
+            } catch (Exception e) {
+                telemetry.addData("Limelight Error", "Not found in configuration");
+                limelight = null;
+            }
+        }
+
         light1 = hardwareMap.get(Servo.class, OpmodeConstants.PresetLightName);
         light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
         stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
@@ -203,6 +221,27 @@ public abstract class solo_op_MAIN extends OpMode {
     public void loop() {
         pinpoint.update();
         follower.update();
+
+        // Cache Limelight result once per loop to minimize latency
+        if (limelight != null) {
+            latestLimelightResult = limelight.getLatestResult();
+        }
+
+        // One-time pose calibration using Limelight MegaTag if enabled
+        if (OpmodeConstants.LIMELIGHT_PRESENT && OpmodeConstants.LIMELIGHT_POSE_CALIBRATION && !limelightCalibrated && limelight != null) {
+            if (latestLimelightResult != null && latestLimelightResult.isValid()) {
+                double[] botpose = latestLimelightResult.getBotpose();
+                if (botpose != null && botpose.length >= 6 && (botpose[0] != 0 || botpose[1] != 0)) {
+                    // Limelight returns meters, converted to inches for Pedro Pathing
+                    double x = botpose[0] * 39.3701;
+                    double y = botpose[1] * 39.3701;
+                    double heading = Math.toRadians(botpose[5]);
+                    follower.setPose(new Pose(x, y, heading));
+                    limelightCalibrated = true;
+                }
+            }
+        }
+
         Drawing.drawDebug(follower);
         // Cache pinpoint values immediately after update to avoid redundant I2C reads
         cachedPosX = pinpoint.getPosX(DistanceUnit.MM);
@@ -315,7 +354,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
 
         // Only enable AprilTag processing when alignment is requested (saves CPU/power)
-        boolean alignmentRequested = gamepad1.right_trigger >= 0.2;
+        boolean alignmentRequested = OpmodeConstants.isAprilTagAimPressed(gamepad1);
         if (alignmentRequested != aprilTagProcessorEnabled) {
             portal.setProcessorEnabled(aprilTagProcessor, alignmentRequested);
             aprilTagProcessorEnabled = alignmentRequested;
@@ -345,7 +384,7 @@ public abstract class solo_op_MAIN extends OpMode {
             // Use ftcPose.z for rotation since camera is mounted rotated 90 degrees
             X_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
 
-            if (gamepad1.right_trigger >= 0.2) {// MAPPING
+            if (OpmodeConstants.isAprilTagAimPressed(gamepad1)) {// MAPPING
                 // TODO: Move to back line position automatically
                 follower.setTeleOpDrive(0,0, -X_MOVE, true);
                 //Drive(0, 0, X_MOVE);
@@ -353,7 +392,15 @@ public abstract class solo_op_MAIN extends OpMode {
             }
         }
 
-        if (gamepad1.b) {
+        if (OpmodeConstants.isLimelightAimPressed(gamepad1) && limelight != null) {
+            // Technique 1: Limelight Precision Aiming
+            double rotationPower = calculateLimelightRotation();
+            if (rotationPower != 0) {
+                follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, rotationPower, true);
+                alignmentActive = true;
+            }
+        } else if (OpmodeConstants.isOdometryAimPressed(gamepad1)) {
+            // Technique 2: Odometry Snap
             if(breakModeActive){
                 breakModeActive = false;
                 follower.startTeleopDrive(false);
@@ -364,7 +411,7 @@ public abstract class solo_op_MAIN extends OpMode {
             double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
 
             // Calculate the shortest angular distance - FLIP the sign here
-            double angle_to_target = angle - heading;  // Changed from heading - angle
+            double angle_to_target = angle - heading;
 
             // Normalize to [-π, π] to ensure shortest rotation path
             while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
@@ -378,8 +425,7 @@ public abstract class solo_op_MAIN extends OpMode {
             double rotationPower = kP * angle_to_target * exponentialGain;
             rotationPower = Range.clip(rotationPower, -0.7, 0.7);
             follower.setTeleOpDrive(0, 0, rotationPower, true);
-            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
+            alignmentActive = true;
 
         } else if (!alignmentActive) {
             if(!breakModeActive){
@@ -411,30 +457,13 @@ public abstract class solo_op_MAIN extends OpMode {
         // Only use manual drive if alignment is not active
 
 
-        // Always add telemetry data and update for consistent display
-        AddTelemetry();
-
-        boolean rightBumper = gamepad1.right_bumper;
-        now = System.currentTimeMillis();
-
-        // Fire on initial press
-        if (rightBumper && !lastRightBumper) {
-            launchRequested = true;
-            lastFireTime = now;
-        }
-
-        // Continuous fire when held (after interval)
-        if (rightBumper && (now - lastFireTime > FIRE_INTERVAL) && launchState == LaunchState.IDLE) {
-            launchRequested = true;
-
-        }
-
-        lastRightBumper = rightBumper;
-
         // Always call launch() to process the launch state machine
         launch();
 
         intake(gamepad1.left_trigger > 0.2, gamepad1.left_bumper); // MAPPING
+
+        // Add telemetry at the very end of the loop and update
+        AddTelemetry();
     }
 
     private void launch() {
@@ -556,7 +585,6 @@ public abstract class solo_op_MAIN extends OpMode {
     private void AddTelemetry() {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
-        IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60); // tps / tpr * 60(sec to min)
 
         telemetry.addData("Current (Amps)", "%.2f A", amps);
         telemetry.addData("position x", cachedPosX);
@@ -567,21 +595,17 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition() * 360);
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", cachedLauncherVelocity);
-        telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
-        telemetry.addData("gamepad1 right stick x and y", gamepad1.right_stick_x + " " + gamepad1.right_stick_y);
 
-//        // Motor debug telemetry - verify BRAKE mode is working
-//        telemetry.addLine("--- MOTOR DEBUG ---");
-//        telemetry.addData("FL Power", "%.3f", frontLeftMotor.getPower());
-//        telemetry.addData("FR Power", "%.3f", frontRightMotor.getPower());
-//        telemetry.addData("BL Power", "%.3f", backLeftMotor.getPower());
-//        telemetry.addData("BR Power", "%.3f", backRightMotor.getPower());
-//        telemetry.addData("FL Mode", frontLeftMotor.getMode());
-//        telemetry.addData("FL ZeroPower", frontLeftMotor.getZeroPowerBehavior());
-//
-        // AprilTag telemetry - show all detected tags for consistent display (prevents flickering)
+        // Limelight specific telemetry
+        if (OpmodeConstants.LIMELIGHT_PRESENT) {
+            if (latestLimelightResult != null && latestLimelightResult.isValid()) {
+                telemetry.addData("Limelight", "LOCKED (TX: %.2f)", latestLimelightResult.getTx());
+            } else {
+                telemetry.addData("Limelight", "SEARCHING...");
+            }
+        }
 
-        telemetry.update();
+        telemetry.update(); 
     }
 
     private void initialize_drive() {
@@ -812,6 +836,32 @@ public abstract class solo_op_MAIN extends OpMode {
         lastAlignmentError = error;
         lastAlignmentTime = currentTime;
 
-        return Range.clip(-0.01*error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
+        return Range.clip(-0.01 * error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
     }
-}
+
+    /**
+     * Calculates the rotation power needed to align with the goal using Limelight's horizontal offset (tx).
+     */
+    protected double calculateLimelightRotation() {
+        if (latestLimelightResult != null && latestLimelightResult.isValid()) {
+            double tx = latestLimelightResult.getTx(); // Horizontal offset in degrees
+            double rotationError = -tx; // Negative because Limelight tx is positive if target is to the right
+
+            double power = rotationError * OpmodeConstants.Limelight_P;
+
+            // Apply minimum power threshold to overcome static friction
+            if (Math.abs(power) < OpmodeConstants.Limelight_MIN_POWER) {
+                power = Math.signum(power) * OpmodeConstants.Limelight_MIN_POWER;
+            }
+
+            return Range.clip(power, -0.7, 0.7);
+        }
+        return 0;
+    }
+
+    @Override
+    public void stop() {
+        if (limelight != null) {
+            limelight.stop();
+        }
+    }}

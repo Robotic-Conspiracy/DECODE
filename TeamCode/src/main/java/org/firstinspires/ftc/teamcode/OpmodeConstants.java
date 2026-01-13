@@ -42,5 +42,51 @@ public class OpmodeConstants {
     public static final String AimLightName = "aim light";
     public static final String FloodgateName = "floodgate";
     public static final String WebcamName = "Webcam 1";
+    public static final String LimelightName = "limelight";
+    public static final String PinpointName = "pinpoint";
+
+    // Limelight Features
+    public static boolean LIMELIGHT_PRESENT = true;
+    public static boolean LIMELIGHT_POSE_CALIBRATION = true;
+
+    // Limelight Tuning
+    public static double Limelight_P = 0.04;
+    public static double Limelight_MIN_POWER = 0.05;
+
+    // --- AUTO-AIM CONTROL MAPPINGS ---
+    /**
+     * Aiming Technique 1: Limelight Precision
+     * Uses the Limelight's horizontal offset (TX) for pixel-perfect alignment.
+     * Best for: Final adjustment before shooting.
+     */
+    public static boolean isLimelightAimPressed(com.qualcomm.robotcore.hardware.Gamepad gamepad) {
+        return gamepad.a;
+    }
+
+    /**
+     * Aiming Technique 2: Odometry Snap
+     * Uses field coordinates (Pose) to calculate the angle to the goal.
+     * Best for: Quick turn-to-goal from any orientation.
+     */
+    public static boolean isOdometryAimPressed(com.qualcomm.robotcore.hardware.Gamepad gamepad) {
+        return gamepad.b;
+    }
+
+    /**
+     * Aiming Technique 3: AprilTag Locking
+     * Uses AprilTag relative distance and bearing for alignment.
+     * Best for: Positioning relative to the backline.
+     */
+    public static boolean isAprilTagAimPressed(com.qualcomm.robotcore.hardware.Gamepad gamepad) {
+        return gamepad.right_trigger > 0.2;
+    }
+
+    // Limelight Camera Position (relative to robot center)
+    public static double CAMERA_X_OFFSET = 220.0; // mm (Forward of center is postive)
+    public static double CAMERA_Y_OFFSET = -4.0;  // mm (Left of center is positive)
+    public static double CAMERA_Z_OFFSET = 300.0; // mm (Height from floor)
+    public static double CAMERA_PITCH = 0.0;      // degrees
+    public static double CAMERA_YAW = 0.0;        // degrees
+    public static double CAMERA_ROLL = 0.0;       // degrees
 
 }
