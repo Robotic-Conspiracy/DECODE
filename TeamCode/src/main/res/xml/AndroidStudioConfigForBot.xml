@@ -70,30 +70,7 @@ when something is not working correctly.
 
 ************************************************************* -->
 
-            <Motor name=".."  port="[...]" /> <!-- Yellow -->
-
             <!--
-            Andymark Gearmotors
-
-            IMPORTANT: The NeveRest20GearMotor type does not contain
-            appropriate values for the orbital gear motor! You will need to
-            set these directly in software (at least for now)
-            -->
-
-            <NeveRest3.7v1Gearmotor name="[...]" port="[...]" />
-            <NeveRest20Gearmotor name="[...]" port="[...]" />
-            <NeveRest40Gearmotor name="[...]" port="[...]" />
-            <NeveRest60Gearmotor name="[...]" port="[...]" />
-
-            <!--
-            REV Robotics Gearmotors
-            -->
-
-            <RevRobotics20HDHexMotor name="[...]" port="[...]" />
-            <RevRobotics40HDHexMotor name="[...]" port="[...]" />
-            <RevRoboticsCoreHexMotor name="[...]" port="[...]" />
-
-            <!-- 
             GoBILDA Gearmotors
              -->
 
