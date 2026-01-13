@@ -97,10 +97,42 @@ when something is not working correctly.
             GoBILDA Gearmotors
              -->
 
-            <goBILDA5203SeriesMotor name="[...]" port="[...]" />
-            <goBILDA5203SeriesMotor name="[...]" port="[...]" />
-            <goBILDA5203SeriesMotor name="[...]" port="[...]" />
-            <goBILDA5203SeriesMotor name="[...]" port="[...]" />
+            <goBILDA5203SeriesMotor name="[front_left_drive]" port="[0]" />
+            <goBILDA5203SeriesMotor name="[front_right_drive]" port="[1]" />
+            <goBILDA5203SeriesMotor name="[back_left_drive]" port="[2]" />
+            <goBILDA5203SeriesMotor name="[back_right_drive]" port="[3]" />
+
+            <goBILDA5203SeriesMotor name="[intake]" port="[4]" />
+            <goBILDA5203SeriesMotor name="[launcher]" port="[5]" />
+
+            <Servo name="[left twideler] port=[5]" />
+            <Servo name="[intake ramp] port=[4]" />
+            <Servo name="[intake stopper] port=[2]" />
+            <ContinuousRotationServo name="[left_feeder]" port="[0]" />
+            <ContinuousRotationServo name="[right_feeder]" port="[1]" />
+
+
+
+            public static final String IntakeName = "intake";
+    public static final String IntakeRampName = "intake ramp";
+    public static final String IntakeStopperName = "intake stopper";
+    public static final String AimServoName = "left twideler";
+    public static final String LeftFeederName = "left_feeder";
+    public static final String RightFeederName = "right_feeder";
+    public static final String LauncherName = "launcher";
+
+    public static final String FrontLeftMotor = "front_left_drive";
+    public static final String FrontRightMotor = "front_right_drive";
+    public static final String BackLeftMotor = "back_left_drive";
+    public static final String BackRightMotor = "back_right_drive";
+
+    public static final String IMUName = "imu";
+    public static final String odometryName = "odometry";
+    public static final String PresetLightName = "preset light";
+    public static final String AimLightName = "aim light";
+    public static final String FloodgateName = "floodgate";
+    public static final String WebcamName = "Webcam 1";
+
 
             <!-- 
             Tetrix Gearmotors
