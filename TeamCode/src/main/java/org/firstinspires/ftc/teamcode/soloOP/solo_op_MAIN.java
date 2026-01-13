@@ -442,7 +442,7 @@ public abstract class solo_op_MAIN extends OpMode {
             }
         }
 
-        if (gamepad1.b) {
+        if (gamepad1.right_trigger) {
             if(breakModeActive){
                 breakModeActive = false;
                 follower.startTeleopDrive(false);
@@ -477,10 +477,20 @@ public abstract class solo_op_MAIN extends OpMode {
             }
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
-        if (gamepad1.xWasPressed()) {
+        if (gamepad1.bWasPressed()) {
             follower.startTeleopDrive(true);
             follower.followPath(pathToBack.get());
-
+        }
+        elif (gamepad1.aWasPressed()) {
+            follower.startTeleopDrive(true);
+            follower.followPath(pathToHuman.get());
+        }
+        elif (gamepad1.xWasPressed()) {
+            follower.startTeleopDrive(true);
+            follower.followPath(pathToGate.get());
+        }
+        if (Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1){
+            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
