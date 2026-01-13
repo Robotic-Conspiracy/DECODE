@@ -21,7 +21,7 @@ public class solo_op_BLUE extends solo_op_MAIN {
     }
     public int set_backline_angle(){return 110;}
     public Pose set_gate_position() {
-        return new Pose(10.870, 61.913);
+        return new Pose(10.870, 63);
     }
     public int set_gate_angle(){return 147;}
     public Pose set_human_position() {
