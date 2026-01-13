@@ -334,54 +334,6 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
         }
 
-        // Reset odometry pods and robot pose when button A is pressed.
-        // Coordinates are placeholders (x, y, z) — replace the numeric values below with your RED/BLUE coordinates.
-        if (gamepad1.aWasPressed()) {
-            // placeholder coordinates - replace these with real ones (the user said they'll add them later)
-            double x;
-            double y;
-            double z;
-
-            if ("Red".equalsIgnoreCase(color)) {
-                // TODO: replace 0,0,0 with RED team's x,y,z
-                x = 9; // RED_X
-                y = 9; // RED_Y
-                z = 180; // RED_Z (heading in radians)
-            } else {
-                // TODO: replace 0,0,0 with BLUE team's x,y,z
-                x = 135; // BLUE_X
-                y = 9; // BLUE_Y
-                z = 0; // BLUE_Z (heading in radians)
-            }
-
-            // Update the shared pose so other systems see the new pose
-            StaticCommunism.pose = new Pose(x, y, Math.toRadians(z));
-
-            // Tell the follower about the new starting pose
-            try {
-                follower.setStartingPose(StaticCommunism.pose);
-            } catch (Exception e) {
-                telemetry.addData("Follower reset failed", e.toString());
-            }
-
-            // Re-initialize pinpoint to reset the odometry pods/encoders.
-            // initialize() is used here because it is available in this class earlier;
-            // depending on the GoBildaPinpointDriver implementation you may want to call a dedicated reset method.
-            try {
-                pinpoint.initialize();
-            } catch (Exception e) {
-                telemetry.addData("Pinpoint init failed", e.toString());
-            }
-
-            // Update cached values to match the new pose so telemetry doesn't briefly show stale data
-            cachedPosX = x;
-            cachedPosY = y;
-            cachedHeading = z;
-
-            telemetry.addData("Odometry reset", "color=%s x=%.3f y=%.3f z=%.3f", color, x, y, z);
-            telemetry.update();
-        }
-
         double ON_TIME = .5;
         double OFF_TIME = 1;
 
