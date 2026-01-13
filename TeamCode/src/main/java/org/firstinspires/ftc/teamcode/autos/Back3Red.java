@@ -10,7 +10,7 @@ public class Back3Red extends Back3Main {
     public void set_starting_pose(){
         // Mirrored from blue: x' = 144 - 63 = 81
         starting_pose_x = 81;
-        starting_pose_y = 8;
+        starting_pose_y = 9;
         starting_pose_heading = 90;
     }
 
@@ -20,7 +20,7 @@ public class Back3Red extends Back3Main {
 
         // Mirrored from blue across x = 72 -> x' = 144 - x
         // Blue shootPreloadStart was (63, 8) -> Red is (81, 8)
-        paths.shootPreloadStart = new Pose(81.000, 8.000);
+        paths.shootPreloadStart = new Pose(81.000, 9.000);
         // Blue shootPreloadEnd was (58, 16) -> Red is (86, 16)
         paths.shootPreloadEnd = new Pose(86, 16);
 
