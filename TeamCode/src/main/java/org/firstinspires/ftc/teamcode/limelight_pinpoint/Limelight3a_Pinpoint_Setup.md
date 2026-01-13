@@ -35,7 +35,7 @@ This guide outlines the steps required to integrate the **Limelight 3a** vision 
 
 1.  Download the `GoBildaPinpointDriver.java` from the goBilda website or GitHub.
 2.  Place the driver in `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`.
-3.  In the robot configuration on the Driver Station, add the I2C device on the correct port and name it `"pinpoint"`.
+3.  In the robot configuration on the Driver Station, add the I2C device on the correct port and name it `"odometry"`.
 
 ---
 

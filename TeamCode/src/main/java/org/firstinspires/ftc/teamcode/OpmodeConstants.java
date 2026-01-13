@@ -43,7 +43,6 @@ public class OpmodeConstants {
     public static final String FloodgateName = "floodgate";
     public static final String WebcamName = "Webcam 1";
     public static final String LimelightName = "limelight";
-    public static final String PinpointName = "pinpoint";
 
     // Limelight Features
     public static boolean LIMELIGHT_PRESENT = true;
@@ -52,6 +51,8 @@ public class OpmodeConstants {
     // Limelight Tuning
     public static double Limelight_P = 0.04;
     public static double Limelight_MIN_POWER = 0.05;
+    public static double LIMELIGHT_AUTO_LOCK_THRESHOLD = 0.5; // degrees
+    public static double LIMELIGHT_AUTO_LOCK_TIMEOUT = 1.5;   // seconds
 
     // --- AUTO-AIM CONTROL MAPPINGS ---
     /**
