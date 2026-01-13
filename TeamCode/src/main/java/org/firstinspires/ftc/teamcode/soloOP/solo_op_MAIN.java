@@ -64,7 +64,7 @@ public abstract class solo_op_MAIN extends OpMode {
     abstract Pose set_human_position();
     GoBildaPinpointDriver pinpoint;
     private Supplier<PathChain> pathToBack;
-    private Supplier<PathChain> pathToGoal;
+    private Supplier<PathChain> pathToGate;
     private Supplier<PathChain> pathToHuman;
 
 
@@ -203,7 +203,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, backlinePosition)))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(backlineAimAngle), 0.8))
                 .build();
-        pathToGoal = () -> follower.pathBuilder()
+        pathToGate = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, gatePosition)))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(gateAimAngle), 0.8))
                 .build();
