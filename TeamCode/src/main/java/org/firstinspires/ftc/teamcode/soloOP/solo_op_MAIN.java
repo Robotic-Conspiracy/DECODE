@@ -430,47 +430,43 @@ public abstract class solo_op_MAIN extends OpMode {
         // Handle driving - only one Drive() call per loop
         boolean alignmentActive = false;
 
-        if (detection != null) {
-            // Use ftcPose.z for rotation since camera is mounted rotated 90 degrees
-            X_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
+        if (alignmentRequested) {
+            if (detection != null) {
+                // Align to the target AprilTag when it is visible
+                if (breakModeActive) {
+                    breakModeActive = false;
+                    follower.startTeleopDrive(false);
+                }
+                X_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
+                follower.setTeleOpDrive(0, 0, -X_MOVE, true);
+                alignmentActive = true;
+            } else {
+                // No tag: rotate toward the predefined aim heading using Pedro follower
+                if (breakModeActive) {
+                    breakModeActive = false;
+                    follower.startTeleopDrive(false);
+                }
 
-            if (gamepad1.right_trigger >= 0.2) {// MAPPING
-                // TODO: Move to back line position automatically
-                follower.setTeleOpDrive(0,0, -X_MOVE, true);
-                //Drive(0, 0, X_MOVE);
+                double targetHeading = Math.toRadians(gateAimAngle);
+                double headingError = targetHeading - follower.getHeading();
+
+                // Normalize to [-π, π] for shortest rotation
+                while (headingError > Math.PI) headingError -= 2 * Math.PI;
+                while (headingError < -Math.PI) headingError += 2 * Math.PI;
+
+                double kP = 3.0;
+                double exponentialFactor = 0.8;
+                double normalizedError = Math.abs(headingError) / Math.PI;
+                double exponentialGain = Math.pow(normalizedError, exponentialFactor);
+
+                double rotationPower = kP * headingError * exponentialGain;
+                rotationPower = Range.clip(rotationPower, -0.7, 0.7);
+                follower.setTeleOpDrive(0, 0, rotationPower, true);
                 alignmentActive = true;
             }
         }
 
-        if (gamepad1.right_trigger) {
-            if(breakModeActive){
-                breakModeActive = false;
-                follower.startTeleopDrive(false);
-            }
-
-            double heading = follower.getHeading();
-            // Use atan2 for correct quadrant handling
-            double angle = Math.atan2((gatePosition.getY() - follower.getPose().getY()), (gatePosition.getX() - follower.getPose().getX()));
-
-            // Calculate the shortest angular distance - FLIP the sign here
-            double angle_to_target = angle - heading;  // Changed from heading - angle
-
-            // Normalize to [-π, π] to ensure shortest rotation path
-            while (angle_to_target > Math.PI) angle_to_target -= 2 * Math.PI;
-            while (angle_to_target < -Math.PI) angle_to_target += 2 * Math.PI;
-
-            double kP = 3;//1.5
-            double exponentialFactor = 0.8;//0.8
-            double normalizedError = Math.abs(angle_to_target) / Math.PI;
-            double exponentialGain = Math.pow(normalizedError, exponentialFactor);
-
-            double rotationPower = kP * angle_to_target * exponentialGain;
-            rotationPower = Range.clip(rotationPower, -0.7, 0.7);
-            follower.setTeleOpDrive(0, 0, rotationPower, true);
-            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-            //Drive(gamepad1.left_stick_y, gamepad1.left_stick_x, X_MOVE);
-
-        } else if (!alignmentActive) {
+        if (!alignmentActive) {
             if(!breakModeActive){
                 breakModeActive = true;
                 follower.startTeleopDrive(true);
@@ -481,15 +477,15 @@ public abstract class solo_op_MAIN extends OpMode {
             follower.startTeleopDrive(true);
             follower.followPath(pathToBack.get());
         }
-        elif (gamepad1.aWasPressed()) {
+        else if (gamepad1.aWasPressed()) {
             follower.startTeleopDrive(true);
             follower.followPath(pathToHuman.get());
         }
-        elif (gamepad1.xWasPressed()) {
+        else if (gamepad1.xWasPressed()) {
             follower.startTeleopDrive(true);
             follower.followPath(pathToGate.get());
         }
-        if (Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1){
+        if (!alignmentActive && (Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         }
 
