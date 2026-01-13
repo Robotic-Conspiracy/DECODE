@@ -182,7 +182,7 @@ public abstract class solo_op_MAIN extends OpMode {
         stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
         floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(16,58))))
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(58,16))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(108), 0.8))
                 .build();
 
@@ -316,7 +316,7 @@ public abstract class solo_op_MAIN extends OpMode {
             double y;
             double z;
 
-            if ("RED".equalsIgnoreCase(color)) {
+            if ("Red".equalsIgnoreCase(color)) {
                 // TODO: replace 0,0,0 with RED team's x,y,z
                 x = 9; // RED_X
                 y = 9; // RED_Y
