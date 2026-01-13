@@ -56,8 +56,16 @@ public abstract class solo_op_MAIN extends OpMode {
     public long now = System.currentTimeMillis();
     abstract void set_color();
     abstract int target_goal_tag();
+    abstract int set_backline_angle();
+    abstract int set_gate_angle();
+    abstract int set_human_angle();
+
+    abstract Pose set_gate_position();
+    abstract Pose set_human_position();
     GoBildaPinpointDriver pinpoint;
-    private Supplier<PathChain> pathChain;
+    private Supplier<PathChain> pathToBack;
+    private Supplier<PathChain> pathToGoal;
+    private Supplier<PathChain> pathToHuman;
 
 
     // Performance optimization flags
@@ -152,7 +160,12 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo stoppy_servo;
 
     private Follower follower;
-    public Pose goalPosition;
+    public Pose gatePosition;
+    public int gateAimAngle;
+    public Pose humanPosition;
+    public int humanAimAngle;
+    public Pose backlinePosition;
+    public int backlineAimAngle;
     public PathChain path;
     private boolean breakModeActive;
     private TelemetryManager panelsTelemetry;
@@ -164,7 +177,12 @@ public abstract class solo_op_MAIN extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(StaticCommunism.pose);
-        goalPosition = set_goal_position();
+        gatePosition = set_gate_position();
+        gateAimAngle = set_gate_angle();
+        humanAimAngle = set_human_angle();
+        humanPosition = set_human_position();
+        backlinePosition = set_backline_position();
+        backlineAimAngle = set_backline_angle();
         Drawing.init();
         set_color();
 
@@ -181,9 +199,17 @@ public abstract class solo_op_MAIN extends OpMode {
         light2 = hardwareMap.get(Servo.class, OpmodeConstants.AimLightName);
         stoppy_servo = hardwareMap.get(Servo.class, OpmodeConstants.IntakeStopperName);
         floodgate = hardwareMap.get(AnalogInput.class, OpmodeConstants.FloodgateName);
-        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(58,16))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(108), 0.8))
+        pathToBack = () -> follower.pathBuilder()
+                .addPath(new Path(new BezierLine(follower::getPose, backlinePosition)))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(backlineAimAngle), 0.8))
+                .build();
+        pathToGoal = () -> follower.pathBuilder()
+                .addPath(new Path(new BezierLine(follower::getPose, gatePosition)))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(gateAimAngle), 0.8))
+                .build();
+        pathToHuman = () -> follower.pathBuilder()
+                .addPath(new Path(new BezierLine(follower::getPose, humanPosition)))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(humanAimAngle), 0.8))
                 .build();
 
         aprilTagProcessor = aprilTagProcessorBuilder.build();
@@ -424,7 +450,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
             double heading = follower.getHeading();
             // Use atan2 for correct quadrant handling
-            double angle = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
+            double angle = Math.atan2((gatePosition.getY() - follower.getPose().getY()), (gatePosition.getX() - follower.getPose().getX()));
 
             // Calculate the shortest angular distance - FLIP the sign here
             double angle_to_target = angle - heading;  // Changed from heading - angle
@@ -453,7 +479,7 @@ public abstract class solo_op_MAIN extends OpMode {
         }
         if (gamepad1.xWasPressed()) {
             follower.startTeleopDrive(true);
-            follower.followPath(pathChain.get());
+            follower.followPath(pathToBack.get());
 
         }
 
@@ -761,6 +787,7 @@ public abstract class solo_op_MAIN extends OpMode {
     }
 
     public abstract Pose set_goal_position();
+    public abstract Pose set_backline_position();
 
     enum IntakeState {
         SPIN,

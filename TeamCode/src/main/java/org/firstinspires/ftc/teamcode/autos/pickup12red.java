@@ -13,7 +13,7 @@ public class pickup12red extends pickup12main {
     @Override
     public void set_starting_pose(){
         starting_pose_x = 81;
-        starting_pose_y = 8;
+        starting_pose_y = 9;
 
         //follower.setStartingPose(new Pose(81, 8, Math.toRadians(90)));
     }
@@ -21,7 +21,7 @@ public class pickup12red extends pickup12main {
         String color = "red";
         int tagToAim = 24;
         // Mirrored from blue across x = 72 -> x' = 144 - x
-        paths.shootPreloadStart = new Pose(81.000, 8.000);
+        paths.shootPreloadStart = new Pose(81.000, 9.000);
         paths.shootPreloadEnd = new Pose(86, 16);
 
         paths.prePickup1Start = new Pose(86, 16);
