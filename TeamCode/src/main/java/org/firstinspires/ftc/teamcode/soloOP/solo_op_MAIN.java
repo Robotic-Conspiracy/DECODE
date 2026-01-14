@@ -369,7 +369,13 @@ public abstract class solo_op_MAIN extends OpMode {
                     breakModeActive = false;
                     follower.startTeleopDrive(false);
                 }
-                x_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
+                double error = detection.ftcPose.yaw;
+                if (target_goal_tag() == 20) { // Blue
+                    error += OpmodeConstants.AprilTagAlignmentOffset;
+                } else if (target_goal_tag() == 24) { // Red
+                    error -= OpmodeConstants.AprilTagAlignmentOffset;
+                }
+                x_MOVE = calculateAlignmentCorrection(error);
                 follower.setTeleOpDrive(0, 0, -x_MOVE, true);
                 alignmentActive = true;
                 AutoMove = true;
@@ -381,7 +387,7 @@ public abstract class solo_op_MAIN extends OpMode {
                     AutoMove = true;
                 }
 
-                double targetHeading = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
+                double targetHeading = Math.toRadians(backlineAimAngle);
                 double headingError = targetHeading - follower.getHeading();
 
                 // Normalize to [-π, π] for shortest rotation
@@ -841,6 +847,10 @@ public abstract class solo_op_MAIN extends OpMode {
         lastAlignmentError = error;
         lastAlignmentTime = currentTime;
 
-        return Range.clip(-0.01*error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
+        if (OpmodeConstants.UsePDAlignment) {
+            return correction;
+        } else {
+            return Range.clip(-0.01 * error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
+        }
     }
 }
