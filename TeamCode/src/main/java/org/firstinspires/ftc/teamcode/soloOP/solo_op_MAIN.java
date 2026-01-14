@@ -47,7 +47,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import java.util.List;
 import java.util.function.Supplier;
 
-//  to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
+// to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
 
 @Configurable
 //@TeleOp(name = "Main Solo Op - run color")
@@ -209,7 +209,7 @@ public abstract class solo_op_MAIN extends OpMode {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
         telemetry.addData("Current (Amps)", "%.2f A", amps);
-        
+
     }
     @Override
     public void start(){
@@ -369,13 +369,7 @@ public abstract class solo_op_MAIN extends OpMode {
                     breakModeActive = false;
                     follower.startTeleopDrive(false);
                 }
-                double error = detection.ftcPose.yaw;
-                if (target_goal_tag() == 20) { // Blue
-                    error += OpmodeConstants.AprilTagAlignmentOffset;
-                } else if (target_goal_tag() == 24) { // Red
-                    error -= OpmodeConstants.AprilTagAlignmentOffset;
-                }
-                x_MOVE = calculateAlignmentCorrection(error);
+                x_MOVE = calculateAlignmentCorrection(detection.ftcPose.z);
                 follower.setTeleOpDrive(0, 0, -x_MOVE, true);
                 alignmentActive = true;
                 AutoMove = true;
@@ -387,7 +381,7 @@ public abstract class solo_op_MAIN extends OpMode {
                     AutoMove = true;
                 }
 
-                double targetHeading = Math.toRadians(backlineAimAngle);
+                double targetHeading = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
                 double headingError = targetHeading - follower.getHeading();
 
                 // Normalize to [-π, π] for shortest rotation
@@ -598,8 +592,8 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("position y", cachedPosY);
         telemetry.addData("angle", cachedHeading);
         telemetry.addData("Current Preset: ", selectedPreset);
-        telemetry.addData("Servo Target Position: ", "%.6f", AimServoAngle);
-        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition());
+        telemetry.addData("Servo Target Position: ", AimServoAngle);
+        telemetry.addData("L Servo Position: ", "%.6f", LEFT_LAUNCH_SERVO.getPosition());
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", cachedLauncherVelocity);
         telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
@@ -847,10 +841,6 @@ public abstract class solo_op_MAIN extends OpMode {
         lastAlignmentError = error;
         lastAlignmentTime = currentTime;
 
-        if (OpmodeConstants.UsePDAlignment) {
-            return correction;
-        } else {
-            return Range.clip(-0.01 * error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
-        }
+        return Range.clip(-0.01*error, -ALIGNMENT_MAX_POWER, ALIGNMENT_MAX_POWER);
     }
 }

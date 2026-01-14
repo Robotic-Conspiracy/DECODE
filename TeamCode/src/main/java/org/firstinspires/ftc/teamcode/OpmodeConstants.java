@@ -18,7 +18,7 @@ public class OpmodeConstants {
     // Launcher servo positions (0.0 to 1.0) for Autonomous presets
     public static final double AutoMidAngle = 0.133333; //48/360.0;
     public static final double AutoGoalAngle = 0.202777; //73/360.0;
-    public static final double AutoBacklineAngle = 0.136111; // 49/360.0;
+    public static final double AutoBacklineAngle = 0.133333; // 48/360.0;
 
     // Intake system mechanism positions and timings
     public static final double IntakeRampLaunchPos = 0.61; // Angle when launching
@@ -26,8 +26,6 @@ public class OpmodeConstants {
     public static final double FeedTimeSeconds = 0.15;      // Time to spin feeders per shot
 
     // Advanced alignment configuration
-    public static final boolean UsePDAlignment = true;      // Use Proportional-Derivative logic
-    public static final double AprilTagAlignmentOffset = 5.0; // Aim offset from Tag center (degrees)
 
     // Launcher Motor PIDF Coefficients for velocity stability
     public static final double Launcher_P = 80;
