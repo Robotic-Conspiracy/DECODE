@@ -592,8 +592,8 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("position y", cachedPosY);
         telemetry.addData("angle", cachedHeading);
         telemetry.addData("Current Preset: ", selectedPreset);
-        telemetry.addData("Servo Target Position: ", AimServoAngle);
-        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition() * 360);
+        telemetry.addData("Servo Target Position: ", "%.6f", AimServoAngle);
+        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition());
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", cachedLauncherVelocity);
         telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
