@@ -47,7 +47,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import java.util.List;
 import java.util.function.Supplier;
 
-// to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
+//  to change mapping of buttons ctrl + F search "MAPPING" to Jump to line
 
 @Configurable
 //@TeleOp(name = "Main Solo Op - run color")
