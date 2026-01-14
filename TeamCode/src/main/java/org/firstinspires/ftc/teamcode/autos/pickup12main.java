@@ -185,6 +185,7 @@ public abstract class pickup12main extends OpMode {
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        StaticCommunism.pose = follower.getPose();
         // if waiting for a path, check timeout
         if (waitingForPath) {
             long elapsed = System.currentTimeMillis() - currentPathStartTime;
