@@ -57,15 +57,8 @@ public abstract class solo_op_MAIN extends OpMode {
     abstract void set_color();
     abstract int target_goal_tag();
     abstract int set_backline_angle();
-    abstract int set_gate_angle();
-    abstract int set_human_angle();
-
-    abstract Pose set_gate_position();
-    abstract Pose set_human_position();
     GoBildaPinpointDriver pinpoint;
     private Supplier<PathChain> pathToBack;
-    private Supplier<PathChain> pathToGate;
-    private Supplier<PathChain> pathToHuman;
     public boolean AutoMove;
 
 
@@ -158,10 +151,6 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo stoppy_servo;
 
     private Follower follower;
-    public Pose gatePosition;
-    public int gateAimAngle;
-    public Pose humanPosition;
-    public int humanAimAngle;
     public Pose backlinePosition;
     public int backlineAimAngle;
     public PathChain path;
@@ -175,10 +164,6 @@ public abstract class solo_op_MAIN extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(StaticCommunism.pose);
-        gatePosition = set_gate_position();
-        gateAimAngle = set_gate_angle();
-        humanAimAngle = set_human_angle();
-        humanPosition = set_human_position();
         backlinePosition = set_backline_position();
         backlineAimAngle = set_backline_angle();
         Drawing.init();
@@ -201,15 +186,6 @@ public abstract class solo_op_MAIN extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, backlinePosition)))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(backlineAimAngle), 0.8))
                 .build();
-        pathToGate = () -> follower.pathBuilder()
-                .addPath(new Path(new BezierLine(follower::getPose, gatePosition)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(gateAimAngle), 0.8))
-                .build();
-        pathToHuman = () -> follower.pathBuilder()
-                .addPath(new Path(new BezierLine(follower::getPose, humanPosition)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(humanAimAngle), 0.8))
-                .build();
-
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -400,7 +376,7 @@ public abstract class solo_op_MAIN extends OpMode {
                     AutoMove = true;
                 }
 
-                double targetHeading = Math.toRadians(gateAimAngle);
+                double targetHeading = Math.toRadians();
                 double headingError = targetHeading - follower.getHeading();
 
                 // Normalize to [-π, π] for shortest rotation
@@ -432,17 +408,7 @@ public abstract class solo_op_MAIN extends OpMode {
             follower.followPath(pathToBack.get());
             AutoMove = true;
         }
-        else if (gamepad1.aWasPressed()) {
-            follower.startTeleopDrive(true);
-            follower.followPath(pathToHuman.get());
-            AutoMove = true;
-        }
-        else if (gamepad1.xWasPressed()) {
-            follower.startTeleopDrive(true);
-            follower.followPath(pathToGate.get());
-            AutoMove = true;
-        }
-        if ((Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
+        if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
             AutoMove = false;
         }
