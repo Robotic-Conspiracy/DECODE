@@ -181,6 +181,7 @@ import org.firstinspires.ftc.teamcode.autos.pedroPathing.Constants;
             panelsTelemetry.debug("Y", follower.getPose().getY());
             panelsTelemetry.debug("Heading", follower.getPose().getHeading());
             panelsTelemetry.update(telemetry);
+            StaticCommunism.pose = follower.getPose();
         }
 
         public static class Paths {

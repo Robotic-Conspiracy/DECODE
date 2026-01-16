@@ -57,15 +57,11 @@ public abstract class solo_op_MAIN extends OpMode {
     abstract void set_color();
     abstract int target_goal_tag();
     abstract int set_backline_angle();
-    abstract int set_gate_angle();
-    abstract int set_human_angle();
+    public abstract Pose set_goal_position();
+    public abstract Pose set_backline_position();
 
-    abstract Pose set_gate_position();
-    abstract Pose set_human_position();
     GoBildaPinpointDriver pinpoint;
     private Supplier<PathChain> pathToBack;
-    private Supplier<PathChain> pathToGate;
-    private Supplier<PathChain> pathToHuman;
     public boolean AutoMove;
 
 
@@ -135,7 +131,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
     //configurable vars
     public static int targetSpeed = backlineSpeed;//launch motor speed
-    public static double targetAngle = backlineAngle;
+    public static double AimServoAngle = backlineAngle;
     public static int INTAKE_SPEED = 1200;
     // other vars and objects
     private final ElapsedTime feedTimer = new ElapsedTime();
@@ -158,12 +154,9 @@ public abstract class solo_op_MAIN extends OpMode {
     private Servo stoppy_servo;
 
     private Follower follower;
-    public Pose gatePosition;
-    public int gateAimAngle;
-    public Pose humanPosition;
-    public int humanAimAngle;
     public Pose backlinePosition;
     public int backlineAimAngle;
+    public Pose goalPosition;
     public PathChain path;
     private boolean breakModeActive;
     private TelemetryManager panelsTelemetry;
@@ -175,12 +168,9 @@ public abstract class solo_op_MAIN extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(StaticCommunism.pose);
-        gatePosition = set_gate_position();
-        gateAimAngle = set_gate_angle();
-        humanAimAngle = set_human_angle();
-        humanPosition = set_human_position();
         backlinePosition = set_backline_position();
         backlineAimAngle = set_backline_angle();
+        goalPosition = set_goal_position();
         Drawing.init();
         set_color();
 
@@ -201,15 +191,6 @@ public abstract class solo_op_MAIN extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, backlinePosition)))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(backlineAimAngle), 0.8))
                 .build();
-        pathToGate = () -> follower.pathBuilder()
-                .addPath(new Path(new BezierLine(follower::getPose, gatePosition)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(gateAimAngle), 0.8))
-                .build();
-        pathToHuman = () -> follower.pathBuilder()
-                .addPath(new Path(new BezierLine(follower::getPose, humanPosition)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(humanAimAngle), 0.8))
-                .build();
-
         aprilTagProcessor = aprilTagProcessorBuilder.build();
 
         aprilTagProcessor.setDecimation(3);
@@ -228,7 +209,7 @@ public abstract class solo_op_MAIN extends OpMode {
         double voltage = floodgate.getVoltage();
         double amps = (voltage / 3.3) * 40.0;
         telemetry.addData("Current (Amps)", "%.2f A", amps);
-        
+
     }
     @Override
     public void start(){
@@ -266,17 +247,17 @@ public abstract class solo_op_MAIN extends OpMode {
 
         //changing servo rotation
         if (gamepad1.dpadRightWasPressed()) {// MAPPING
-            targetAngle += (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
+            AimServoAngle += (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
         }
         if (gamepad1.dpadLeftWasPressed()) {// MAPPING
-            targetAngle -= (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
+            AimServoAngle -= (gamepad1.x ? 0.013888 : 0.002777);// MAPPING
         }
         double SERVO_MAXIMUM_POSITION = 0.25;
         double SERVO_MINIMUM_POSITION = 0;
-        if (targetAngle > SERVO_MAXIMUM_POSITION) {
-            targetAngle = SERVO_MAXIMUM_POSITION;
-        } else if (targetAngle < SERVO_MINIMUM_POSITION) {
-            targetAngle = SERVO_MINIMUM_POSITION;
+        if (AimServoAngle > SERVO_MAXIMUM_POSITION) {
+            AimServoAngle = SERVO_MAXIMUM_POSITION;
+        } else if (AimServoAngle < SERVO_MINIMUM_POSITION) {
+            AimServoAngle = SERVO_MINIMUM_POSITION;
         }
         if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad1.dpadUpWasPressed() || gamepad1.dpadDownWasPressed()) {// MAPPING
             selectedPreset = Preset.CUSTOM;
@@ -288,25 +269,25 @@ public abstract class solo_op_MAIN extends OpMode {
                 case OFF:
                     selectedPreset = Preset.GOAL;
                     targetSpeed = goalSpeed;
-                    targetAngle = goalAngle;
+                    AimServoAngle = goalAngle;
                     break;
 
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
                     targetSpeed = midSpeed;
-                    targetAngle = midAngle;
+                    AimServoAngle = midAngle;
                     break;
 
                 case MIDDLE:
                     selectedPreset = Preset.BACK;
                     targetSpeed = backlineSpeed;
-                    targetAngle = backlineAngle;
+                    AimServoAngle = backlineAngle;
                     break;
 
                 case BACK:
                     selectedPreset = Preset.OFF;
                     targetSpeed = 0;
-                    targetAngle = 0.25;
+                    AimServoAngle = 0.25;
                     break;
             }
         }
@@ -400,7 +381,7 @@ public abstract class solo_op_MAIN extends OpMode {
                     AutoMove = true;
                 }
 
-                double targetHeading = Math.toRadians(gateAimAngle);
+                double targetHeading = Math.atan2((goalPosition.getY() - follower.getPose().getY()), (goalPosition.getX() - follower.getPose().getX()));
                 double headingError = targetHeading - follower.getHeading();
 
                 // Normalize to [-π, π] for shortest rotation
@@ -432,17 +413,8 @@ public abstract class solo_op_MAIN extends OpMode {
             follower.followPath(pathToBack.get());
             AutoMove = true;
         }
-        else if (gamepad1.aWasPressed()) {
+        if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
             follower.startTeleopDrive(true);
-            follower.followPath(pathToHuman.get());
-            AutoMove = true;
-        }
-        else if (gamepad1.xWasPressed()) {
-            follower.startTeleopDrive(true);
-            follower.followPath(pathToGate.get());
-            AutoMove = true;
-        }
-        if ((Math.abs(gamepad1.left_stick_y) > 0.1 ||Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
             AutoMove = false;
         }
@@ -563,7 +535,7 @@ public abstract class solo_op_MAIN extends OpMode {
 
         switch (intakeState) {
             case READY:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                LEFT_LAUNCH_SERVO.setPosition(AimServoAngle);
                 intake_ramp.setPosition(LAUNCH_POS);
                 intake.setVelocity(0);
                 if (Current_speed == REV_SPEED) {
@@ -580,7 +552,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 leftFeeder.setPower(Current_speed);
                 rightFeeder.setPower(Current_speed);
                 // keep launcher servo in safe position
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                LEFT_LAUNCH_SERVO.setPosition(AimServoAngle);
                 stoppy_servo.setPosition(0.55);
                 break;
 
@@ -597,7 +569,7 @@ public abstract class solo_op_MAIN extends OpMode {
                 break;
 
             case SPIN:
-                LEFT_LAUNCH_SERVO.setPosition(targetAngle);
+                LEFT_LAUNCH_SERVO.setPosition(AimServoAngle);
                 IN_RPM = ((cachedIntakeVelocity / TPR_1620) * 60);
                 IN_TARGET_RPM = ((SPIN_SPEED / 60.0) * TPR_1620);
                 intake.setVelocity(IN_TARGET_RPM);
@@ -621,8 +593,8 @@ public abstract class solo_op_MAIN extends OpMode {
         telemetry.addData("position y", cachedPosY);
         telemetry.addData("angle", cachedHeading);
         telemetry.addData("Current Preset: ", selectedPreset);
-        telemetry.addData("Servo Target Position: ", targetAngle);
-        telemetry.addData("L Servo Position: ", LEFT_LAUNCH_SERVO.getPosition() * 360);
+        telemetry.addData("Servo Target Position: ", AimServoAngle);
+        telemetry.addData("L Servo Position: ", "%.6f", LEFT_LAUNCH_SERVO.getPosition());
         telemetry.addData("target velocity", targetSpeed);
         telemetry.addData("current velocity", cachedLauncherVelocity);
         telemetry.addData("gamepad1 left stick x and y", gamepad1.left_stick_x + " " + gamepad1.left_stick_y);
@@ -750,8 +722,7 @@ public abstract class solo_op_MAIN extends OpMode {
         this.targetDetection = targetDetection;
     }
 
-    public abstract Pose set_goal_position();
-    public abstract Pose set_backline_position();
+
 
     enum IntakeState {
         SPIN,
