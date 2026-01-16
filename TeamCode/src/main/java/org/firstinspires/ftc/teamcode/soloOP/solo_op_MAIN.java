@@ -220,8 +220,7 @@ public abstract class solo_op_MAIN extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
-
-
+        follower.startTeleopDrive();
         pinpoint.update();
         follower.update();
         Drawing.drawDebug(follower);
@@ -268,11 +267,11 @@ public abstract class solo_op_MAIN extends OpMode {
             switch (selectedPreset) {
                 case CUSTOM:
 
-                case OFF:
-                    selectedPreset = Preset.GOAL;
-                    targetSpeed = goalSpeed;
-                    AimServoAngle = goalAngle;
-                    break;
+//                case OFF:
+//                    selectedPreset = Preset.GOAL;
+//                    targetSpeed = goalSpeed;
+//                    AimServoAngle = goalAngle;
+//                    break;
 
                 case GOAL:
                     selectedPreset = Preset.MIDDLE;
@@ -414,13 +413,19 @@ public abstract class solo_op_MAIN extends OpMode {
             follower.startTeleopDrive(true);
             follower.followPath(pathToBack.get());
             AutoMove = true;
-        }
-        if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
-            follower.startTeleopDrive(true);
-            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+        } else if (gamepad1.bWasReleased()){
             follower.pausePathFollowing();
+            follower.startTeleOpDrive(true);
             AutoMove = false;
         }
+//        if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
+//            follower.pausePathFollowing();
+//            if(!follower.getTeleopDrive()){
+//                follower.startTeleopDrive(true);
+//            }
+//            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+//            AutoMove = false;
+//        }
 
         // Update light2 to show AprilTag alignment status (only when auto-aiming)
         if (alignmentRequested) {
