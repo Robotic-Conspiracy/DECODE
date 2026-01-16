@@ -220,10 +220,7 @@ public abstract class solo_op_MAIN extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
-        if(follower.atParametricEnd()){
-            follower.startTeleOpDrive(true);
-            AutoMove = false;
-        }
+
 
         pinpoint.update();
         follower.update();
@@ -421,6 +418,7 @@ public abstract class solo_op_MAIN extends OpMode {
         if ((Math.abs(gamepad1.left_stick_y) > 0.1 || Math.abs(gamepad1.left_stick_x) > 0.1 || Math.abs(gamepad1.right_stick_x) > 0.1)){
             follower.startTeleopDrive(true);
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            follower.pausePathFollowing();
             AutoMove = false;
         }
 
