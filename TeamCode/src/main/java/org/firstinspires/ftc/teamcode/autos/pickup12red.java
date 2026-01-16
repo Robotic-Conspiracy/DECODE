@@ -34,10 +34,10 @@ public class pickup12red extends pickup12main {
         paths.shootPickup1End = new Pose(86, 16);
 
         paths.prePickup2Start = new Pose(86, 16);
-        paths.prePickup2End = new Pose(92, 55);
+        paths.prePickup2End = new Pose(92, 58);
 
-        paths.pickUp2Start = new Pose(92, 55);
-        paths.pickUp2End = new Pose(132, 55);
+        paths.pickUp2Start = new Pose(92, 58);
+        paths.pickUp2End = new Pose(132, 58);
 
         paths.shootPickup2Start = new Pose(132, 60);
         paths.shootPickup2End = new Pose(86, 16);
