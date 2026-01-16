@@ -220,7 +220,7 @@ public abstract class solo_op_MAIN extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
-        follower.startTeleopDrive();
+
         pinpoint.update();
         follower.update();
         Drawing.drawDebug(follower);
@@ -286,9 +286,9 @@ public abstract class solo_op_MAIN extends OpMode {
                     break;
 
                 case BACK:
-                    selectedPreset = Preset.OFF;
-                    targetSpeed = 0;
-                    AimServoAngle = 0.25;
+                    selectedPreset = Preset.GOAL;
+                    targetSpeed = goalSpeed;
+                    AimServoAngle = goalAngle;
                     break;
             }
         }
