@@ -11,7 +11,7 @@ public class OpmodeConstants {
     public static final double TeleopBacklineAngle = 0.133333; //48/360.0;
 
     // Launcher motor velocities (in Ticks Per Second) for Autonomous presets
-    public static final int AutoBacklineSpeed = 2240;
+    public static final int AutoBacklineSpeed = 2300;
     public static final int AutoMidSpeed = 1820;
     public static final int AutoGoalSpeed = 1500;
 

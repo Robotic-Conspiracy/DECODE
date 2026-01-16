@@ -220,6 +220,11 @@ public abstract class solo_op_MAIN extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
+        if(follower.atParametricEnd()){
+            follower.startTeleOpDrive(true);
+            AutoMove = false;
+        }
+
         pinpoint.update();
         follower.update();
         Drawing.drawDebug(follower);
